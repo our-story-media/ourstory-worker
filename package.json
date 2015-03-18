@@ -1,0 +1,23 @@
+{
+  "name": "transcode-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "fluent-ffmpeg":"*",
+    "s3":"*",
+    "knox":"*",
+    "aws-sdk":"*",
+    "fivebeans":"*",
+    "winston":"*",
+    "winston-mongodb":"*",
+    "lodash":"*",
+    "async":"*",
+    "mongodb":"*"
+	},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
