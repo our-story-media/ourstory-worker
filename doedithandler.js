@@ -163,8 +163,7 @@ module.exports = function(winston)
                     logger.info('Merging finished !');
                     cb();
                   })
-                  .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.shortlink + '.mp4'), path.normalize(path.dirname(require.main.filename) + '
-                    /.tmp/'));
+                  .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.shortlink + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
             });
 
             // calls.push(function(cb){
