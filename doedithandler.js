@@ -37,6 +37,7 @@ module.exports = function(winston)
         try
         {
             logger.info("Edit Started: "+edit.id + " / "+edit.shortlink);
+            //console.log(edit);
         // for (var i = 0; i < keys.length; i++)
         //     console.log(keys[i]);
         //console.log(edit);
@@ -113,13 +114,13 @@ module.exports = function(winston)
                         console.log("ffmpeg "+command);
                     });
                     ff.on('error', function(err, stdout, stderr) {
-                        console.log(stderr);
-                        console.log(stdout);
-                        console.log('An error occurred: ' + err.message);
+                        //console.log(stderr);
+                        //console.log(stdout);
+                        logger.error('An error occurred: ' + err.message);
                         cb(true);
                       })
                       .on('end', function() {
-                        console.log('Conversion finished !');
+                        logger.info('Conversion finished !');
                         cb();
                       })
                       .save(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
@@ -150,16 +151,16 @@ module.exports = function(winston)
                 });
 
                 ff.on('start',function(command){
-                    console.log("ffmpeg "+command);
+                    logger.info("ffmpeg "+command);
                 });
                 ff.on('error', function(err, stdout, stderr) {
-                    console.log(stderr);
-                    console.log(stdout);
-                    console.log('An error occurred: ' + err.message);
+                    //console.log(stderr);
+                    //console.log(stdout);
+                    logger.error('An error occurred: ' + err.message);
                     cb(true);
                   })
                   .on('end', function() {
-                    console.log('Merging finished !');
+                    logger.info('Merging finished !');
                     cb();
                   })
                   .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.shortlink + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
@@ -231,7 +232,7 @@ module.exports = function(winston)
                 } 
                   }, function(error, data) { 
                     // handle callback 
-                    console.log(error);
+                    logger.error(error);
                     //console.log(data);
                     // console.log('transcode submitted');
                     if (error)
@@ -251,7 +252,7 @@ module.exports = function(winston)
             async.series(calls,function(err){
                 if (err)
                 {
-                    console.log("editing failed");
+                    logger.error("editing failed");
                     //edit.shortlink = edit.code;
                     edit.failed = true;
                     //delete edit.code;
@@ -269,7 +270,7 @@ module.exports = function(winston)
                 }
                 else
                 {
-                    console.log("editing done");
+                    logger.log("editing done");
                     edit.path = edit.shortlink + '.mp4';
                     //edit.shortlink = edit.code;
                     //delete edit.code;
@@ -286,7 +287,7 @@ module.exports = function(winston)
         }
         catch (e)
         {
-            console.log(e);
+            logger.error(e);
             callback('bury');
         }
     }
