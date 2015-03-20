@@ -267,6 +267,7 @@ module.exports = function(winston)
                     //edit.shortlink = edit.code;
                     edit.failed = true;
                     //delete edit.code;
+                    logger.error("Editing Failed");
                     //update edit record
                     var collection = thedb.collection('edit');                   
                     collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
@@ -281,7 +282,7 @@ module.exports = function(winston)
                 }
                 else
                 {
-                    logger.log("editing done");
+                    logger.info("Editing Done");
                     edit.path = edit.shortlink + '.mp4';
                     //edit.shortlink = edit.code;
                     //delete edit.code;
