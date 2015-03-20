@@ -269,7 +269,7 @@ module.exports = function(winston)
                     //delete edit.code;
                     logger.error("Editing Failed");
                     //update edit record
-                    var collection = thedb.collection('edit');                   
+                    var collection = thedb.collection('edits');                   
                     collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
                         logger.error(err);
@@ -289,7 +289,7 @@ module.exports = function(winston)
                     //delete edit.code;
                     //update edit record
 
-                    var collection = thedb.collection('edit');       
+                    var collection = thedb.collection('edits');       
                     collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
                         logger.error(err);
