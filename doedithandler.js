@@ -303,11 +303,11 @@ module.exports = function(winston)
                     //Edits.update({edit.id},{path:thenewpath}
                 });
             }
-            catch (e)
-            {
-                logger.error(e);
-                callback('bury');
-            }
+        }
+        catch (e)
+        {
+            logger.error(e);
+            callback('bury');
         }
     }
 
