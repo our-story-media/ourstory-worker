@@ -290,9 +290,10 @@ module.exports = function(winston)
                     //update edit record
 
                     var collection = thedb.collection('edit');       
-                   collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
+                    collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
                         logger.error(err);
+                        logger.info(result);
                         callback('success');
                     });
                 }
