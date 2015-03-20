@@ -200,7 +200,16 @@ module.exports = function(winston)
                   client.putFile(path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.shortlink + ".mp4"), 'upload/' + edit.shortlink + ".mp4", {'x-amz-acl': 'public-read'},
                         function(err, result) {
                             //console.log(err);
-                            cb(err);
+                            if (err)
+                            {
+                                logger.error(err);
+                                cb(true);
+                            }
+                            else
+                            {
+                                logger.info("Uploaded");
+                                cb();
+                            }
                   });
 
             });
@@ -232,15 +241,17 @@ module.exports = function(winston)
                 } 
                   }, function(error, data) { 
                     // handle callback 
-                    logger.error(error);
+                   
                     //console.log(data);
                     // console.log('transcode submitted');
                     if (error)
                     {
+                        logger.error(error);
                         cb(true);
                     }
                     else
                     {
+                        logger.info("Transcode submitted");
                         cb();
                     }
                 });
