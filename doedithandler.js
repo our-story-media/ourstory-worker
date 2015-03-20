@@ -270,7 +270,7 @@ module.exports = function(winston)
                     logger.error("Editing Failed");
                     //update edit record
                     var collection = thedb.collection('edits');                   
-                    collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
+                    collection.update({shortlink:edit.shortlink}, {$set:{failed:true}}, {w:1}, function(err, result) {
                         //done update...
                         logger.error(err);
                         callback('bury');
@@ -290,7 +290,7 @@ module.exports = function(winston)
                     //update edit record
 
                     var collection = thedb.collection('edits');       
-                    collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
+                    collection.update({shortlink:edit.shortlink}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
                         logger.error(err);
                         logger.info(result);
