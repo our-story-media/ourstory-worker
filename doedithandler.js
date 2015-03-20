@@ -36,7 +36,7 @@ module.exports = function(winston)
         
         try
         {
-            logger.info("Edit Started: "+edit.id + " / "+edit.shortlink);
+            logger.info("Edit Started: "+edit.id + " / "+edit.code);
 
             //console.log(os.platform());
             if (os.platform()=="win32")
@@ -166,7 +166,7 @@ module.exports = function(winston)
                         logger.info('Merging finished !');
                         cb();
                       })
-                      .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.shortlink + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
+                      .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
                 });
 
                 // calls.push(function(cb){
@@ -200,7 +200,7 @@ module.exports = function(winston)
                         bucket: config.S3_BUCKET
                       };
                       var client = knox.createClient(knox_params);
-                      client.putFile(path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.shortlink + ".mp4"), 'upload/' + edit.shortlink + ".mp4", {'x-amz-acl': 'public-read'},
+                      client.putFile(path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.code + ".mp4"), 'upload/' + edit.code + ".mp4", {'x-amz-acl': 'public-read'},
                             function(err, result) {
                                 //console.log(err);
                                 if (err)
@@ -225,14 +225,14 @@ module.exports = function(winston)
                       //InputKeyPrefix: '/upload',
                       OutputKeyPrefix: 'upload/', 
                       Input: { 
-                        Key: 'upload/' + edit.shortlink + '.mp4', 
+                        Key: 'upload/' + edit.code + '.mp4', 
                         FrameRate: 'auto', 
                         Resolution: 'auto', 
                         AspectRatio: 'auto', 
                         Interlaced: 'auto', 
                         Container: 'auto' }, 
                       Output: { 
-                        Key: edit.shortlink + '.mp4', 
+                        Key: edit.code + '.mp4', 
                         //ThumbnailPattern: 'thumbs-{count}',
                         PresetId: '1351620000001-000020', // specifies the output video format
                         Rotate: 'auto',
@@ -273,7 +273,7 @@ module.exports = function(winston)
                         logger.error("Editing Failed");
                         //update edit record
                         var collection = thedb.collection('edits');                   
-                        collection.update({shortlink:edit.shortlink}, {$set:{failed:true}}, {w:1}, function(err, result) {
+                        collection.update({code:edit.code}, {$set:{failed:true}}, {w:1}, function(err, result) {
                             //done update...
                             logger.error(err);
                             callback('bury');
@@ -293,7 +293,7 @@ module.exports = function(winston)
                         //update edit record
 
                         var collection = thedb.collection('edits');       
-                        collection.update({shortlink:edit.shortlink}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
+                        collection.update({code:edit.code}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                             //done update...
                             logger.error(err);
                             logger.info(result);
