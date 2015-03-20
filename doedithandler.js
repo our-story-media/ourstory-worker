@@ -234,7 +234,7 @@ module.exports = function(winston)
                       Output: { 
                         Key: edit.code + '.mp4',
                         //CreateThumbnails:true,
-                        ThumbnailPattern: 'thumbs-{count}',
+                        ThumbnailPattern: edit.code + '-{count}',
                         PresetId: '1351620000001-000020', // specifies the output video format
                         Rotate: 'auto',
                         Watermarks:[
