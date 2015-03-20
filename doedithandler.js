@@ -272,6 +272,7 @@ module.exports = function(winston)
                     var collection = thedb.collection('edit');                   
                     collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
+                        logger.error(err);
                         callback('bury');
                     });
 
@@ -291,6 +292,7 @@ module.exports = function(winston)
                     var collection = thedb.collection('edit');       
                    collection.update({_id:edit.id}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                         //done update...
+                        logger.error(err);
                         callback('success');
                     });
                 }
