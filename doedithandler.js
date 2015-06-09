@@ -51,16 +51,16 @@ module.exports = function(winston)
             logger.info("Edit Started: "+edit.id + " / "+edit.code);
 
             // //console.log(os.platform());
-            // if (os.platform()=="win32")
-            // {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            // }
-            // else
-            // {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            // }
+            if (os.platform()=="win32")
+            {
+                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
+                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
+            }
+            else
+            {
+                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
+                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
+            }
 
             //download files from s3
             //console.log(edit.media);
@@ -114,9 +114,9 @@ module.exports = function(winston)
                 calls.push(function(cb){
                     var mlt = new MLT
                       , multitrack = new MLT.Multitrack
-                      , tractor = new MLT.Tractor
-                      , transitionTime = 25
-                      , showTime = 100 + transitionTime * 2
+                      // , tractor = new MLT.Tractor
+                      // , transitionTime = 25
+                      // , showTime = 100 + transitionTime * 2
                       , mltFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + ".mlt");
                     
                     //PUSH AUDIO:
@@ -137,8 +137,8 @@ module.exports = function(winston)
                         mlt.push(producer);
                         playlist.entry({
                             producer: producer,
-                            in:0,
-                            out:0
+                            startFrame:0,
+                            length:0
                         });
                     });
 
