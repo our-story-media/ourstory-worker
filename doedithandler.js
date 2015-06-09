@@ -12,6 +12,18 @@ var _ = require('lodash');
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient
 
+var MLT = require('mlt');
+var child_process = require('child_process');
+
+var mlt = new MLT
+      , multitrack = new MLT.Multitrack
+      , tractor = new MLT.Tractor
+      , transitionTime = 25
+      , showTime = 100 + transitionTime * 2
+      , mltFilename = './test.mlt';
+
+var totallength = 200;
+
 module.exports = function(winston)
 {
     var connection = null;
@@ -38,17 +50,17 @@ module.exports = function(winston)
         {
             logger.info("Edit Started: "+edit.id + " / "+edit.code);
 
-            //console.log(os.platform());
-            if (os.platform()=="win32")
-            {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            }
-            else
-            {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            }
+            // //console.log(os.platform());
+            // if (os.platform()=="win32")
+            // {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
+            // }
+            // else
+            // {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
+            // }
 
             //download files from s3
             //console.log(edit.media);
@@ -98,37 +110,103 @@ module.exports = function(winston)
                 });
 
 
-                //-c:v libx264
-                _.each(edit.media,function(m){
-                    calls.push(function(cb){
-                        //return cb();
-                        var media = m;
-                        //download from s3
-                        var ff = ffmpeg();
-                        ff.input(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
-                        ff.fps(30.333)
-                        ff.videoCodec('libx264').outputOptions('-preset slower');
-                        // ff.preset('slower');
-                        ff.size('1920x?').aspect('16:9');
-                        ff.outputOptions('-g 2')
-                        ff.keepDAR();
+                //_.each(edit.media,function(m){
+                calls.push(function(cb){
+                    var mlt = new MLT
+                      , multitrack = new MLT.Multitrack
+                      , tractor = new MLT.Tractor
+                      , transitionTime = 25
+                      , showTime = 100 + transitionTime * 2
+                      , mltFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + ".mlt");
+                    
+                    //PUSH AUDIO:
+                    // music = new MLT.Producer.Audio({source: music});
+                    // mlt.push(music);
+                    // var music = (new MLT.Playlist()).entry({
+                    //    producer: music,
+                    //    length: totallength
+                    // });
+                    // mlt.push(music);
+                    // multitrack.addTrack(new MLT.Multitrack.Track(music));
 
-                        ff.on('start',function(command){
-                            console.log("ffmpeg "+command);
+                    var playlist = new MLT.Playlist();
+                    mlt.push(playlist);
+
+                    _.each(edit.media,function(m){           
+                        var producer = new MLT.Producer.Video({source: photo.source})
+                        mlt.push(producer);
+                        playlist.entry({
+                            producer: producer,
+                            in:0,
+                            out:0
                         });
-                        ff.on('error', function(err, stdout, stderr) {
-                            //console.log(stderr);
-                            //console.log(stdout);
-                            logger.error('An error occurred: ' + err.message);
-                            cb(true);
-                          })
-                          .on('end', function() {
-                            logger.info('Conversion finished !');
-                            cb();
-                          })
-                          .save(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
+                    });
+
+                    multitrack.addTrack(new MLT.Multitrack.Track(playlist));
+                    mlt.push(tractor.push(multitrack));
+
+                    //var media = m;
+                    //mlt.push(tractor.push(multitrack));
+
+                    fs.writeFile(mltFilename, mlt.toString({pretty:true}), function (err) {
+                      if (err) {
+                        return cb(err);
+                      }
+                      else
+                      {
+                        logger.info('Finished prepping melt file...');
+                        //OUTPUT:
+                        var videoFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.code + ".mp4");
+                        var child = 'melt ' + mltFilename + ' -consumer avformat:' + videoFilename;
+
+                        logger.info('Melting. Please be Patient!');
+                        child = child_process.exec(child, function (err, stdout, stderr) {
+                              if (err) {
+                                logger.error(err);
+                                return cb(err);
+                              }
+                              else
+                              {
+                                logger.info('Finished: ' + videoFilename);
+                                cb();
+                              }
+                           });
+                        }
                     });
                 });
+                //});
+
+                //-c:v libx264
+                // _.each(edit.media,function(m){
+                //     calls.push(function(cb){
+                //         //return cb();
+                //         var media = m;
+                //         //download from s3
+                //         var ff = ffmpeg();
+                //         ff.input(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
+                //         ff.fps(30.333)
+                //         ff.videoCodec('libx264').outputOptions('-preset slower');
+                //         // ff.preset('slower');
+                //         ff.size('1920x?').aspect('16:9');
+                //         ff.outputOptions('-g 2')
+                //         ff.keepDAR();
+
+                //         ff.on('start',function(command){
+                //             console.log("ffmpeg "+command);
+                //         });
+                //         ff.on('error', function(err, stdout, stderr) {
+                //             //console.log(stderr);
+                //             //console.log(stdout);
+                //             logger.error('An error occurred: ' + err.message);
+                //             cb(true);
+                //           })
+                //           .on('end', function() {
+                //             logger.info('Conversion finished !');
+                //             cb();
+                //           })
+                //           .save(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
+                //     });
+                // });
 
 
                 //edit
@@ -145,29 +223,29 @@ module.exports = function(winston)
                 //  cb();
                 // });
 
-                calls.push(function(cb){
-                    //return cb();
-                    var ff = ffmpeg();
-                    _.each(edit.media,function(m)
-                    {
-                        ff.mergeAdd(path.normalize(path.dirname(require.main.filename) + '/upload/' + m.path.replace(config.S3_CLOUD_URL,'')));
-                    });
+                // calls.push(function(cb){
+                //     //return cb();
+                //     var ff = ffmpeg();
+                //     _.each(edit.media,function(m)
+                //     {
+                //         ff.mergeAdd(path.normalize(path.dirname(require.main.filename) + '/upload/' + m.path.replace(config.S3_CLOUD_URL,'')));
+                //     });
 
-                    ff.on('start',function(command){
-                        logger.info("ffmpeg "+command);
-                    });
-                    ff.on('error', function(err, stdout, stderr) {
-                        //console.log(stderr);
-                        //console.log(stdout);
-                        logger.error('An error occurred: ' + err.message);
-                        cb(true);
-                      })
-                      .on('end', function() {
-                        logger.info('Merging finished !');
-                        cb();
-                      })
-                      .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
-                });
+                //     ff.on('start',function(command){
+                //         logger.info("ffmpeg "+command);
+                //     });
+                //     ff.on('error', function(err, stdout, stderr) {
+                //         //console.log(stderr);
+                //         //console.log(stdout);
+                //         logger.error('An error occurred: ' + err.message);
+                //         cb(true);
+                //       })
+                //       .on('end', function() {
+                //         logger.info('Merging finished !');
+                //         cb();
+                //       })
+                //       .mergeToFile(path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + '.mp4'), path.normalize(path.dirname(require.main.filename) + '/.tmp/'));
+                // });
 
                 // calls.push(function(cb){
 
@@ -192,7 +270,6 @@ module.exports = function(winston)
                 //ff.complexFilter('overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2');
 
                 //upload to s3
-
                 calls.push(function(cb){
                     var knox_params = {
                         key: config.AWS_ACCESS_KEY_ID,
@@ -217,6 +294,7 @@ module.exports = function(winston)
 
                 });
 
+                //TRANSCODE OUPUT:
                 calls.push(function(cb){
                     AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
                     var elastictranscoder = new AWS.ElasticTranscoder();
@@ -279,11 +357,6 @@ module.exports = function(winston)
                             logger.error(err);
                             callback('bury');
                         });
-
-                        // edit.save(function(err,done)
-                        // {
-                            
-                        // });
                     }
                     else
                     {
