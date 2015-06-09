@@ -137,8 +137,8 @@ module.exports = function(winston)
                         mlt.push(producer);
                         playlist.entry({
                             producer: producer,
-                            startFrame:0,
-                            length:0
+                            startFrame:100,
+                            length:500
                         });
                     });
 
