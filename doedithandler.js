@@ -133,7 +133,7 @@ module.exports = function(winston)
                     mlt.push(playlist);
 
                     _.each(edit.media,function(m){           
-                        var producer = new MLT.Producer.Video({source: photo.source})
+                        var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
                         mlt.push(producer);
                         playlist.entry({
                             producer: producer,
