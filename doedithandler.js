@@ -145,6 +145,10 @@ module.exports = function(winston)
                     multitrack.addTrack(new MLT.Multitrack.Track(playlist));
                     mlt.push(tractor.push(multitrack));
 
+                    var tractor = new MLT.Tractor;
+                    tractor.push(multitrack);
+                    mlt.push(tractor);
+
                     //var media = m;
                     //mlt.push(tractor.push(multitrack));
 
