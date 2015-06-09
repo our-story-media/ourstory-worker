@@ -147,8 +147,8 @@ module.exports = function(winston)
                     mlt.push(tractor.push(multitrack));
 
                     
-                    tractor.push(multitrack);
-                    mlt.push(tractor);
+                    //tractor.push(multitrack);
+                    //mlt.push(tractor);
 
                     //var media = m;
                     //mlt.push(tractor.push(multitrack));
