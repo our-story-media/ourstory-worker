@@ -109,6 +109,20 @@ module.exports = function(winston)
                     });
                 });
 
+                _.each(edit.media,function(m){
+                    calls.push(function(cb){
+                        //return cb();
+                        var media = m;
+                        //download from s3
+                        var ff = ffmpeg();
+                        ff.ffprobe(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')), function(err, metadata) {
+                            console.dir(metadata);
+                            media.meta = metadata;
+                        });                    
+                    });
+                });
+
+
 
                 //_.each(edit.media,function(m){
                 calls.push(function(cb){
@@ -118,21 +132,14 @@ module.exports = function(winston)
                       // , transitionTime = 25
                       // , showTime = 100 + transitionTime * 2
                       , mltFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + ".mlt");
-                    
-                    //PUSH AUDIO:
-                    // music = new MLT.Producer.Audio({source: music});
-                    // mlt.push(music);
-                    // var music = (new MLT.Playlist()).entry({
-                    //    producer: music,
-                    //    length: totallength
-                    // });
-                    // mlt.push(music);
-                    // multitrack.addTrack(new MLT.Multitrack.Track(music));
 
                     var playlist = new MLT.Playlist();
                     mlt.push(playlist);
 
-                    _.each(edit.media,function(m){           
+                    _.each(edit.media,function(m){
+
+                        console.log(m.meta);
+
                         var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
                         mlt.push(producer);
                         playlist.entry({
