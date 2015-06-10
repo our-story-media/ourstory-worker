@@ -174,7 +174,7 @@ module.exports = function(winston)
                         logger.info('Finished prepping melt file...');
                         //OUTPUT:
                         var videoFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.code + ".mp4");
-                        var child = 'melt ' + mltFilename + ' -consumer avformat:' + videoFilename;
+                        var child = 'melt ' + mltFilename + ' -progress -consumer -strict -2 avformat:' + videoFilename;
 
                         logger.info('Melting. Please be Patient!');
                         child = child_process.exec(child, function (err, stdout, stderr) {
