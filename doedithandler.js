@@ -32,6 +32,8 @@ module.exports = function(winston)
     function DoEditHandler()
     {
         
+        process.env.SDL_VIDEODRIVER = 'dummy';
+
         this.type = 'edit';
         connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
       
