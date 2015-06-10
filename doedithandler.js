@@ -115,7 +115,7 @@ module.exports = function(winston)
                         var media = m;
                         //download from s3
                         //var ff = ffmpeg();
-                        logger.info("reading meta for "+path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,''));
+                        logger.info("reading meta for "+path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
                         ffmpeg.ffprobe(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')), function(err, metadata) {
                             logger.error(err);
                             console.dir(metadata);
