@@ -141,7 +141,7 @@ module.exports = function(winston)
 
                     _.each(edit.media,function(m){
 
-                        console.log(m.meta);
+                        console.log(m.meta.streams[0].nb_frames + ' frames');
 
                         var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
                         mlt.push(producer);
