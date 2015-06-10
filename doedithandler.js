@@ -118,6 +118,7 @@ module.exports = function(winston)
                         ff.ffprobe(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')), function(err, metadata) {
                             console.dir(metadata);
                             media.meta = metadata;
+                            cb();
                         });                    
                     });
                 });
