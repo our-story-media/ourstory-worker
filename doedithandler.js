@@ -33,6 +33,7 @@ module.exports = function(winston)
     {
         
         process.env.SDL_VIDEODRIVER = 'dummy';
+        process.env.SDL_AUDIODRIVER = 'dummy';
 
         this.type = 'edit';
         connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
@@ -154,9 +155,9 @@ module.exports = function(winston)
                         });
                     });
 
-                    var tractor = new MLT.Tractor;
-                    multitrack.addTrack(new MLT.Multitrack.Track(playlist));
-                    mlt.push(tractor.push(multitrack));
+                    //var tractor = new MLT.Tractor;
+                    //multitrack.addTrack(new MLT.Multitrack.Track(playlist));
+                    //mlt.push(tractor.push(multitrack));
 
                     //tractor.push(multitrack);
                     //mlt.push(tractor);
