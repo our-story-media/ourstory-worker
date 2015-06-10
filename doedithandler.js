@@ -147,8 +147,8 @@ module.exports = function(winston)
                         mlt.push(producer);
                         playlist.entry({
                             producer: producer,
-                            startFrame:100,
-                            length:500
+                            //startFrame:100,
+                            length:m.meta.streams[0].nb_frames
                         });
                     });
 
@@ -156,7 +156,6 @@ module.exports = function(winston)
                     multitrack.addTrack(new MLT.Multitrack.Track(playlist));
                     mlt.push(tractor.push(multitrack));
 
-                    
                     //tractor.push(multitrack);
                     //mlt.push(tractor);
 
