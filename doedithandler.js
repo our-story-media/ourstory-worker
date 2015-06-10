@@ -121,7 +121,7 @@ module.exports = function(winston)
                         logger.info("reading meta for "+path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')));
                         ffmpeg.ffprobe(path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')), function(err, metadata) {
                             logger.error(err);
-                            console.dir(metadata);
+                            //console.dir(metadata);
                             media.meta = metadata;
                             cb();
                         });                    
@@ -144,7 +144,7 @@ module.exports = function(winston)
 
                     _.each(edit.media,function(m){
 
-                        console.log(m.meta.streams[0].nb_frames + ' frames');
+                        //console.log(m.meta.streams[0].nb_frames + ' frames');
 
                         var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
                         mlt.push(producer);
