@@ -144,6 +144,8 @@ module.exports = function(winston)
                       scriptPath:__dirname,
                       args: [JSON.stringify(json)]
                     };
+
+                    console.log(options.args);
                      
                     PythonShell.run('./edit.py', options, function (err, results) {
                       if (err) throw err;
