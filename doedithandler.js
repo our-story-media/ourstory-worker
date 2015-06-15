@@ -142,7 +142,7 @@ module.exports = function(winston)
                     var options = {
                       mode: 'text',
                       scriptPath:__dirname,
-                      args: [json]
+                      args: [JSON.stringify(json)]
                     };
                      
                     PythonShell.run('./edit.py', options, function (err, results) {
