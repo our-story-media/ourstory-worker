@@ -141,6 +141,7 @@ module.exports = function(winston)
 
                     var options = {
                       mode: 'text',
+                      scriptPath:__dirname,
                       args: [json]
                     };
                      
