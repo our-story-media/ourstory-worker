@@ -177,7 +177,7 @@ module.exports = function(winston)
                         playlist.entry({
                             producer: producer,
                             //startFrame:100,
-                            length:m.meta.streams[0].nb_frames
+                            //length:m.meta.streams[0].nb_frames
                         });
                     });
 
