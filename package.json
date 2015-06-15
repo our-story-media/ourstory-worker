@@ -13,7 +13,8 @@
     "winston-mongodb":"*",
     "lodash":"*",
     "async":"*",
-    "mongodb":"*"
+    "mongodb":"*",
+    "python-shell":"*"
 	},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
