@@ -156,7 +156,7 @@ module.exports = function(winston)
                 // });
 
 
-                _.each(edit.media,function(m){
+                //_.each(edit.media,function(m){
                 calls.push(function(cb){
                     var mlt = new MLT
                       , multitrack = new MLT.Multitrack
@@ -193,21 +193,6 @@ module.exports = function(winston)
                         var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
 
                         logger.info('Melting. Please be Patient!');
-
-                        // var spawn = require('child_process').spawn,
-                        //     ls    = spawn('ls', ['-lh', '/usr']);
-
-                        // ls.stdout.on('data', function (data) {
-                        //   console.log('stdout: ' + data);
-                        // });
-
-                        // ls.stderr.on('data', function (data) {
-                        //   console.log('stderr: ' + data);
-                        // });
-
-                        // ls.on('close', function (code) {
-                        //   console.log('child process exited with code ' + code);
-                        // });
                         
                         child = child_process.exec(child, function (err, stdout, stderr) {
                               if (err) {
@@ -223,7 +208,7 @@ module.exports = function(winston)
                         }
                     });
                 });
-                });
+                //});
 
                 //-c:v libx264
                 // _.each(edit.media,function(m){
