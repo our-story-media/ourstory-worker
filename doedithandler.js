@@ -242,7 +242,7 @@ module.exports = function(winston)
                             //   logger.error('' + data);
                             // });
 
-                            ls.on('close', function (code) {
+                            ls.on('exit', function (code) {
                                 logger.info('Finished: ' + videoFilename);
                               cb();
                             });
