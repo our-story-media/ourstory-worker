@@ -237,20 +237,21 @@ module.exports = function(winston)
                                  logger.error('' + error);
                                  logger.error('' + stderror);
                                  logger.info(''+stdout);
+                                 cb(true);
                             });
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
-                            child.stdout.on('data', function(data) {
-                                logger.info('' + data);
-                            });
-                            child.stderr.on('data', function(data) {
-                                logger.error('' + data);
-                            });
-                            child.on('close', function(code) {
-                                logger.info('closing code: ' + code);
-                                cb(code!=0);
-                            });
+                            // child.stdout.on('data', function(data) {
+                            //     logger.info('' + data);
+                            // });
+                            // child.stderr.on('data', function(data) {
+                            //     logger.error('' + data);
+                            // });
+                            // child.on('close', function(code) {
+                            //     logger.info('closing code: ' + code);
+                            //     cb(code!=0);
+                            // });
                             
 
                             // ls.stdout.on('data', function (data) {
