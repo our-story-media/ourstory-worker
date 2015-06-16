@@ -237,13 +237,13 @@ module.exports = function(winston)
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
-                            child.stdout.on('data', function(data) {
-                                logger.info('' + data);
-                            });
-                            child.stderr.on('data', function(data) {
-                                logger.error('' + data);
-                            });
-                            child.stderr.on('error', function(data) {
+                            // child.stdout.on('data', function(data) {
+                            //     logger.info('' + data);
+                            // });
+                            // child.stderr.on('data', function(data) {
+                            //     logger.error('' + data);
+                            // });
+                            child.on('error', function(data) {
                                 logger.error('' + data);
                             });
                             child.on('close', function(code) {
