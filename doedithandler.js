@@ -231,27 +231,25 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var exec = require('child_process').exec;
+                            var exec = require('child_process').spawn;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024*1024*1024},function(error,stdout,stderror){
-                                 logger.error(error);
-                                 logger.error('' + stderror);
-                                 logger.info(''+stdout);
-                                 cb(true);
-                            });
+                            var child = exec('melt', testcommand,{stdio:'ignore'});
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
-                            // child.stdout.on('data', function(data) {
-                            //     logger.info('' + data);
-                            // });
-                            // child.stderr.on('data', function(data) {
-                            //     logger.error('' + data);
-                            // });
-                            // child.on('close', function(code) {
-                            //     logger.info('closing code: ' + code);
-                            //     cb(code!=0);
-                            // });
+                            child.stdout.on('data', function(data) {
+                                logger.info('' + data);
+                            });
+                            child.stderr.on('data', function(data) {
+                                logger.error('' + data);
+                            });
+                            child.stderr.on('error', function(data) {
+                                logger.error('' + data);
+                            });
+                            child.on('close', function(code) {
+                                logger.info('closing code: ' + code);
+                                cb(code!=0);
+                            });
                             
 
                             // ls.stdout.on('data', function (data) {
