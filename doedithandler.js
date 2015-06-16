@@ -193,24 +193,27 @@ module.exports = function(winston)
 
                         //TESTING:
                         //foo.dv bar.dv -mix 25 -mixer luma -mixer mix:-1
-                        var testcommand = "";
+                        var testcommand = [];
                         // var paths = _.pluck(edit.media,function(m)
                         // {
                         //     //return path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''));
                         //     //testcommand += " "++" -mix 25 -mixer luma ";
                         // });
-    
+
                         var paths = _.each(edit.media,function(m)
                         {
-                            testcommand += " "+path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))+" -mix 25 -mixer luma";
+                            testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''));
+                            testcommand.push("-mix 25");
+                            testcommand.push("-mixer luma");
                         });
 
                         //testcommand = paths.join(' -mix 25 -mixer luma ')
 
                         //testcommand += " -mixer mix:-1";
                         //var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
-                        var child = testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
-                       
+                        //var child = testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
+                       testcommand.push('-progress');
+                       testcommand.push('-consumer avformat:' + videoFilename + " strict=experimental");
 
                         logger.info('Melting. Please be Patient!');
                         
@@ -227,7 +230,7 @@ module.exports = function(winston)
                         //    });
                             console.log(child);
                             var spawn = require('child_process').spawn;
-                            var ls = spawn('melt ' + child);
+                            var ls = spawn('melt ',testcommand);
 
                             ls.stdout.on('data', function (data) {
                               console.log(data);
