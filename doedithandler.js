@@ -230,15 +230,15 @@ module.exports = function(winston)
                         //    });
                             console.log('melt ' + testcommand.join(' '));
                             var spawn = require('child_process').spawn;
-                            var ls = spawn('melt',testcommand);
+                            var ls = spawn('melt',testcommand,{ stdio: 'inherit' });
 
-                            ls.stdout.on('data', function (data) {
-                              logger.info('' + data);
-                            });
+                            // ls.stdout.on('data', function (data) {
+                            //   logger.info('' + data);
+                            // });
 
-                            ls.stderr.on('data', function (data) {
-                              logger.error('' + data);
-                            });
+                            // ls.stderr.on('data', function (data) {
+                            //   logger.error('' + data);
+                            // });
 
                             ls.on('close', function (code) {
                                 logger.info('Finished: ' + videoFilename);
