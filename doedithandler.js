@@ -202,7 +202,7 @@ module.exports = function(winston)
 
                         var paths = _.each(edit.media,function(m)
                         {
-                            testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''));
+                            testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
                             testcommand.push("-mix 25");
                             testcommand.push("-mixer luma");
                         });
