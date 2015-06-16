@@ -194,12 +194,20 @@ module.exports = function(winston)
                         //TESTING:
                         //foo.dv bar.dv -mix 25 -mixer luma -mixer mix:-1
                         var testcommand = "";
-                        _.each(edit.media,function(m)
+                        // var paths = _.pluck(edit.media,function(m)
+                        // {
+                        //     //return path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''));
+                        //     //testcommand += " "++" -mix 25 -mixer luma ";
+                        // });
+    
+                        var paths = _.each(edit.media,function(m)
                         {
-                            testcommand += " "+path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))+" -mix 25 -mixer luma ";
+                            testcommand += " "+path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))+" -mix 25 -mixer luma";
                         });
 
-                        testcommand += " -mixer mix:-1";
+                        //testcommand = paths.join(' -mix 25 -mixer luma ')
+
+                        //testcommand += " -mixer mix:-1";
                         //var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
                         var child = 'melt ' + testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
                         console.log(child);
