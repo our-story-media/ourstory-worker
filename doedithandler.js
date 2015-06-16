@@ -231,9 +231,11 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var exec = require('child_process').spawn;
+                            var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var child = exec('sh', ['edit_do.sh','melt ' + testcommand.join(' ') + '']);
+                            var child = exec('edit_do.sh "melt ' + testcommand.join(' ') + '"',function(err, o,e){
+                                
+                            });
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
