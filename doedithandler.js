@@ -233,7 +233,11 @@ module.exports = function(winston)
 
                             var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024*1024*1024});
+                            var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024*1024*1024},function(error,stdout,stderror){
+                                 logger.error('' + error);
+                                 logger.error('' + stderror);
+                                 logger.info(''+stdout);
+                            });
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
