@@ -230,7 +230,7 @@ module.exports = function(winston)
                         //    });
                             console.log('melt ' + testcommand.join(' '));
                             var spawn = require('child_process').spawn;
-                            var ls = spawn('melt',testcommand,{ stdio: ['pipe', 'pipe', null, null, null] });
+                            var ls = spawn('melt',testcommand);
 
                             ls.stdout.on('data', function (data) {
                               logger.info('' + data);
