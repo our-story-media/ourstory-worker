@@ -232,7 +232,7 @@ module.exports = function(winston)
 
 
                             var spawn = require('child_process').spawn;
-                            var ls = spawn('melt',testcommand);
+                            var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
 
                             ls.stdout.on('data', function (data) {
                               logger.info('' + data);
