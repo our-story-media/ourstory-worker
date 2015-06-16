@@ -231,9 +231,9 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var spawn = require('child_process');
+                            var spawn = require('child_process').spawnSync;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var ls = spawn.spawnSync('melt',testcommand);
+                            var ls = spawn('melt',testcommand);
                             logger.info(ls.stdout);
                             cb();
 
