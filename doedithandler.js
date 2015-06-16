@@ -233,19 +233,19 @@ module.exports = function(winston)
 
                             var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var child = exec('melt ' + testcommand.join(' '));
+                            var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024*1024});
                             //logger.info(ls.stdout);
                             //var child = exec('node ./commands/server.js');
                             
                             child.stdout.on('data', function(data) {
-                                console.log('stdout: ' + data);
+                                logger.info('' + data);
                             });
                             child.stderr.on('data', function(data) {
-                                console.log('stdout: ' + data);
+                                logger.error('' + data);
                             });
                             child.on('close', function(code) {
-                                console.log('closing code: ' + code);
-                                cb();
+                                logger.info('closing code: ' + code);
+                                cb(code!=0);
                             });
                             
 
