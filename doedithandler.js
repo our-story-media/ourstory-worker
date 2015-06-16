@@ -190,7 +190,18 @@ module.exports = function(winston)
                         logger.info('Finished prepping melt file...');
                         //OUTPUT:
                         var videoFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' +edit.code + ".mp4");
-                        var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
+
+                        //TESTING:
+                        //foo.dv bar.dv -mix 25 -mixer luma -mixer mix:-1
+                        var testcommand = "";
+                        _.each(edit.media,function(m)
+                        {
+                            testcommand += " "+path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))+" -mix 25 -mixer luma ";
+                        });
+
+                        testcommand += " -mixer mix:-1";
+                        //var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
+                        var child = 'melt ' + testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
 
                         logger.info('Melting. Please be Patient!');
                         
