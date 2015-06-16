@@ -231,7 +231,7 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var exec = require('child_process').exec;
+                            var exec = require('child_process').execFile;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
                             var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024*1024*1024},function(error,stdout,stderror){
                                  logger.error('' + error);
