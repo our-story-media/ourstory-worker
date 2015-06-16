@@ -176,7 +176,7 @@ module.exports = function(winston)
                                 logger.info('' + data);
                             });
                             child.stderr.on('data', function(data) {
-                                logger.error('' + data);
+                                console.log('' + data);
                             });
                             child.on('error', function(data) {
                                 logger.error('' + data);
