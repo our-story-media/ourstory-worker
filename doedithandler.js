@@ -230,11 +230,11 @@ module.exports = function(winston)
                             var ls = spawn('melt' + child);
 
                             ls.stdout.on('data', function (data) {
-                              logger.info(data);
+                              console.log(data);
                             });
 
                             ls.stderr.on('data', function (data) {
-                              logger.error(data);
+                              console.log(data);
                             });
 
                             ls.on('close', function (code) {
