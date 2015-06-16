@@ -228,7 +228,7 @@ module.exports = function(winston)
                         //         cb();
                         //       }
                         //    });
-                            console.log(testcommand);
+                            console.log('melt ' + testcommand.join(' '));
                             var spawn = require('child_process').spawn;
                             var ls = spawn('melt',testcommand);
 
