@@ -202,6 +202,7 @@ module.exports = function(winston)
                         testcommand += " -mixer mix:-1";
                         //var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
                         var child = 'melt ' + testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
+                        console.log(child);
 
                         logger.info('Melting. Please be Patient!');
                         
