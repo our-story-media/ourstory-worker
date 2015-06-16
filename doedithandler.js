@@ -231,11 +231,23 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var spawn = require('child_process').spawnSync;
+                            var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var ls = spawn('melt',testcommand);
+                            var child = exec('melt',testcommand.join(' '));
                             logger.info(ls.stdout);
-                            cb();
+                            //var child = exec('node ./commands/server.js');
+                            
+                            child.stdout.on('data', function(data) {
+                                console.log('stdout: ' + data);
+                            });
+                            child.stderr.on('data', function(data) {
+                                console.log('stdout: ' + data);
+                            });
+                            child.on('close', function(code) {
+                                console.log('closing code: ' + code);
+                                cb();
+                            });
+                            
 
                             // ls.stdout.on('data', function (data) {
                             //   logger.info('' + data);
