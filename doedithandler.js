@@ -231,21 +231,24 @@ module.exports = function(winston)
                             console.log('melt ' + testcommand.join(' '));
 
 
-                            var spawn = require('child_process').spawn;
-                            var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
+                            var spawn = require('child_process').spawnSync;
+                            //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
+                            var ls = spawn('melt',testcommand);
+                            logger.info(ls.stdout);
+                            cb();
 
-                            ls.stdout.on('data', function (data) {
-                              logger.info('' + data);
-                            });
+                            // ls.stdout.on('data', function (data) {
+                            //   logger.info('' + data);
+                            // });
 
-                            ls.stderr.on('data', function (data) {
-                              logger.error('' + data);
-                            });
+                            // ls.stderr.on('data', function (data) {
+                            //   logger.error('' + data);
+                            // });
 
-                            ls.on('exit', function (code) {
-                                logger.info('Finished: ' + videoFilename);
-                              cb();
-                            });
+                            // ls.on('exit', function (code) {
+                            //     logger.info('Finished: ' + videoFilename);
+                            //   cb();
+                            // });
                         }
                     });
                 });
