@@ -233,11 +233,11 @@ module.exports = function(winston)
                             var ls = spawn('melt',testcommand);
 
                             ls.stdout.on('data', function (data) {
-                              console.log(data);
+                              console.log('' + data);
                             });
 
                             ls.stderr.on('data', function (data) {
-                              console.log(data);
+                              console.log('' + data);
                             });
 
                             ls.on('close', function (code) {
