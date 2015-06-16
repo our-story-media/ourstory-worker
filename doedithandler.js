@@ -210,7 +210,7 @@ module.exports = function(winston)
                         //testcommand += " -mixer mix:-1";
                         //var child = 'melt ' + mltFilename + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
                         var child = testcommand + ' -progress -consumer avformat:' + videoFilename + " strict=experimental";
-                        //console.log(child);
+                       
 
                         logger.info('Melting. Please be Patient!');
                         
@@ -225,8 +225,9 @@ module.exports = function(winston)
                         //         cb();
                         //       }
                         //    });
+                            console.log(child);
                             var spawn = require('child_process').spawn;
-                            var ls = spawn('melt', child);
+                            var ls = spawn('melt' + child);
 
                             ls.stdout.on('data', function (data) {
                               logger.info(data);
