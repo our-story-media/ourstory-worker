@@ -3,6 +3,7 @@ logs
 *.log
 
 local.js
+.tmp
 
 # Runtime data
 pids

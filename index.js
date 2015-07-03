@@ -20,7 +20,7 @@ function start()
         //handleExceptions: true
     });
 
-    winston.info("Transcode Server Started");
+    winston.info("Transcode and Sync Server Started");
 
 	var runner = new fivebeans({
 		id:'transcode-server',
@@ -29,7 +29,8 @@ function start()
 		ignoreDefault:true,
 		handlers:
 	    {
-	        edit: require('./doedithandler')(winston)
+	        edit: require('./edithandler')(winston),
+	        dropbox: require('./dropboxhandler')(winston)
 	    },
 	 });
 	runner.on('error',function(err)

@@ -14,7 +14,15 @@
     "lodash":"*",
     "async":"*",
     "mongodb":"*",
-    "python-shell":"*"
+    "python-shell":"*",
+    "fs-extra": "*",
+    "mlt":"*",
+    "request":"*",
+    "tough-cookie":"*",
+    "s3": "*",
+    "dropbox": "*",
+    "moment":"*",
+    "uuid":"*"
 	},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
