@@ -203,6 +203,7 @@ module.exports = function(winston)
 
     DoEditHandler.prototype.work = function(conf, callback)
     {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         logger.info('starting dropbox sync',conf);
 
         //go get the directory structure:
@@ -217,7 +218,7 @@ module.exports = function(winston)
         request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template , jar: j}, function (err,resp,body) {
           //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
             console.log("directory struct:");
-            //console.log(conf);
+            console.log(err);
 
             var dbClient = new Dropbox.Client({
               key         : config.dropbox_clientid,
