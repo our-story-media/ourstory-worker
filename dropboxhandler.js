@@ -18,6 +18,23 @@ var thedb = null;
 var connection = null;
 var logger = null;
 
+var nodemailer = require('nodemailer');
+var directTransport = require('nodemailer-direct-transport');
+var transporter = nodemailer.createTransport(directTransport());
+
+var sendEmail = function(userid, content) {
+
+    var collection = thedb.collection('user');
+    collection.findOne({"_id": new ObjectId(userid)}, function(err, doc) {
+      transporter.sendMail({
+    		from: "Bootlegger <no-reply@bootlegger.tv>", // sender address
+            to: doc.profile.emails[0], // list of receivers
+            subject: 'Dropbox Sync Finished', // Subject line
+            text: content, // plaintext body
+    	});
+    });
+};
+
 var reportprogress = function(conf)
 {
   var collection = thedb.collection('user');
@@ -219,6 +236,12 @@ module.exports = function(winston)
           //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
             console.log("directory struct:");
             console.log(err);
+            if (err)
+            {
+              logger.error(err);
+              callback('bury');
+              return;
+            }
 
             var dbClient = new Dropbox.Client({
               key         : config.dropbox_clientid,
@@ -259,6 +282,7 @@ module.exports = function(winston)
                       console.log(err);
                       //console.log(result);
                       logger.info('Dropbox Sync Complete');
+                      sendEmail(conf.user_id,'Dropbox Sync Cancelled or Incomplete. Error: '+err);
                       callback('bury');
                     });
                 }
@@ -269,6 +293,7 @@ module.exports = function(winston)
                       console.log(err);
                       //console.log(result);
                       logger.info('Dropbox Sync Complete');
+                      sendEmail(conf.user_id,'Dropbox Sync Complete!');
                       callback('success');
                     });
                 }

@@ -22,7 +22,9 @@
     "s3": "*",
     "dropbox": "*",
     "moment":"*",
-    "uuid":"*"
+    "uuid":"*",
+    "nodemailer":"*",
+    "nodemailer-direct-transport":"*"
 	},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
