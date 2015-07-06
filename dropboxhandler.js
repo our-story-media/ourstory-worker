@@ -20,9 +20,9 @@ var logger = null;
 
 var nodemailer = require('nodemailer');
 var directTransport = require('nodemailer-direct-transport');
-var transporter = nodemailer.createTransport('direct', {
+var transporter = nodemailer.createTransport(directTransport({
     debug: true, //this!!!
-  });
+  }));
 
 var sendEmail = function(userid, content) {
 
