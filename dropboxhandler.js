@@ -115,7 +115,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                       downloader.on('error', function(err) {
                         console.log(err);
                         reportprogress(conf);
-                        cb(true);
+                        cb(err);
                       });
                       downloader.on('progress', function() {
                         var prog = (downloader.progressAmount/downloader.progressTotal);
@@ -254,7 +254,7 @@ module.exports = function(winston)
                 var collection = thedb.collection('user');
                 if (err)
                 {
-                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true}}}, {w:1}, function(err, result) {
+                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
                       //done update...
                       console.log(err);
                       //console.log(result);
