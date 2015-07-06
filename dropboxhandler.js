@@ -28,6 +28,7 @@ var sendEmail = function(userid, content) {
 
     var collection = thedb.collection('user');
     collection.findOne({"_id": new ObjectId(userid)}, function(err, doc) {
+      logger.info("sending email to "+doc.profile.emails[0]);
       transporter.sendMail({
     		from: "Bootlegger <no-reply@bootlegger.tv>", // sender address
             to: doc.profile.emails[0], // list of receivers
