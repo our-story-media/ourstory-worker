@@ -17,6 +17,8 @@ var tempdir;
 var thedb = null;
 var connection = null;
 var logger = null;
+var AWS = require('aws-sdk');
+AWS.config.region = config.S3_REGION;
 
 var nodemailer = require('nodemailer');
 var directTransport = require('nodemailer-direct-transport');
@@ -110,24 +112,108 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                 function (cb){
                   checkcancel(conf,cb);
                 });
+
+              //TRANSCODE THE FILE IF NEEDED
+              if (conf.homog)
+              {
+                calls.push(function(cb){
+                  var filename = val;
+                  //check if the file exists:
+                  console.log("looking for "+config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4');
+                  request({method:'HEAD',uri:config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'},function(err,response,data)
+                  {
+                    console.log('code: '+response.statusCode);
+                    if (err || response.statusCode != 200)
+                    {
+                      //console.log(err);
+                      //console.log(data);
+                      console.log("HOMOG file not exist, submitting transcode request");
+                      AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
+                      var elastictranscoder = new AWS.ElasticTranscoder();
+                      elastictranscoder.createJob({
+                        PipelineId: config.ELASTIC_PIPELINE,
+                        //InputKeyPrefix: '/upload',
+                        OutputKeyPrefix: 'upload/',
+                        Input: {
+                          Key: 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,''),
+                          FrameRate: 'auto',
+                          Resolution: 'auto',
+                          AspectRatio: 'auto',
+                          Interlaced: 'auto',
+                          Container: 'auto' },
+                        Output: {
+                          Key: filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4',
+                          // CreateThumbnails:false,
+                          PresetId: config.HOMOG_PRESET, // specifies the output video format
+                      }
+                        }, function(error, data) {
+                          if (error)
+                          {
+                              logger.error(error);
+                              cb(error);
+                          }
+                          else
+                          {
+                             logger.info("Transcode submitted");
+                              //console.log(data);
+                              var params = {
+                                Id: data.Job.Id /* required */
+                              };
+                              elastictranscoder.waitFor('jobComplete', params, function(err, data) {
+                                if (err)
+                                {
+                                  console.log(err, err.stack); // an error occurred
+                                  cb();
+                                }
+                                else{
+                                  console.log(data);           // successful response
+                                  cb();
+                                }
+                              });
+                          }
+                      });
+                    }
+                    else {
+                      //file has been homogeonised!
+                      cb();
+                    }
+                  });
+                });
+              }
+
+              //DOWNLOAD THE FILE LOCALLY
               calls.push(function(cb)
               {
                 var filename = val;
                 var thepath = pf;
                 //download file
                 dbclient.stat(thepath + '/' + filename.local,function(err,stat){
-                    if (!stat)
+                   //console.log(stat);
+                    if (!stat || stat.isRemoved)
                     {
                       console.log('not in dest');
                       //file not in destination, so download to tmp
                       filename.tmp = uuid.v4();
-                      var params = {
-                        localFile: path.normalize(tempdir+"/"+filename.tmp),
-                        s3Params: {
-                          Bucket: config.S3_BUCKET,
-                          Key: "upload/"+filename.remote.replace(config.S3_CLOUD_URL,''),
-                        },
-                      };
+                      if (conf.homog)
+                      {
+                        //console.log("looking for "+filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'+' on s3');
+                          var params = {
+                            localFile: path.normalize(tempdir+"/"+filename.tmp),
+                            s3Params: {
+                              Bucket: config.S3_TRANSCODE_BUCKET_NAME,
+                              Key: "upload/"+filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4',
+                            },
+                          };
+                        }
+                        else {
+                          var params = {
+                            localFile: path.normalize(tempdir+"/"+filename.tmp),
+                            s3Params: {
+                              Bucket: config.S3_BUCKET,
+                              Key: "upload/"+filename.remote.replace(config.S3_CLOUD_URL,''),
+                            },
+                          };
+                        }
                       //console.log("from: "+"upload/"+filename.remote);
                     //  console.log(params);
 
@@ -148,6 +234,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                     }
                     else
                     {
+                      console.log("file exists in dropbox");
                       reportprogress(conf);
                       cb();
                     }
