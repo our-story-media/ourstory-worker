@@ -296,7 +296,11 @@ module.exports = function(winston)
             			var filename = tempdir + '/' + "input_" + conf.event + ".json";
             			fs.writeFileSync(filename, JSON.stringify(args));
 
-            			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
+            			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"',{
+                    env:{
+                      LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/runtime/glnxa64/";
+                    }
+                  }, function callback(error, stdout, stderr){
             			    // result
             			    if (error)
             			    {
