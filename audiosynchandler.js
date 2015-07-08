@@ -298,7 +298,7 @@ module.exports = function(winston)
 
             			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"',{
                     env:{
-                      LD_LIBRARY_PATH : "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/bin/glnxa64:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/runtime/glnxa64"
+                      'LD_LIBRARY_PATH' : "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/bin/glnxa64:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/runtime/glnxa64"
                     }
                   }, function callback(error, stdout, stderr){
             			    // result
