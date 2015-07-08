@@ -119,7 +119,8 @@ module.exports = function(winston)
             //console.log("eventid: "+conf.event);
             //console.log(err);
             //console.log(doc.length + " media files");
-
+            conf.total = doc.length;
+            conf.done = 0;
             //console.log(doc);
 
             var s3 = ss3.createClient({
@@ -231,9 +232,11 @@ module.exports = function(winston)
                 var downloader = s3.downloadFile(params);
                 downloader.on('error', function(err) {
                   console.log(err);
+                  reportprogress(conf);
                   cb(err);
                 });
                 downloader.on('end', function() {
+                  reportprogress(conf);
                   cb();
                 });
               });
@@ -254,23 +257,27 @@ module.exports = function(winston)
             					var command = new FFmpeg({ source: tempdir + '/' + m.path + '.mp3'})
             					.on('error', function(err) {
             		        		console.log('Cannot convert to wav: ' + err.message);
+                            reportprogress(conf);
             		        		cb(err);
             		    		})
             		    		.on('end', function() {
             		        		console.log('Conversion to wav finished successfully');
             		        		//adjust progress:
+                            reportprogress(conf);
             		        		cb();
             		        	})
             		        	.saveToFile(tempdir + '/' + m.path + '.wav');
           	        	}
           	        	else
           	        	{
+                        reportprogress(conf);
           	        		cb();
           	        	}
             			//});
             		}
                 else {
                   console.log("no file found for conversion");
+                  reportprogress(conf);
                   cb();
                 }
               });
@@ -287,31 +294,51 @@ module.exports = function(winston)
               });
               console.log(clips);
               //calls.push(function(cb) {
-            			//do matlab processing:
-            			var esc = require('shell-escape');
-            			var exec = require('child_process').exec;
-                  //console.log(tempdir + conf.audiofile);
-            			var args = {groundTruthPath:tempdir + '/' + conf.audiofile, clips:clips};
-            			console.log(esc([JSON.stringify(args)]));
-            			var filename = tempdir + '/' + "input_" + conf.event + ".json";
-            			fs.writeFileSync(filename, JSON.stringify(args));
+        			//do matlab processing:
+        			var esc = require('shell-escape');
+        			var exec = require('child_process').exec;
+              //console.log(tempdir + conf.audiofile);
+        			var args = {groundTruthPath:tempdir + '/' + conf.audiofile, clips:clips};
+        			console.log(esc([JSON.stringify(args)]));
+        			var filename = tempdir + '/' + "input_" + conf.event + ".json";
+        			fs.writeFileSync(filename, JSON.stringify(args));
 
-            			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
-            			    // result
-                      console.log(stdout);
+        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
+        			    if (error)
+        			    {
+        			    	console.log(error);
+        			    	cb(error);
+        			    }
+        			    else
+        			    {
+                    console.log("matlab script finished");
+                    var updates = [];
+                    //readthe data:
+                    var output = fs.readFileSync(tempdir + '/' + conf.audiofile.replace('.wav','.txt'));
+                    var data = JSON.parse(output);
+                    medi = data[conf.audiofile.replace('.wav','.txt')];
+                    _.each(medi,function(o,k)
+                    {
+                      if (k!='progress')
+                      {
+                        updates.push(function(cb){
+                          var filename = k.replace('id','') + '.mp4';
+                          console.log(filename + ' at '+o);
+                          var collection = thedb.collection('user');
+                          collection.update({"path": filename}, {$set:{offset:o}}, {w:1}, function(err, result) {
+                              //done update...
+                              cb(err);
+                            });
+                        });
+                      }
+                    });
 
-            			    if (error)
-            			    {
-            			    	console.log(error);
-            			    	cb(error);
-            			    }
-            			    else
-            			    {
-                        console.log("matlab script finished");
-            			    	cb();
-            			    }
-            			});
-            	//	});
+                    aync.series(updates,function(err)
+                    {
+                      cb(err);
+                    });
+        			    }
+        			});
             });
 
             async.series(calls,function(err)
@@ -344,106 +371,6 @@ module.exports = function(winston)
 
           });
           });
-
-
-
-
-        	// //start ffmpeg:
-        	// Media.find({event_id:ev.id}).exec(function(err,media)
-        	// {
-        	// 	//for each media, add to list:
-        	// 	var async = require('async');
-        	// 	var calls = [];
-          //
-        	// 	var valid = [];
-        	// 	_.each(media, function(m)
-        	// 	{
-        	// 		console.log("checking "+m);
-        	// 		if (m.path != undefined && fs.existsSync(tmpdir + m.path))
-        	// 		{
-        	// 			console.log("adding to conversion list");
-        	// 			valid.push(tmpdir + m.path + ".wav");
-        	// 			calls.push(function(callback) {
-        	// 				//add to queue:
-        	// 				console.log('converting '+ tmpdir + m.path);
-        	// 				if (!fs.existsSync(tmpdir + m.path + '.wav'))
-        	// 				{
-        	// 					var command = new FFmpeg({ source: tmpdir + m.path})
-        	// 					.on('error', function(err) {
-        	// 		        		console.log('Cannot process video: ' + err.message);
-        	// 		        		callback(null,m);
-        	// 		    		})
-        	// 		    		.on('end', function() {
-        	// 		        		console.log('Processing finished successfully');
-        	// 		        		//adjust progress:
-        	// 		        		callback(null,m);
-        	// 		        	})
-        	// 		        	.saveToFile(tmpdir + m.path + '.wav');
-        	// 	        	}
-        	// 	        	else
-        	// 	        	{
-        	// 	        		callback(null,m);
-        	// 	        	}
-        	// 			});
-        	// 		}
-        	// 		//path
-        	// 	});
-          //
-        	// 	calls.push(function(cb) {
-        	// 		//do matlab processing:
-        	// 		var esc = require('shell-escape');
-        	// 		var exec = require('child_process').exec;
-        	// 		//TODO -- pass arguments
-          //
-        	// 		var args = {groundTruthPath:ev.audio, clips:valid};
-        	// 		console.log(esc([JSON.stringify(args)]));
-        	// 		var filename = tmpdir + "input_" + ev.id + ".json";
-        	// 		fs.writeFileSync(filename, JSON.stringify(args));
-          //
-        	// 		exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
-        	// 		    // result
-        	// 		    if (error)
-        	// 		    {
-        	// 		    	console.log(error);
-        	// 		    	cb(error);
-        	// 		    }
-        	// 		    else
-        	// 		    {
-        	// 		    	 Event.findOne(ev.id).exec(function(err,e)
-        	// 			    {
-        	// 			    	e.audio_progress = 100;
-        	// 			    	e.save(function(err)
-        	// 			    	{
-        	// 			    		genedl(ev.id,function(done)
-        	// 				    	{
-        	// 				    		console.log("done edl generation");
-        	// 							cb(null,e);
-        	// 				    	});
-        	// 			    	});
-        	// 			    });
-        	// 		    }
-        	// 		});
-        	// 	});
-          //
-        	// 	console.log("valid:" + valid);
-          //
-        	// 	async.series(calls, function(err, result) {
-        	// 		console.log("done audio processing");
-        	// 		if (err)
-        	// 		{
-        	// 			 Event.findOne(ev.id).exec(function(err,e)
-        	// 		    {
-        	// 		    	e.audio_progress = -1;
-        	// 		    	e.save(function(err)
-        	// 		    	{
-        	// 		    	});
-        	// 		    });
-        	// 		}
-        	// 	});
-        	// });
-
-        // });
-
     }
 
 
