@@ -298,6 +298,8 @@ module.exports = function(winston)
 
             			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
             			    // result
+                      console.log(stdout);
+
             			    if (error)
             			    {
             			    	console.log(error);
