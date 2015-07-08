@@ -106,7 +106,7 @@ module.exports = function(winston)
     DoAudioHandler.prototype.work = function(conf, callback)
     {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-        process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/runtime/glnxa64";
+        process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v85/runtime/glnxa64/";
 
         logger.info('starting audio sync',conf);
 
