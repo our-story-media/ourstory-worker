@@ -106,7 +106,7 @@ module.exports = function(winston)
     DoAudioHandler.prototype.work = function(conf, callback)
     {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-        process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Runtime/v85:/usr/local/MATLAB/MATLAB_Runtime/v85/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v85/runtime/glnxa64";
+        process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/bin/glnxa64:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/runtime/glnxa64";
 
         logger.info('starting audio sync',conf);
 
@@ -296,11 +296,7 @@ module.exports = function(winston)
             			var filename = tempdir + '/' + "input_" + conf.event + ".json";
             			fs.writeFileSync(filename, JSON.stringify(args));
 
-            			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"',{
-                    env:{
-                      'LD_LIBRARY_PATH' : "/usr/local/MATLAB/MATLAB_Runtime/v85:/usr/local/MATLAB/MATLAB_Runtime/v85/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v85/runtime/glnxa64"
-                    }
-                  }, function callback(error, stdout, stderr){
+            			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
             			    // result
             			    if (error)
             			    {
