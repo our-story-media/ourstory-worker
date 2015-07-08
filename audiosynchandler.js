@@ -303,7 +303,7 @@ module.exports = function(winston)
         			var filename = tempdir + '/' + "input_" + conf.event + ".json";
         			fs.writeFileSync(filename, JSON.stringify(args));
 
-        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',filename, function callback(error, stdout, stderr){
+        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',[filename], function callback(error, stdout, stderr){
         			    if (error)
         			    {
         			    	console.log(error);
