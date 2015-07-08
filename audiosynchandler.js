@@ -86,8 +86,6 @@ module.exports = function(winston)
             process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
             process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
         }
-          process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-          process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/runtime/glnxa64";
 
 
         connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
@@ -107,7 +105,9 @@ module.exports = function(winston)
 
     DoAudioHandler.prototype.work = function(conf, callback)
     {
-
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/runtime/glnxa64";
+        
         logger.info('starting audio sync',conf);
 
         //return callback('success');
