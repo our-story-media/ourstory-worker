@@ -296,14 +296,14 @@ module.exports = function(winston)
               //calls.push(function(cb) {
         			//do matlab processing:
         			var esc = require('shell-escape');
-        			var exec = require('child_process').exec;
+        			var exec = require('child_process').execFile;
               //console.log(tempdir + conf.audiofile);
         			var args = {groundTruthPath:tempdir + '/' + conf.audiofile, clips:clips};
         			console.log(esc([JSON.stringify(args)]));
         			var filename = tempdir + '/' + "input_" + conf.event + ".json";
         			fs.writeFileSync(filename, JSON.stringify(args));
 
-        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips "'+filename+'"', function callback(error, stdout, stderr){
+        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',filename, function callback(error, stdout, stderr){
         			    if (error)
         			    {
         			    	console.log(error);
