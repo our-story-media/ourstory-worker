@@ -107,7 +107,7 @@ module.exports = function(winston)
     {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         process.env.LD_LIBRARY_PATH = "/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/bin/glnxa64/:/usr/local/MATLAB/MATLAB_Compiler_Runtime/v80/runtime/glnxa64";
-        
+
         logger.info('starting audio sync',conf);
 
         //return callback('success');
@@ -163,6 +163,7 @@ module.exports = function(winston)
 
                   request({method:'HEAD',uri:config.S3_TRANSCODE_BUCKET + 'audio/' + m.path + '.mp3'},function(err,response,data)
                   {
+                    //console.log(err)
                     console.log('code: '+response.statusCode);
                     if (err || response.statusCode != 200)
                     {
@@ -280,7 +281,7 @@ module.exports = function(winston)
               console.log("processing all files");
 
               var clips = _.pluck(doc,'path');
-              _.map(clips,function(c)
+              clips = _.map(clips,function(c)
               {
                   return tempdir + '/' + c +'.wav';
               });
