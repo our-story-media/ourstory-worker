@@ -45,19 +45,20 @@ var sendEmail = function(userid, content) {
 
 var reportprogress = function(conf)
 {
-  var collection = thedb.collection('user');
+  var collection = thedb.collection('event');
   conf.done++;
-  var progress = (conf.done / (conf.total*2))*100;
-  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{audiosync:{msg:'sync in progress',status:'progress',percentage:progress}}}, {w:1}, function(err, result) {
+  var progress = (conf.done / (conf.total*3))*100;
+  console.log(progress + "%");
+  collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosync:{msg:'sync in progress',status:'progress',percentage:progress}}}, {w:1}, function(err, result) {
       //done update...
     });
 }
 
 var checkcancel = function(conf,cb)
 {
-  var collection = thedb.collection('user');
+  var collection = thedb.collection('event');
   //console.log("checking cancel");
-  collection.findOne({"_id": new ObjectId(conf.user_id)}, function(err, doc) {
+  collection.findOne({"_id": new ObjectId(conf.event)}, function(err, doc) {
     //console.log(doc);
        if (doc.audiosynccancel)
        {
@@ -352,6 +353,7 @@ module.exports = function(winston)
                           var collection = thedb.collection('media');
                           collection.update({"path": filename}, {$set:{offset:offset}}, {w:1}, function(err, result) {
                               //done update...
+                              reportprogress(conf);
                               console.log(result);
                               cb(err);
                             });
@@ -371,10 +373,10 @@ module.exports = function(winston)
             {
               logger.error(err);
               //FINISHED:
-              var collection = thedb.collection('user');
+              var collection = thedb.collection('event');
               if (err)
               {
-                collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{audiosynccancel:false,audiosync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
                     //done update...
                     console.log(err);
                     //console.log(result);
@@ -385,7 +387,7 @@ module.exports = function(winston)
               }
               else
               {
-                collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{audiosynccancel:false,audiosync:{msg:'Complete',status:'done',percentage:100,stopped:true}}}, {w:1}, function(err, result) {
+                collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Complete',status:'done',percentage:100,stopped:true}}}, {w:1}, function(err, result) {
                     //done update...
                     console.log(err);
                     //console.log(result);
