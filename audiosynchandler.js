@@ -336,9 +336,9 @@ module.exports = function(winston)
                     //readthe data:
                     var output = fs.readFileSync(path.normalize(path.dirname(require.main.filename)) + '/' + conf.audiofile.replace('.wav','.txt'));
                     var data = JSON.parse(output);
-                    console.log(data);
+                    //console.log(data);
                     medi = data[conf.audiofile.replace('.wav','')];
-                    console.log(medi);
+                    //console.log(medi);
                     _.each(medi,function(o,k)
                     {
                       if (k!='progress')
@@ -346,9 +346,9 @@ module.exports = function(winston)
                         updates.push(function(cb){
                           var filename = k.replace('id','') + '.mp4';
                           var off = o.split(':');
-                          var offset = (off[3]/100) + off[2] + (off[1]*60) + (off[0] * 60 * 60);
+                          var offset = parseFloat(off[3]/100.0) + parseFloat(off[2]) + (parseFloat(off[1])*60) + (parseFloat(off[0]) * 60 * 60);
 
-                          console.log(filename + ' at '+o);
+                          console.log(filename + ' at '+o + " " + offset);
                           var collection = thedb.collection('media');
                           collection.update({"path": filename}, {$set:{offset:offset}}, {w:1}, function(err, result) {
                               //done update...
