@@ -132,6 +132,10 @@ module.exports = function(winston)
             });
 
             var calls = [];
+            calls.push(
+              function (cb){
+                checkcancel(conf,cb);
+              });
 
             //download master audio
             calls.push(function(cb)
@@ -159,6 +163,10 @@ module.exports = function(winston)
             _.each(doc,function(m){
 
               //transcode file to audio
+              calls.push(
+                function (cb){
+                  checkcancel(conf,cb);
+                });
               calls.push(function(cb){
                   var file = m;
 
@@ -218,6 +226,10 @@ module.exports = function(winston)
               });
 
               //download file
+              calls.push(
+                function (cb){
+                  checkcancel(conf,cb);
+                });
               calls.push(function(cb){
                 var file = m;
                 console.log("starting download of audio");
@@ -242,6 +254,10 @@ module.exports = function(winston)
               });
 
               //convert to wav:
+              calls.push(
+                function (cb){
+                  checkcancel(conf,cb);
+                });
               calls.push(function(cb){
                 var file = m;
                 console.log('starting ffmpeg conversion');
@@ -284,6 +300,10 @@ module.exports = function(winston)
             });
 
             //process all files
+            calls.push(
+              function (cb){
+                checkcancel(conf,cb);
+              });
             calls.push(function(cb){
               console.log("processing all files");
 
