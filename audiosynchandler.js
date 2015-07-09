@@ -346,7 +346,7 @@ module.exports = function(winston)
                         updates.push(function(cb){
                           var filename = k.replace('id','') + '.mp4';
                           var off = o.split(':');
-                          var offset = parseFloat(off[3]/100.0) + parseFloat(off[2]) + (parseFloat(off[1])*60) + (parseFloat(off[0]) * 60 * 60);
+                          var offset = (parseInt(off[3])/100.0) + parseInt(off[2]) + (parseInt(off[1])*60) + (parseInt(off[0]) * 60 * 60);
 
                           console.log(filename + ' at '+o + " " + offset);
                           var collection = thedb.collection('media');
