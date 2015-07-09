@@ -345,9 +345,12 @@ module.exports = function(winston)
                       {
                         updates.push(function(cb){
                           var filename = k.replace('id','') + '.mp4';
+                          var off = o.split(':');
+                          var offset = (off[3]/100) + off[2] + (off[1]*60) + (off[0] * 60 * 60);
+
                           console.log(filename + ' at '+o);
-                          var collection = thedb.collection('user');
-                          collection.update({"path": filename}, {$set:{offset:o}}, {w:1}, function(err, result) {
+                          var collection = thedb.collection('media');
+                          collection.update({"path": filename}, {$set:{offset:offset}}, {w:1}, function(err, result) {
                               //done update...
                               console.log(result);
                               cb(err);
