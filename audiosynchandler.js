@@ -334,7 +334,7 @@ module.exports = function(winston)
                     console.log("matlab script finished");
                     var updates = [];
                     //readthe data:
-                    var output = fs.readFileSync(tempdir + '/' + conf.audiofile.replace('.wav','.txt'));
+                    var output = fs.readFileSync(path.normalize(path.dirname(require.main.filename)) + '/' + conf.audiofile.replace('.wav','.txt'));
                     var data = JSON.parse(output);
                     medi = data[conf.audiofile.replace('.wav','.txt')];
                     _.each(medi,function(o,k)
