@@ -347,6 +347,7 @@ module.exports = function(winston)
                           var collection = thedb.collection('user');
                           collection.update({"path": filename}, {$set:{offset:o}}, {w:1}, function(err, result) {
                               //done update...
+                              console.log(result);
                               cb(err);
                             });
                         });
