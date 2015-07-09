@@ -353,7 +353,7 @@ module.exports = function(winston)
                       }
                     });
 
-                    aync.series(updates,function(err)
+                    async.series(updates,function(err)
                     {
                       cb(err);
                     });
