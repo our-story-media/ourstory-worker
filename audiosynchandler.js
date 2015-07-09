@@ -337,7 +337,8 @@ module.exports = function(winston)
                     var output = fs.readFileSync(path.normalize(path.dirname(require.main.filename)) + '/' + conf.audiofile.replace('.wav','.txt'));
                     var data = JSON.parse(output);
                     console.log(data);
-                    medi = data[conf.audiofile.replace('.wav','.txt')];
+                    medi = data[conf.audiofile.replace('.wav','')];
+                    console.log(medi);
                     _.each(medi,function(o,k)
                     {
                       if (k!='progress')
