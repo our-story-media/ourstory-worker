@@ -340,6 +340,9 @@ module.exports = function(winston)
                     //console.log(data);
                     medi = data[conf.audiofile.replace('.wav','')];
                     //console.log(medi);
+                    //remove master audio
+                    fs.unlinkSync(tempdir + '/' + conf.audiofile);
+
                     _.each(medi,function(o,k)
                     {
                       if (k!='progress')
@@ -351,6 +354,9 @@ module.exports = function(winston)
 
                           console.log(filename + ' at '+o + " " + offset);
                           var collection = thedb.collection('media');
+                          //remove the file:
+                          fs.unlinkSync(tempdir + '/' + filename);
+
                           collection.update({"path": filename}, {$set:{offset:offset}}, {w:1}, function(err, result) {
                               //done update...
                               reportprogress(conf);
@@ -363,6 +369,7 @@ module.exports = function(winston)
 
                     async.series(updates,function(err)
                     {
+                      //remove all files:
                       cb(err);
                     });
         			    }
