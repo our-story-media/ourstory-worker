@@ -119,6 +119,10 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                 calls.push(function(cb){
                   var filename = val;
                   //check if the file exists:
+                  
+                  
+                  //TODO -- if its an image or audio, ignore and dont do homog...
+                  
                   console.log("looking for "+config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4');
                   request({method:'HEAD',uri:config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'},function(err,response,data)
                   {
@@ -310,6 +314,7 @@ module.exports = function(winston)
 
     DoEditHandler.prototype.work = function(conf, callback)
     {
+      try{
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         logger.info('starting dropbox sync',conf);
 
@@ -322,7 +327,7 @@ module.exports = function(winston)
         var url = config.master_url;
 
         j.setCookie(cookie, url);
-        request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template , jar: j}, function (err,resp,body) {
+        request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template+'&apikey='+ config.CURRENT_EDIT_KEY, jar: j}, function (err,resp,body) {
           //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
             console.log("directory struct:");
             console.log(err);
@@ -390,7 +395,10 @@ module.exports = function(winston)
 
             });
         });
-
+      }
+      catch (ex){
+        console.log(ex);
+      }
     }
 
 
