@@ -55,7 +55,9 @@ var checkcancel = function(conf,cb)
   var collection = thedb.collection('user');
   //console.log("checking cancel");
   collection.findOne({"_id": new ObjectId(conf.user_id)}, function(err, doc) {
-    //console.log(doc);
+      console.log('userid: '+conf.user_id);
+      console.log(err);
+      console.log(doc);
        if (doc.dropboxsynccancel)
        {
          console.log('cancelled');
