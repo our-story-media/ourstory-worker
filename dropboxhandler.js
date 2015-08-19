@@ -332,7 +332,7 @@ module.exports = function(winston)
         request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template+'&apikey='+ config.CURRENT_EDIT_KEY, jar: j}, function (err,resp,body) {
           //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
             console.log("directory struct:");
-            console.log(body);
+            //console.log(resp);
             console.log(err);
             if (err)
             {
