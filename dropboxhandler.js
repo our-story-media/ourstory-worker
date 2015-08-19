@@ -360,7 +360,17 @@ module.exports = function(winston)
             //var total = _.merge(allmedia);
             //console.log(total);
 
-            dodirs('',allmedia,thecalls,dbClient,s3,conf);
+            try{
+              dodirs('',allmedia,thecalls,dbClient,s3,conf);
+            }
+            catch (err)
+            {
+              callback('bury');
+              var collection = thedb.collection('user');
+              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                
+              });
+            }
             //recurse through the dir
               //for each dir, create
               //for each file, download
