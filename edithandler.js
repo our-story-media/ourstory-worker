@@ -12,6 +12,7 @@ var _ = require('lodash');
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var PythonShell = require('python-shell');
+var ObjectId = require('mongodb').ObjectID;
 
 var MLT = require('mlt');
 var child_process = require('child_process');
@@ -30,6 +31,9 @@ module.exports = function(winston)
     var connection = null;
     var thedb = null;
     var logger = null;
+    
+    
+    
     function DoEditHandler()
     {
         
@@ -162,7 +166,8 @@ module.exports = function(winston)
                         
                          //   console.log('melt ' + testcommand.join(' '));
 
-
+                            var lastprogress = 0;
+                         
                             var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
                             var child = exec('melt ' + testcommand.join(' '),function(err, o,e){
@@ -174,11 +179,21 @@ module.exports = function(winston)
                             
                             child.stdout.on('data', function(data) {
                                 logger.info('' + data);
-                                console.log("stdout: "+data);
+                                //console.log("stdout: "+data);
                             });
                             child.stderr.on('data', function(data) {
                                 console.log('' + data);
-                                console.log("stderr: "+data);
+                                var re = /percentage:\s*(\d*)/;
+                                var perc = data.match(re);
+                                if (re[0] != lastprogress)
+                                {
+                                    //update db if progress changed:
+                                    lastprogress = re[0];
+                                    var collection = thedb.collection('edits');
+                                    collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
+                                        
+                                    });
+                                } 
                             });
                             child.on('error', function(data) {
                                 logger.error('' + data);
