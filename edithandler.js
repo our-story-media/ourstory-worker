@@ -184,11 +184,11 @@ module.exports = function(winston)
                             child.stderr.on('data', function(data) {
                                 console.log('' + data);
                                 var re = /percentage:\s*(\d*)/;
-                                var perc = data.match(re).replace('percentage: ','');
+                                var perc = re.exec(data);
                                 
                                 if (perc)
                                 {
-                                    if (perc[0] != lastprogress)
+                                    if (perc && perc.replace('progress') != lastprogress)
                                     {
                                         //update db if progress changed:
                                         lastprogress = perc[0];
