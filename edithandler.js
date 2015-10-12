@@ -186,15 +186,17 @@ module.exports = function(winston)
                                 var re = /percentage:\s*(\d*)/;
                                 var perc = data.match(re);
                                 
-                                
-                                if (perc[0] != lastprogress)
+                                if (perc.length>0)
                                 {
-                                    //update db if progress changed:
-                                    lastprogress = perc[0];
-                                    var collection = thedb.collection('edits');
-                                    collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
-                                        
-                                    });
+                                    if (perc[0] != lastprogress)
+                                    {
+                                        //update db if progress changed:
+                                        lastprogress = perc[0];
+                                        var collection = thedb.collection('edits');
+                                        collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
+                                            
+                                        });
+                                    }
                                 } 
                             });
                             child.on('error', function(data) {
