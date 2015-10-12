@@ -185,10 +185,12 @@ module.exports = function(winston)
                                 console.log('' + data);
                                 var re = /percentage:\s*(\d*)/;
                                 var perc = data.match(re);
-                                if (re[0] != lastprogress)
+                                
+                                
+                                if (perc[0] != lastprogress)
                                 {
                                     //update db if progress changed:
-                                    lastprogress = re[0];
+                                    lastprogress = perc[0];
                                     var collection = thedb.collection('edits');
                                     collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
                                         
