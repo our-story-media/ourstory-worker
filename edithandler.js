@@ -184,7 +184,7 @@ module.exports = function(winston)
                             child.stderr.on('data', function(data) {
                                 console.log('' + data);
                                 var re = /percentage:\s*(\d*)/;
-                                var perc = data.match(re);
+                                var perc = data.match(re).replace('percentage: ','');
                                 
                                 if (perc)
                                 {
