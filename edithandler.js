@@ -186,7 +186,7 @@ module.exports = function(winston)
                                 var re = /percentage:\s*(\d*)/;
                                 var perc = data.match(re);
                                 
-                                if (perc.length>0)
+                                if (perc)
                                 {
                                     if (perc[0] != lastprogress)
                                     {
