@@ -188,10 +188,10 @@ module.exports = function(winston)
                                 
                                 if (perc)
                                 {
-                                    if (perc && perc[0].replace('progress') != lastprogress)
+                                    if (perc && perc[1] != lastprogress)
                                     {
                                         //update db if progress changed:
-                                        lastprogress = perc[0];
+                                        lastprogress = perc[1];
                                         var collection = thedb.collection('edits');
                                         collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
                                             
