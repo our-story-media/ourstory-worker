@@ -16,8 +16,8 @@ function start()
     require('winston-mongodb').MongoDB;
     winston.add(winston.transports.MongoDB, {
 		db:'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database,
-        storeHost:true,
-        //handleExceptions: true
+		collection:'log',
+        storeHost:true
     });
 
     winston.info("Transcode and Sync Server Started");
