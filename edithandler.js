@@ -188,7 +188,7 @@ module.exports = function(winston)
                                 
                                 if (perc)
                                 {
-                                    if (perc && perc.replace('progress') != lastprogress)
+                                    if (perc && perc[0].replace('progress') != lastprogress)
                                     {
                                         //update db if progress changed:
                                         lastprogress = perc[0];
