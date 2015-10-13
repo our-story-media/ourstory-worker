@@ -78,7 +78,7 @@ module.exports = function(winston)
 
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
-            if (edit.media.length<2 || edit.media.length>6)
+            if (edit.media.length<2 || edit.media.length>12)
             {
                 logger.error("Less than 2 clips.");
                 callback('bury');
