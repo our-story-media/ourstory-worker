@@ -31,7 +31,7 @@ function start()
 	    {
 	        edit: require('./edithandler')(winston),
 	        dropbox: require('./dropboxhandler')(winston),
-					audio: require('./audiosynchandler')(winston)
+			audio: require('./audiosynchandler')(winston)
 	    },
 	 });
 	runner.on('error',function(err)

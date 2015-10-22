@@ -331,13 +331,18 @@ module.exports = function(winston)
         j.setCookie(cookie, url);
         request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template+'&apikey='+ config.CURRENT_EDIT_KEY, jar: j}, function (err,resp,body) {
           //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
-            console.log("directory struct:");
-            //console.log(resp);
-            console.log(err);
-            if (err)
+            //console.log("directory struct:");
+            //console.log(body);
+            //console.log(resp.statusCode);
+            //console.log(err);
+            if (err || resp.statusCode !=200)
             {
-              logger.error(err);
+              logger.error(err,body);
               callback('bury');
+              var collection = thedb.collection('user');
+              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                
+              });
               return;
             }
 
