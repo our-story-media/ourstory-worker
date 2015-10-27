@@ -45,7 +45,11 @@ var reportprogress = function(conf)
   var collection = thedb.collection('user');
   conf.done++;
   var progress = (conf.done / (conf.total*2))*100;
-  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsync:{msg:'sync in progress',status:'progress',percentage:progress}}}, {w:1}, function(err, result) {
+  var replacement = {};
+  replacement["sync."+conf.event_id+".dropboxsync.msg"] = 'sync in progress';
+  replacement["sync."+conf.event_id+".dropboxsync.status"] = 'progress';
+  replacement["sync."+conf.event_id+".dropboxsync.percentage"] = progress;
+  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
       //done update...
     });
 }
@@ -54,19 +58,18 @@ var checkcancel = function(conf,cb)
 {
   var collection = thedb.collection('user');
   //console.log("checking cancel");
+  
   collection.findOne({"_id": new ObjectId(conf.user_id)}, function(err, doc) {
-      //console.log('userid: '+conf.user_id);
-      //console.log(err);
-      //console.log(doc);
-       if (doc.dropboxsynccancel)
-       {
-         console.log('cancelled');
-         cb(true)
-       }
-       else {
-         cb();
-       }
-    });
+    if (doc.sync[conf.event_id].dropboxsynccancel)
+    {
+      console.log('cancelled');
+      cb(true)
+    }
+    else 
+    {
+      cb();
+    }
+  });
 }
 
 var dodirs = function(pf, dir, calls, dbclient, s3,conf)
@@ -340,7 +343,9 @@ module.exports = function(winston)
               logger.error(err,body);
               callback('bury');
               var collection = thedb.collection('user');
-              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                var replacement = {};
+              replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}};
+              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                 
               });
               return;
@@ -375,7 +380,9 @@ module.exports = function(winston)
             {
               callback('bury');
               var collection = thedb.collection('user');
-              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+              var replacement = {};
+              replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}};              
+              collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                 
               });
             }
@@ -390,7 +397,9 @@ module.exports = function(winston)
                 var collection = thedb.collection('user');
                 if (err)
                 {
-                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                  var replacement = {};
+                  replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}; 
+                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                       //done update...
                       console.log(err);
                       //console.log(result);
@@ -401,7 +410,9 @@ module.exports = function(winston)
                 }
                 else
                 {
-                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:{dropboxsynccancel:false,dropboxsync:{msg:'Complete',status:'done',percentage:100,stopped:true}}}, {w:1}, function(err, result) {
+                  var replacement = {};
+                  replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Complete',status:'done',percentage:100,stopped:true}}; 
+                  collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                       //done update...
                       console.log(err);
                       //console.log(result);

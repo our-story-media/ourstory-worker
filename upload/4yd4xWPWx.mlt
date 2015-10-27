@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mlt>
+  <playlist id="30f2ff6f-defe-4322-98b8-e01078653ffb">
+    <entry producer="833afc4f-58e5-4426-bd28-618839dbb432"/>
+    <entry producer="26a92aa5-9a5b-4920-81c9-d3ce1f4b681f"/>
+    <entry producer="43185091-e9cc-456d-8c57-918c14454ff4"/>
+  </playlist>
+  <producer id="833afc4f-58e5-4426-bd28-618839dbb432" mlt_service="avformat" resource="d:\Research\transcode-server\upload\635759295817583110_635759209874135790.mp4"/>
+  <producer id="26a92aa5-9a5b-4920-81c9-d3ce1f4b681f" mlt_service="avformat" resource="d:\Research\transcode-server\upload\635759303435151450_635759209958790460.mp4"/>
+  <producer id="43185091-e9cc-456d-8c57-918c14454ff4" mlt_service="avformat" resource="d:\Research\transcode-server\upload\635759290733693050_635759210012077890.mp4"/>
+</mlt>
