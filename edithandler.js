@@ -32,11 +32,8 @@ module.exports = function(winston)
     var thedb = null;
     var logger = null;
     
-    
-    
     function DoEditHandler()
     {
-        
         process.env.SDL_VIDEODRIVER = 'dummy';
         process.env.SDL_AUDIODRIVER = 'dummy';
 
@@ -81,11 +78,13 @@ module.exports = function(winston)
             if (edit.media.length<2 || edit.media.length>20)
             {
                 logger.error("Less than 2 clips or more than 20.");
-                callback('bury');
+                collection.update({code:edit.code}, {$set:{fail:true,failreason:'More than 20 clips',$unset:{path:""}}}, {w:1}, function(err, result) {
+                    callback('bury');
+                });
             }
             else
             {
-                //download
+                //download                
                 _.each(edit.media,function(m){
                     calls.push(function(cb){
                         var media = m;
@@ -98,18 +97,22 @@ module.exports = function(winston)
                             },
                           });
 
+                          console.log(media);
+
+
                           var params = {
-                            localFile: path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'')),
+                            localFile: path.normalize(dir+"/"+media.filename.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')),
                             s3Params: {
                               Bucket: config.S3_BUCKET,
-                              Key: "upload/"+media.path.replace(config.S3_CLOUD_URL,'')
+                              Key: "upload/"+media.filename.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
                             },
                           };
-                          //console.log(params);
+                          console.log(params);
                           var downloader = s3.downloadFile(params);
 
                           downloader.on('error', function(err) {
-                            cb(true);
+                              //console.log("s3 error "+err);
+                            cb(err.toString());
                           });
                           downloader.on('end', function() {             
                             cb();
@@ -141,7 +144,7 @@ module.exports = function(winston)
 
                     fs.writeFile(mltFilename, mlt.toString({pretty:true}), function (err) {
                       if (err) {
-                        return cb(err);
+                        return cb(err.toString());
                       }
                       else
                       {
@@ -204,7 +207,13 @@ module.exports = function(winston)
                             });
                             child.on('close', function(code) {
                                 logger.info('closing code: ' + code);
-                                cb(code!=0);
+                                /****
+                                THIS IS RETURNING 0 EVEN IF THE EDIT FAILS...
+                                ****/
+                                
+                                console.log("edit return code " + code);
+                                
+                                cb(code!=null);
                             });
                         }
                     });
@@ -224,7 +233,7 @@ module.exports = function(winston)
                                 if (err)
                                 {
                                     logger.error(err);
-                                    cb(true);
+                                    cb(err.toString());
                                 }
                                 else
                                 {
@@ -270,7 +279,7 @@ module.exports = function(winston)
                         if (error)
                         {
                             logger.error(error);
-                            cb(true);
+                            cb(error.toString());
                         }
                         else
                         {
@@ -286,14 +295,15 @@ module.exports = function(winston)
                 async.series(calls,function(err){
                     if (err)
                     {
-                        logger.error("editing failed");
+                        //logger.error("editing failed");
                         //edit.shortlink = edit.code;
                         edit.failed = true;
                         //delete edit.code;
                         logger.error("Editing Failed");
+                        logger.error(err);
                         //update edit record
                         var collection = thedb.collection('edits');                   
-                        collection.update({code:edit.code}, {$set:{failed:true}}, {w:1}, function(err, result) {
+                        collection.update({code:edit.code}, {$set:{failed:true,failreason:err},$unset:{path:""}}, {w:1}, function(err, result) {
                             //done update...
                             logger.error(err);
                             callback('bury');
@@ -303,19 +313,15 @@ module.exports = function(winston)
                     {
                         logger.info("Editing Done");
                         edit.path = edit.shortlink + '.mp4';
-                        //edit.shortlink = edit.code;
-                        //delete edit.code;
-                        //update edit record
 
                         var collection = thedb.collection('edits');       
                         collection.update({code:edit.code}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
                             //done update...
-                            logger.error(err);
+                            if (err) logger.error(err);
                             logger.info(result);
                             callback('success');
                         });
                     }
-                    //Edits.update({edit.id},{path:thenewpath}
                 });
             }
         }

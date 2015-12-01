@@ -20,6 +20,13 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
   end
+  config.vm.network "private_network", ip: "192.168.50.10", virtualbox__intnet: true do |n|
+    config.vm.provider "virtualbox" do |v|
+        v.customize ["modifyvm", :id, "--nicpromisc#{n.id}", "allow-all"]
+      end
+    end
+  
+  
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
   config.vm.provision :shell, path: "bootstrap.sh"
   config.vm.post_up_message = "Bootlegger Worker Server Development Environment Started."
