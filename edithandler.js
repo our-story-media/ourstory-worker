@@ -97,14 +97,14 @@ module.exports = function(winston)
                             },
                           });
 
-                          console.log(media);
+                          //console.log(media);
 
 
                           var params = {
-                            localFile: path.normalize(dir+"/"+media.filename.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')),
+                            localFile: path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')),
                             s3Params: {
                               Bucket: config.S3_BUCKET,
-                              Key: "upload/"+media.filename.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
+                              Key: "upload/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
                             },
                           };
                           console.log(params);
