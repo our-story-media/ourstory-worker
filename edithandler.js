@@ -173,8 +173,10 @@ module.exports = function(winston)
                          
                             var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
-                            var child = exec('melt ' + testcommand.join(' '),function(err, o,e){
+                            var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024},function(err, o,e){
                                 logger.info('Done Editing');
+                                if (err)
+                                    logger.error(err);
                                 //cb(code!=0);
                             });
                             //logger.info(ls.stdout);
