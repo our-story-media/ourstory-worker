@@ -121,26 +121,26 @@ module.exports = function(winston)
                 });
 
                 calls.push(function(cb){
-                    var mlt = new MLT
-                      , multitrack = new MLT.Multitrack
+                    //var mlt = new MLT
+                     // , multitrack = new MLT.Multitrack
                       // , tractor = new MLT.Tractor
                       // , transitionTime = 25
                       // , showTime = 100 + transitionTime * 2
-                      , mltFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + ".mlt");
+                    // var mltFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + ".mlt");
 
-                    var playlist = new MLT.Playlist();
-                    mlt.push(playlist);
+                    //var playlist = new MLT.Playlist();
+                    //mlt.push(playlist);
 
-                    _.each(edit.media,function(m){
+                    // _.each(edit.media,function(m){
 
-                        //console.log(m.meta.streams[0].nb_frames + ' frames');
+                    //     //console.log(m.meta.streams[0].nb_frames + ' frames');
 
-                        var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
-                        mlt.push(producer);
-                        playlist.entry({
-                            producer: producer,
-                        });
-                    });
+                    //     var producer = new MLT.Producer.Video({source: path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,''))})
+                    //     mlt.push(producer);
+                    //     playlist.entry({
+                    //         producer: producer,
+                    //     });
+                    // });
 
                     fs.writeFile(mltFilename, mlt.toString({pretty:true}), function (err) {
                       if (err) {
@@ -155,11 +155,15 @@ module.exports = function(winston)
                         //TESTING:
                         var testcommand = [];
 
-                        var paths = _.each(edit.media,function(m)
+                        _.each(edit.media,function(m)
                         {
                             testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
-                            testcommand.push("-mix 15");
+                            testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
+                            if (m.inpoint)
+                                testcommand.push('-in "'+m.inpoint+'"');
+                            if (m.inpoint)
+                                testcommand.push('-out "'+m.outpoint+'"');
                         });
 
                        testcommand.push('-progress');
