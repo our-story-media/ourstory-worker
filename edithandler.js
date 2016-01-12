@@ -162,7 +162,7 @@ module.exports = function(winston)
                             testcommand.push("-mixer luma");
                             if (m.inpoint)
                                 testcommand.push('-in "'+m.inpoint+'"');
-                            if (m.inpoint)
+                            if (m.outpoint && m.outpoint!="00:00:00")
                                 testcommand.push('-out "'+m.outpoint+'"');
                         });
 
