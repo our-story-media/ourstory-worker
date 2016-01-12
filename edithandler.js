@@ -203,13 +203,14 @@ module.exports = function(winston)
                                         lastprogress = perc[1];
                                         var collection = thedb.collection('edits');
                                         collection.update({code:edit.code}, {$set:{progress:lastprogress}}, {w:1}, function(err, result) {
-                                            
+                                            //done collection update
                                         });
                                     }
                                 } 
                             });
                             child.on('error', function(data) {
                                 logger.error('' + data);
+                                cb(data);
                             });
                             child.on('close', function(code) {
                                 logger.info('closing code: ' + code);
@@ -218,8 +219,7 @@ module.exports = function(winston)
                                 ****/
                                 
                                 console.log("edit return code " + code);
-                                
-                                cb(code!=null);
+                                cb();
                             });
                         }
                     });
