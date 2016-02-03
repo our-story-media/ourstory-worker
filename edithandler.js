@@ -78,7 +78,8 @@ module.exports = function(winston)
             if (edit.media.length<2 || edit.media.length>20)
             {
                 logger.error("Less than 2 clips or more than 20.");
-                collection.update({code:edit.code}, {$set:{fail:true,failreason:'More than 20 clips',$unset:{path:""}}}, {w:1}, function(err, result) {
+                var collection = thedb.collection('edits');
+                collection.update({code:edit.code}, {$set:{fail:true,failreason:'Less than 2 or more than 20 clips',$unset:{path:""}}}, {w:1}, function(err, result) {
                     callback('bury');
                 });
             }
