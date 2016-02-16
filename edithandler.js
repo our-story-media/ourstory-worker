@@ -75,7 +75,8 @@ module.exports = function(winston)
 
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
-            if (edit.media.length<2 || edit.media.length>20)
+            //TODO -- TAKE THIS OUT!
+            if (false && edit.media.length<2 || edit.media.length>20)
             {
                 logger.error("Less than 2 clips or more than 20.");
                 var collection = thedb.collection('edits');
@@ -161,8 +162,8 @@ module.exports = function(winston)
                             testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
                             if (m.inpoint)
                                 testcommand.push('in="'+m.inpoint+'"');
-                            //if (m.outpoint && m.outpoint!="00:00:00")
-                                //testcommand.push('out="'+m.outpoint+'"');
+                            if (m.outpoint && m.outpoint!="00:00:00")
+                                testcommand.push('out="'+m.outpoint+'"');
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
                         });
@@ -178,6 +179,7 @@ module.exports = function(winston)
                          
                             var exec = require('child_process').exec;
                             //var ls = spawn('melt',testcommand,{stdio:[null,null,'pipe']});
+                            console.log('melt ' + testcommand.join(' '));
                             var child = exec('melt ' + testcommand.join(' '),{maxBuffer:1024*1024},function(err, o,e){
                                 logger.info('Done Editing');
                                 if (err)
