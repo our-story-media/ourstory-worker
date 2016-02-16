@@ -161,8 +161,8 @@ module.exports = function(winston)
                             testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
                             if (m.inpoint)
                                 testcommand.push('in="'+m.inpoint+'"');
-                            if (m.outpoint && m.outpoint!="00:00:00")
-                                testcommand.push('out="'+m.outpoint+'"');
+                            //if (m.outpoint && m.outpoint!="00:00:00")
+                                //testcommand.push('out="'+m.outpoint+'"');
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
                         });
