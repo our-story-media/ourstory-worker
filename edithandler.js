@@ -159,12 +159,12 @@ module.exports = function(winston)
                         _.each(edit.media,function(m)
                         {
                             testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
-                            testcommand.push("-mix 10");
-                            testcommand.push("-mixer luma");
                             if (m.inpoint)
                                 testcommand.push('in="'+m.inpoint+'"');
                             if (m.outpoint && m.outpoint!="00:00:00")
                                 testcommand.push('out="'+m.outpoint+'"');
+                            testcommand.push("-mix 10");
+                            testcommand.push("-mixer luma");
                         });
 
                        testcommand.push('-progress');
