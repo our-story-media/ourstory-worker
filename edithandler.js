@@ -76,7 +76,7 @@ module.exports = function(winston)
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
             //TODO -- TAKE THIS OUT!
-            if (false && edit.media.length<2 || edit.media.length>20)
+            if (edit.media.length<2 || edit.media.length>20)
             {
                 logger.error("Less than 2 clips or more than 20.");
                 var collection = thedb.collection('edits');
