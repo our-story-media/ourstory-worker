@@ -162,9 +162,9 @@ module.exports = function(winston)
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
                             if (m.inpoint)
-                                testcommand.push('-in "'+m.inpoint+'"');
+                                testcommand.push('in="'+m.inpoint+'"');
                             if (m.outpoint && m.outpoint!="00:00:00")
-                                testcommand.push('-out "'+m.outpoint+'"');
+                                testcommand.push('out="'+m.outpoint+'"');
                         });
 
                        testcommand.push('-progress');
@@ -270,7 +270,7 @@ module.exports = function(winston)
                         Key: edit.code + '.mp4',
                         //CreateThumbnails:true,
                         ThumbnailPattern: edit.code + '-{count}',
-                        PresetId: '1351620000001-000020', // specifies the output video format
+                        PresetId: config.TRANSCODE_PRESET, // specifies the output video format
                         Rotate: 'auto',
                         Watermarks:[
                         {
