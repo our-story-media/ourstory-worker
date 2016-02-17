@@ -76,11 +76,11 @@ module.exports = function(winston)
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
             //TODO -- TAKE THIS OUT!
-            if (edit.media.length<2 || edit.media.length>20)
+            if (edit.media.length<2)
             {
-                logger.error("Less than 2 clips or more than 20.");
+                logger.error("Less than 2 clips.");
                 var collection = thedb.collection('edits');
-                collection.update({code:edit.code}, {$set:{fail:true,failreason:'Less than 2 or more than 20 clips',$unset:{path:""}}}, {w:1}, function(err, result) {
+                collection.update({code:edit.code}, {$set:{fail:true,failreason:'Less than 2 clips',$unset:{path:""}}}, {w:1}, function(err, result) {
                     callback('bury');
                 });
             }
