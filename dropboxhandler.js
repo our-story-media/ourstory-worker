@@ -224,7 +224,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                           };
                         }
                       //console.log("from: "+"upload/"+filename.remote);
-                    //  console.log(params);
+                     console.log(params);
 
                       var downloader = s3.downloadFile(params);
                       downloader.on('error', function(err) {
