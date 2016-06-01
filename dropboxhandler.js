@@ -144,14 +144,14 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                         //InputKeyPrefix: '/upload',
                         OutputKeyPrefix: 'upload/',
                         Input: {
-                          Key: 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,''),
+                          Key: 'upload/' + filename.id,
                           FrameRate: 'auto',
                           Resolution: 'auto',
                           AspectRatio: 'auto',
                           Interlaced: 'auto',
                           Container: 'auto' },
                         Output: {
-                          Key: filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4',
+                          Key: filename.id + '_homog.mp4',
                           // CreateThumbnails:false,
                           PresetId: config.HOMOG_PRESET, // specifies the output video format
                       }
@@ -210,7 +210,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                             localFile: path.normalize(tempdir+"/"+filename.tmp),
                             s3Params: {
                               Bucket: config.S3_TRANSCODE_BUCKET_NAME,
-                              Key: "upload/"+filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4',
+                              Key: "upload/"+filename.id + '_homog.mp4',
                             },
                           };
                         }
@@ -219,7 +219,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                             localFile: path.normalize(tempdir+"/"+filename.tmp),
                             s3Params: {
                               Bucket: config.S3_BUCKET,
-                              Key: "upload/"+filename.remote.replace(config.S3_CLOUD_URL,''),
+                              Key: "upload/"+filename.id,
                             },
                           };
                         }
