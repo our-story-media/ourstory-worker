@@ -219,7 +219,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                             localFile: path.normalize(tempdir+"/"+filename.tmp),
                             s3Params: {
                               Bucket: config.S3_BUCKET,
-                              Key: "upload/"+filename.id,
+                              Key: "upload/"+filename.id+".mp4",
                             },
                           };
                         }
