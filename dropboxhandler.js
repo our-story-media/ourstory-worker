@@ -136,6 +136,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                     {
                       filename.remote = response.uri; 
                     }
+                    cb();
                   });
                 });
 
