@@ -19,7 +19,6 @@ var connection = null;
 var logger = null;
 var AWS = require('aws-sdk');
 AWS.config.region = config.S3_REGION;
-var cloudfront = require('aws-cloudfront-sign');
 
 var nodemailer = require('nodemailer');
 var directTransport = require('nodemailer-direct-transport');
@@ -134,6 +133,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   var collection = thedb.collection('media');
                   collection.findOne({"_id": new ObjectId(filename.id)}, function(err, doc) {
                     filename.remote = doc.path;
+                    filename.homog = doc.path + "_homog.mp4";
                     console.log(filename.remote);
                     cb();
                   });

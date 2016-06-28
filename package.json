@@ -24,8 +24,7 @@
     "uuid":"*",
     "nodemailer":"*",
     "nodemailer-direct-transport":"*",
-    "shell-escape":"*",
-    "aws-cloudfront-sign":"*"
+    "shell-escape":"*"
 	},
   "scripts": {
     "start":"node index.js",
