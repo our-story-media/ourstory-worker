@@ -130,12 +130,12 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                calls.push(
                 function (cb){
                   var filename = val;
-                  console.log(filename);
+                  // console.log(filename);
                   var collection = thedb.collection('media');
                   collection.findOne({"_id": new ObjectId(filename.id)}, function(err, doc) {
                     filename.remote = doc.path;
-                    // filename.homog = doc.path + "_homog.mp4";
-                    console.log(filename.remote);
+                    filename.homog = doc.path + "_homog.mp4";
+                    // console.log(filename.remote);
                     cb();
                   });
                 });
@@ -158,7 +158,9 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   
                   //TODO -- if its an image or audio, ignore and dont do homog...
                   console.log("looking for "+val.homog);
-                  request({method:'HEAD',uri:val.homog},function(err,response,data)
+                  var j = request.jar();
+                  var cookie = request.cookie('sails.sid='+conf.session);
+                  request({method:'HEAD',uri:config.master_url + '/media/homog/' + filename.id + '&apikey='+ config.CURRENT_EDIT_KEY, jar: j},function(err,response,data)
                   {
                     console.log('code: '+response.statusCode);
                     if (err || response.statusCode != 200)
@@ -173,14 +175,14 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                         //InputKeyPrefix: '/upload',
                         OutputKeyPrefix: 'upload/',
                         Input: {
-                          Key: 'upload/' + filename.id,
+                          Key: 'upload/' + filename.remote,
                           FrameRate: 'auto',
                           Resolution: 'auto',
                           AspectRatio: 'auto',
                           Interlaced: 'auto',
                           Container: 'auto' },
                         Output: {
-                          Key: filename.id + '_homog.mp4',
+                          Key: filename.homog,
                           // CreateThumbnails:false,
                           PresetId: config.HOMOG_PRESET, // specifies the output video format
                       }
