@@ -121,9 +121,12 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   privateKeyPath: config.CLOUDFRONT_KEYFILE,
                   expireTime: moment().add(1, 'day')
               }
-              val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4", options);
+
+              // console.log(val);
+
+              val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4.mp4", options);
               val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.id + "_homog.mp4", options);
-              console.log(val.remote);
+              // console.log(val.remote);
 
               // CHECK CANCEL
               calls.push(
@@ -243,7 +246,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                       downloader.on('error', function(err) {
                         console.log(err);
                         reportprogress(conf);
-                        cb(err);
+                        cb();
                       });
                       downloader.on('progress', function() {
                         var prog = (downloader.progressAmount/downloader.progressTotal);
@@ -299,7 +302,12 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   if (filename.tmp)
                   {
                     console.log('deleting '+filename.tmp);
-                    fs.unlinkSync(tempdir + '/' + filename.tmp);
+                    try {
+                      fs.unlinkSync(tempdir + '/' + filename.tmp);
+                    } catch (error) {
+                      console.log(error);
+                    }
+                    
                   }
                   cb();
               });
