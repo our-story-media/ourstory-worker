@@ -19,15 +19,16 @@
     "mlt":"*",
     "request":"*",
     "tough-cookie":"*",
-    "s3": "*",
     "dropbox": "*",
     "moment":"*",
     "uuid":"*",
     "nodemailer":"*",
     "nodemailer-direct-transport":"*",
-    "shell-escape":"*"
+    "shell-escape":"*",
+    "aws-cloudfront-sign":"*"
 	},
   "scripts": {
+    "start":"node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
