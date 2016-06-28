@@ -127,15 +127,14 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
               // val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4.mp4", options);
               // val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.id + "_homog.mp4", options);
 
+              // get the real path information from the db:
                calls.push(
                 function (cb){
                   var filename = val;
-                  request({method:'HEAD',uri:filename.remote},function(err,response,data)
-                  {
-                    if (!err && response.statusCode == 200)
-                    {
-                      filename.remote = response.uri; 
-                    }
+                  var collection = thedb.collection('media');
+                  collection.findOne({"_id": new ObjectId(vall.id)}, function(err, doc) {
+                    filename.remote = doc.path;
+                    console.log(filename.remote);
                     cb();
                   });
                 });
@@ -240,7 +239,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                             localFile: path.normalize(tempdir+"/"+filename.tmp),
                             s3Params: {
                               Bucket: config.S3_TRANSCODE_BUCKET_NAME,
-                              Key: "upload/"+filename.id + '_homog.mp4',
+                              Key: "upload/"+ filename.remote + '_homog.mp4',
                             },
                           };
                         }
@@ -249,7 +248,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                             localFile: path.normalize(tempdir+"/"+filename.tmp),
                             s3Params: {
                               Bucket: config.S3_BUCKET,
-                              Key: "upload/"+filename.id+".mp4",
+                              Key: "upload/"+filename.remote,
                             },
                           };
                         }
