@@ -132,7 +132,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                 function (cb){
                   var filename = val;
                   var collection = thedb.collection('media');
-                  collection.findOne({"_id": new ObjectId(vall.id)}, function(err, doc) {
+                  collection.findOne({"_id": new ObjectId(filename.id)}, function(err, doc) {
                     filename.remote = doc.path;
                     console.log(filename.remote);
                     cb();
