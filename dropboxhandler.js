@@ -116,16 +116,29 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
               //download from s3
 
               // SET REAL VALUE OF REMOTE:
-              var options = {
-                  keypairId: config.CLOUDFRONT_KEY, 
-                  privateKeyPath: config.CLOUDFRONT_KEYFILE,
-                  expireTime: moment().add(1, 'day')
-              }
+              // var options = {
+              //     keypairId: config.CLOUDFRONT_KEY, 
+              //     privateKeyPath: config.CLOUDFRONT_KEYFILE,
+              //     expireTime: moment().add(1, 'day')
+              // }
 
               // console.log(val);
 
-              val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4.mp4", options);
-              val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.id + "_homog.mp4", options);
+              // val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4.mp4", options);
+              // val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.id + "_homog.mp4", options);
+
+               calls.push(
+                function (cb){
+                  var filename = val;
+                  request({method:'HEAD',uri:filename.remote},function(err,response,data)
+                  {
+                    if (!err && response.statusCode == 200)
+                    {
+                      filename.remote = response.uri; 
+                    }
+                  });
+                });
+
               // console.log(val.remote);
 
               // CHECK CANCEL
