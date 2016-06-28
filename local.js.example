@@ -22,5 +22,7 @@ module.exports = {
     S3_TRANSCODE_BUCKET_NAME:'bootleggertrans',
     HOMOG_PRESET:'1437577812457-m33jon',
     AUDIO_PRESET:'1437639878992-iqiibs',
-    CURRENT_EDIT_KEY:''
+    CURRENT_EDIT_KEY:'',
+    CLOUDFRONT_KEY:'',
+    CLOUDFRONT_KEYFILE:'',
 }

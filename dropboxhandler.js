@@ -19,6 +19,7 @@ var connection = null;
 var logger = null;
 var AWS = require('aws-sdk');
 AWS.config.region = config.S3_REGION;
+var cloudfront = require('aws-cloudfront-sign');
 
 var nodemailer = require('nodemailer');
 var directTransport = require('nodemailer-direct-transport');
@@ -113,6 +114,17 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
               conf.total++;
               //var p = pf+key;
               //download from s3
+
+              // SET REAL VALUE OF REMOTE:
+              var options = {
+                  keypairId: config.CLOUDFRONT_KEY, 
+                  privateKeyPath: config.CLOUDFRONT_KEYFILE,
+                  expireTime: moment().add(1, 'day')
+              }
+              val.remote = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.remote, options);
+              val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.remote + "_homog.mp4", options);
+
+              // CHECK CANCEL
               calls.push(
                 function (cb){
                   checkcancel(conf,cb);
@@ -128,8 +140,8 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   
                   //TODO -- if its an image or audio, ignore and dont do homog...
                   
-                  console.log("looking for "+config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4');
-                  request({method:'HEAD',uri:config.S3_TRANSCODE_BUCKET + 'upload/' + filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'},function(err,response,data)
+                  console.log("looking for "+val.homog);
+                  request({method:'HEAD',uri:val.homog},function(err,response,data)
                   {
                     console.log('code: '+response.statusCode);
                     if (err || response.statusCode != 200)
