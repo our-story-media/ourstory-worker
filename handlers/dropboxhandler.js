@@ -1,4 +1,4 @@
-var config = require('./local.js');
+var config = require('../config/local.js');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var request = require('request');

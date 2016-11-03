@@ -1,0 +1,3 @@
+- error codes and documentation
+- docker
+- clear out old files to save space (on a timer?)

@@ -27,9 +27,8 @@
     "shell-escape":"*"
 	},
   "scripts": {
-    "start":"node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":"node index.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

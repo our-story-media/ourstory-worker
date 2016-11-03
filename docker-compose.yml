@@ -1,0 +1,12 @@
+version: '2'
+services:
+  worker:
+    build: .
+    command: nodemon --debug=5858
+    volumes:
+      - .:/usr/src/app/
+      - /usr/src/app/node_modules
+networks:
+  default:
+    external:
+      name: serverapp_bootlegger-network

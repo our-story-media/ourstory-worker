@@ -1,16 +1,13 @@
 //edit file:
 var winston = require('winston');
-
 var fivebeans = require('fivebeans').worker;
-var config = require('./local.js');
-//ENTRY POINT:
+var config = require('./config/local.js');
 
-//console.log(config);
+//ENTRY POINT:
 start();
 
 function start()
 {
-	//console.log('mongodb://'+((config.db_user != '') ? config.db_user  + ':':'') + config.db_user + '@' + config.db_host + ':' + config.db_port + '/' + config.db_database);
 	winston.remove(winston.transports.Console);
 	winston.add(winston.transports.Console, {colorize: true});
     require('winston-mongodb').MongoDB;
@@ -29,9 +26,9 @@ function start()
 		ignoreDefault:true,
 		handlers:
 	    {
-	        edit: require('./edithandler')(winston),
-	        dropbox: require('./dropboxhandler')(winston),
-			audio: require('./audiosynchandler')(winston)
+	        edit: require('./handlers/edithandler')(winston),
+	        dropbox: require('./handlers/dropboxhandler')(winston),
+			audio: require('./handlers/audiosynchandler')(winston)
 	    },
 	 });
 	runner.on('error',function(err)
