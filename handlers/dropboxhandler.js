@@ -1,5 +1,4 @@
 var config = require('../config/local.js');
-var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var request = require('request');
 var _ = require('lodash');
@@ -9,7 +8,7 @@ var uploaddir = "/upload/";
 var ss3 = require('s3');
 var path = require('path');
 var Dropbox = require('dropbox');
-var maindir = ".tmp";
+var maindir = ".tmp/";
 var moment = require('moment');
 var path = require('path');
 var uuid = require('uuid');
@@ -25,20 +24,6 @@ var directTransport = require('nodemailer-direct-transport');
 var transporter = nodemailer.createTransport(directTransport({
     debug: true, //this!!!
   }));
-
-var sendEmail = function(userid, content) {
-
-    var collection = thedb.collection('user');
-    collection.findOne({"_id": new ObjectId(userid)}, function(err, doc) {
-      logger.info("sending email to "+doc.profile.emails[0].value);
-      transporter.sendMail({
-    		from: "Bootlegger <no-reply@bootlegger.tv>", // sender address
-            to: doc.profile.emails[0].value, // list of receivers
-            subject: 'Dropbox Sync Finished', // Subject line
-            text: content, // plaintext body
-    	});
-    });
-};
 
 var reportprogress = function(conf)
 {
@@ -332,7 +317,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
   }
 
 
-module.exports = function(winston)
+module.exports = function(winston, thedb)
 {
 
     function DoEditHandler()
@@ -345,12 +330,12 @@ module.exports = function(winston)
         tempdir = path.normalize(__dirname + '/' + maindir);
 
 
-      //console.log('mongodb://'+config.db_user+':'+config.db_password+'@'+config.db_host+':'+config.db_port+'/'+config.db_database);
-        MongoClient.connect(connection, function(err, db) {
-           // MongoClient.connect('mongodb://localhost/bootlegger', function(err, db) {
-            if(err) throw err;
-            thedb = db;
-          });
+      // //console.log('mongodb://'+config.db_user+':'+config.db_password+'@'+config.db_host+':'+config.db_port+'/'+config.db_database);
+      //   MongoClient.connect(connection, function(err, db) {
+      //      // MongoClient.connect('mongodb://localhost/bootlegger', function(err, db) {
+      //       if(err) throw err;
+      //       thedb = db;
+      //     });
     }
 
     DoEditHandler.prototype.work = function(conf, callback)
@@ -381,6 +366,12 @@ module.exports = function(winston)
               var collection = thedb.collection('user');
                 var replacement = {};
               replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}};
+              var err_obj = {
+                    code:700,
+                    reason:'Cannot load directory structure'
+                };
+              replacement['sync.error'] = err_obj;
+
               collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                 
               });
@@ -417,6 +408,11 @@ module.exports = function(winston)
               callback('bury');
               var collection = thedb.collection('user');
               var replacement = {};
+              var err_obj = {
+                  code:702,
+                  reason:'Error processing files'
+              };
+              replacement['sync.error'] = err_obj;
               replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}};              
               collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                 
@@ -434,13 +430,18 @@ module.exports = function(winston)
                 if (err)
                 {
                   var replacement = {};
-                  replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}; 
+                  replacement["sync."+conf.event_id] = {dropboxsynccancel:false,dropboxsync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}};
+                  var err_obj = {
+                    code:701,
+                    reason:err
+                  };
+                  replacement['sync.error'] = err_obj; 
                   collection.update({"_id": new ObjectId(conf.user_id)}, {$set:replacement}, {w:1}, function(err, result) {
                       //done update...
                       console.log(err);
                       //console.log(result);
                       logger.info('Dropbox Sync Complete');
-                      sendEmail(conf.user_id,'Dropbox Sync Cancelled or Incomplete. Error: '+err);
+                      sendEmail(conf.user_id,'Dropbox Sync','Your Dropbox Sync has been Cancelled or is Incomplete. Error: '+err);
                       callback('bury');
                     });
                 }
@@ -453,7 +454,7 @@ module.exports = function(winston)
                       console.log(err);
                       //console.log(result);
                       logger.info('Dropbox Sync Complete');
-                      sendEmail(conf.user_id,'Dropbox Sync Complete!');
+                      sendEmail(conf.user_id,'Dropbox Sync','Your Dropbox Sync is complete!');
                       callback('success');
                     });
                 }

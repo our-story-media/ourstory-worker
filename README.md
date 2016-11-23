@@ -25,6 +25,15 @@ Copy `local.example.js` to `local.js` and edit appropriatly
 
 Use the docker-compose file included by running `docker-compose up`. If you are developing Bootlegger Server on the same docker machine, then they will be in the same infrastructure.
 
+# Error Codes
+
+600 - Edit failed
+601 - Less than min clips provided
+700 - Dropbox sync cannot load directory structure
+701 - General dropbox sync error
+702 - Error processing files during sync
+800 - Error during audio sync processing
+
 ---
 
 ![](platform.png)

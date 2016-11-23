@@ -1,5 +1,4 @@
 var config = require('../config/local.js');
-var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var request = require('request');
 var _ = require('lodash');
@@ -9,7 +8,7 @@ var uploaddir = "/upload/";
 var ss3 = require('s3');
 var path = require('path');
 var Dropbox = require('dropbox');
-var maindir = "tmp";
+var maindir = ".tmp";
 var moment = require('moment');
 var path = require('path');
 var uuid = require('uuid');
@@ -29,19 +28,7 @@ var transporter = nodemailer.createTransport(directTransport({
     debug: true, //this!!!
   }));
 
-var sendEmail = function(userid, content) {
 
-    var collection = thedb.collection('user');
-    collection.findOne({"_id": new ObjectId(userid)}, function(err, doc) {
-      logger.info("sending email to "+doc.profile.emails[0].value);
-      transporter.sendMail({
-    		from: "Bootlegger <no-reply@bootlegger.tv>", // sender address
-            to: doc.profile.emails[0].value, // list of receivers
-            subject: 'Audio Sync Finished', // Subject line
-            text: content, // plaintext body
-    	});
-    });
-};
 
 var reportprogress = function(conf)
 {
@@ -71,9 +58,8 @@ var checkcancel = function(conf,cb)
     });
 }
 
-module.exports = function(winston)
+module.exports = function(winston, thedb)
 {
-
     function DoAudioHandler()
     {
         this.type = 'audiosync';
@@ -89,19 +75,12 @@ module.exports = function(winston)
         }
 
 
-        connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
+        // connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
 
         //console.log(__dirname + '/' + dir);
         fs.mkdirsSync(__dirname + '/' + maindir);
         tempdir = path.normalize(__dirname + '/' + maindir);
 
-
-      //console.log('mongodb://'+config.db_user+':'+config.db_password+'@'+config.db_host+':'+config.db_port+'/'+config.db_database);
-        MongoClient.connect(connection, function(err, db) {
-           // MongoClient.connect('mongodb://localhost/bootlegger', function(err, db) {
-            if(err) throw err;
-            thedb = db;
-          });
     }
 
     DoAudioHandler.prototype.work = function(conf, callback)
@@ -383,12 +362,16 @@ module.exports = function(winston)
               var collection = thedb.collection('event');
               if (err)
               {
-                collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err}}}, {w:1}, function(err, result) {
+                var err_obj = {
+                  code:800,
+                  reason:err
+                };
+                collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err_obj}}}, {w:1}, function(err, result) {
                     //done update...
                     console.log(err);
                     //console.log(result);
                     logger.info('Audio Sync Complete');
-                    sendEmail(conf.user_id,'Audio Sync Cancelled or Incomplete. Error: '+err);
+                    sendEmail(conf.user_id,'Audio Sync Error','Your Audio Sync has been Cancelled or is Incomplete. Error: '+err);
                     callback('bury');
                   });
               }
@@ -399,7 +382,7 @@ module.exports = function(winston)
                     console.log(err);
                     //console.log(result);
                     logger.info('Audio Sync Complete');
-                    sendEmail(conf.user_id,'Audio Sync Complete!');
+                    sendEmail(conf.user_id,'Audio Sync Complete!','Your Bootlegger audio sync is complete.');
                     callback('success');
                   });
               }

@@ -25,4 +25,9 @@ module.exports = {
     CURRENT_EDIT_KEY:'',
     CLOUDFRONT_KEY:'',
     CLOUDFRONT_KEYFILE:'',
+    MIN_CLIP_COUNT:2,
+    email:{
+        SENDGRID_ID:'',
+        SENDGRID_TEMPLATE:''
+    }
 }

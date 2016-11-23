@@ -1,8 +1,9 @@
 {
   "name": "transcode-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Worker server for Bootlegger platform.",
   "main": "index.js",
+  "readme": "README.md",
   "dependencies": {
     "fluent-ffmpeg":"*",
     "s3":"*",
@@ -24,11 +25,13 @@
     "uuid":"*",
     "nodemailer":"*",
     "nodemailer-direct-transport":"*",
-    "shell-escape":"*"
+    "shell-escape":"*",
+    "touch":"1.0.0",
+    "sendgrid":"4.7.1"
 	},
   "scripts": {
     "start":"node index.js"
   },
-  "author": "",
+  "author": "Tom Bartindale",
   "license": "MIT"
 }
