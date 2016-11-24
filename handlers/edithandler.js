@@ -26,64 +26,92 @@ module.exports = function(winston, thedb)
     {
         process.env.SDL_VIDEODRIVER = 'dummy';
         process.env.SDL_AUDIODRIVER = 'dummy';
-
         this.type = 'edit';
     }
 
     function clearOut(edit)
     {
         var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
+
         // Remove all the lock files for this edit
         _.each(edit.media,function(m){
-            //console.log(m.tmp_path);
-            if (m.tmp_path)
-            {
-                var f = path.normalize(dir+"/"+m.tmp_path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')) + '.lock';
-                if (fs.existsSync(f))
-                    fs.unlinkSync(f);           
-            }
-            else
-            {
-                var f = path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')) + '.lock';
-                if (fs.existsSync(f))
-                    fs.unlinkSync(f);
-            }            
+           fs.closeSync(m.lock_file);
+           fs.unlinkSync(m.lock_file_name);
         });
         
         //2. remove resulting file
-        if (fs.existsSync(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4")))
-            fs.unlinkSync(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4"));
+        console.log('edit file: ' + edit.tmp_filename);
+        if (fs.existsSync(edit.tmp_filename))
+        {
+            fs.unlinkSync(edit.tmp_filename);
+        }
 
-        //TODO remove all lock files from anywhere older then 3 hours (for failed things half way through)
-
-
-        // Clear out data -- 
+        // List all files 
         var allfiles = fs.readdirSync(path.normalize(path.dirname(require.main.filename) + uploaddir));
 
-        var allfiles_nolock = _.filter(allfiles,function(f){
-            //console.log('does this exist: ' + path.normalize(path.dirname(require.main.filename) + uploaddir) + f + '.lock');
-            return !fs.existsSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f + '.lock') && !_.endsWith(f,'.lock');
+        //3 hours ago
+        var ZOMBIE_TIMEOUT = Date.now() - (3 * 3600000);
+
+        //Remove all lock files from anywhere older then 3 hours (for failed things half way through)
+        var zombie_lockfiles = _.filter(allfiles,function(f){
+            var stats = fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
+            //console.log(stats.atime.getTime())
+            return stats.atime.getTime() < ZOMBIE_TIMEOUT && (_.endsWith('.part') || _.endsWith('.lock'));
         });
 
-        var statfiles = _.map(allfiles_nolock,function(f){
+        logger.info('Removing Zombies: ' + _.size(zombie_lockfiles));
+        _.each(zombie_lockfiles,function(f){
+            //console.log(f);
+            fs.unlinkSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
+        });
+
+
+
+
+        // ONLY delete video files with no lock files
+
+        //TODO -- only delete files with NO lock files
+        var allmp4s = _.filter(allfiles,function(f){
+            return _.endsWith(f,'.mp4') && !_.endsWith(f,'.edit.mp4');
+        });
+
+        var nolockfiles = _.filter(allmp4s,function(f){
+            var matchinglockfiles = _.find(allfiles,function(ff){
+                return _.startsWith(ff,f) && _.endsWith(ff,'.lock');
+            });
+            return _.size(matchinglockfiles) == 0;
+        });
+
+        logger.info('Files with no lock: ' + _.size(nolockfiles));
+        _.each(nolockfiles,function(f){
+            console.log(f);
+        });
+
+        var statfiles = _.map(nolockfiles,function(f){
             return {file:path.normalize(path.dirname(require.main.filename) + uploaddir) + f,stats:fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f)};
         });
 
         // console.log(allfiles_nolock);
-        var ordered = _.orderBy(statfiles,'stats.mtime','desc');
+        var ordered = _.orderBy(statfiles,'stats.atime.getTime()','desc');
+        // console.log('ordered:');
+        // _.each(ordered,function(f){
+        //     console.log(f.file + ' ' + f.stats.atime);
+        // });
+
 
         var keep = [];
         var remove = [];
         //20GB
-        //var sizecounter = 20*1024*1024*1024;
-        var space_avail = 20*1024*1024;
+        var space_avail = 20*1024*1024*1024;
+        //var space_avail = 20*1024*1024;
         var sizecounter = space_avail;
         var index = 0;
 
         while (sizecounter > 0 && index < _.size(ordered))
         {
             keep.push(ordered[index]);
-            sizecounter -= ordered[index].size;
+            // console.log(ordered[index].stats.size);
+            sizecounter -= ordered[index].stats.size;
             index++;
         }
 
@@ -91,12 +119,12 @@ module.exports = function(winston, thedb)
 
         logger.info("Keeping " + _.size(keep) + ' files within the '+(space_avail/(1024*1024)) + 'MB cap');
         _.each(keep,function(f){
-            // console.log(f.file);
+             //console.log(f.file);
         });
 
         logger.info('Removing ' + _.size(remove) + ' files');
         _.each(remove,function(f){
-            // console.log(f.file);
+            //console.log(f.file);
             fs.unlinkSync(f.file);
         });
 
@@ -154,33 +182,26 @@ module.exports = function(winston, thedb)
                         var media = m;
 
                         //if there is a file lock, then change the name of the local file we are using
-                        var localfile = path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/',''));                        
-
-                        //check if the file is in use (by another process)
-                        if (fs.existsSync(localfile + '.lock'))
-                        {
-                            //check that the file is not just in use by me:
-                            if (!_.includes(edit.files_in_use,localfile))
-                            {
-                                var tmp = uuid();
-                                edit.media[index].tmp_path = tmp+media.path;
-                                media.tmp_path = tmp+media.path;
-                                localfile = path.normalize(dir+"/"+media.tmp_path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/',''));
-                                logger.info('File in use by someone else, using ' + media.tmp_path);
-                            }
-                            else
-                            {
-                                logger.info('File in use by me, using ' + localfile);
-                            }
-                        }
+                        var localfile = path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/',''));                  
 
                         //create lock
-                        touch.sync(localfile + '.lock');
+                        // touch.sync(localfile + '.lock');
                         edit.files_in_use.push(localfile);
 
                         //if no file
-                        if (!fs.existsSync(localfile))
-                        {                           
+                        var lockfile =localfile + '.' + uuid() + '.lock'; 
+                        edit.media[index].lock_file = fs.openSync(lockfile,'w');
+                        edit.media[index].lock_file_name = lockfile;
+                        if (fs.existsSync(localfile))
+                        {
+                            //edit.media[index].file_handle = fs.openSync(localfile,'r');
+                            logger.info("Using Cache: " + localfile);
+                            //update file with last time it was accessed
+                            touch.sync(localfile);
+                            cb();
+                        }
+                        else
+                        {                   
                             //download from s3
                             var s3 = ss3.createClient({
                                 s3Options: {
@@ -190,8 +211,9 @@ module.exports = function(winston, thedb)
                                 },
                             });
 
+                            var uuid_tmp = uuid();
                             var params = {
-                                localFile: localfile + '.part',
+                                localFile: localfile + '_' +  uuid_tmp  + '.part',
                                 s3Params: {
                                 Bucket: config.S3_BUCKET,
                                 Key: "upload/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
@@ -205,19 +227,23 @@ module.exports = function(winston, thedb)
                                 //console.log("s3 error "+err);
                                 cb(err.toString());
                                 //release file lock
-                                fs.unlink(localfile + '.lock');
+                                //fs.unlink(localfile + '.lock');
                             });
                             downloader.on('end', function() {          
-                                fs.renameSync(localfile+ '.part',localfile);
+                                try
+                                {
+                                    // console.log('renaming ' + uuid_tmp + '_' + localfile + '.part to' localfile);
+                                    fs.renameSync(localfile + '_' +  uuid_tmp + '.part', localfile);
+                                }
+                                catch (e){
+                                    logger.info('Download thrown away ' + localfile + '_' +  uuid_tmp + '.part');
+                                    fs.unlinkSync(localfile + '_' +  uuid_tmp + '.part');
+                                }
+
+                                //edit.media[index].file_handle = fs.openSync(localfile,'r');
+                                touch.sync(localfile);
                                 cb();
                             });
-                        }
-                        else
-                        {
-                            logger.info("Using Cache: " + localfile);
-                            //update file with last time it was accessed
-                            touch.sync(localfile);
-                            cb();
                         }
                     });
                 });
@@ -225,12 +251,11 @@ module.exports = function(winston, thedb)
                 calls.push(function(cb){
                     
                     // //FOR DEBUGGING
-                    // return cb(null);
-
+                    //return cb(null);
 
                     //OUTPUT:
                     
-                    var videoFilename = path.normalize(path.dirname(require.main.filename) + uploaddir +edit.code + uuid() + ".mp4");
+                    var videoFilename = path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + '.' + uuid() + ".edit.mp4");
 
                     edit.tmp_filename = videoFilename;
 
@@ -293,12 +318,11 @@ module.exports = function(winston, thedb)
                             cb(data);
                         });
                         child.on('close', function(code) {
-                            logger.info('closing code: ' + code);
-                            /****
-                            THIS IS RETURNING 0 EVEN IF THE EDIT FAILS...
-                            ****/
-                            
-                            console.log("edit return code " + code);
+                            logger.info('MLT closing code: ' + code);
+                            // console.log("edit return code " + code);
+                            //sucess!
+                            //fs.renameSync(edit.)
+
                             cb();
                         });
                 });
@@ -306,7 +330,7 @@ module.exports = function(winston, thedb)
                 //upload to s3
                 calls.push(function(cb){
                     // //FOR DEBUGGING
-                    // return cb(null);
+                    //return cb(null);
 
                     var knox_params = {
                         key: config.AWS_ACCESS_KEY_ID,
@@ -316,7 +340,7 @@ module.exports = function(winston, thedb)
                       var client = knox.createClient(knox_params);
 
                     //   console.log(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4"));
-                      client.putFile(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.tmp_filename), 'upload/' + edit.code + ".mp4", {'x-amz-acl': 'public-read'},
+                      client.putFile(edit.tmp_filename, 'upload/' + edit.code + ".mp4", {'x-amz-acl': 'public-read'},
                             function(err, result) {
                                 //console.log(err);
                                 if (err)
@@ -336,7 +360,7 @@ module.exports = function(winston, thedb)
                 //TRANSCODE OUPUT:
                 calls.push(function(cb){
                     // FOR DEBUGGING
-                    // return cb(null);
+                    //return cb(null);
 
                     AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
                     var elastictranscoder = new AWS.ElasticTranscoder();
@@ -419,7 +443,7 @@ module.exports = function(winston, thedb)
                         edit.path = edit.shortlink + '.mp4';
 
                         var collection = thedb.collection('edits');       
-                        collection.update({code:edit.code}, {$set:{path:edit.path}}, {w:1}, function(err, result) {
+                        collection.update({code:edit.code}, {$set:{path:edit.path},$unset:{failed:false,failereason:false,error:false}}, {w:1}, function(err, result) {
                             //done update...
                             if (err) logger.error(err);
                             //logger.info(result);
