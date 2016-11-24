@@ -1,7 +1,7 @@
 var uploaddir = "/.tmp/";
 var ss3 = require('s3');
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var ffmpeg = require('fluent-ffmpeg');
 var knox = require('knox');
 var AWS = require('aws-sdk');
@@ -27,6 +27,9 @@ module.exports = function(winston, thedb)
         process.env.SDL_VIDEODRIVER = 'dummy';
         process.env.SDL_AUDIODRIVER = 'dummy';
         this.type = 'edit';
+
+        fs.mkdirsSync(__dirname + '/..' + uploaddir);
+        // tempdir = path.normalize(uploaddir + '/' + maindir);
     }
 
     function clearOut(edit)
