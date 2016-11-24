@@ -27,12 +27,14 @@ Use the docker-compose file included by running `docker-compose up`. If you are 
 
 # Error Codes
 
-600 - Edit failed
-601 - Less than min clips provided
-700 - Dropbox sync cannot load directory structure
-701 - General dropbox sync error
-702 - Error processing files during sync
-800 - Error during audio sync processing
+**600** - Edit failed\
+**601** - Less than min clips provided
+
+**700** - Dropbox sync cannot load directory structure\
+**701** - General dropbox sync error
+
+**702** - Error processing files during sync\
+**800** - Error during audio sync processing
 
 ---
 
