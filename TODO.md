@@ -1,5 +1,3 @@
-- error codes and documentation
-- docker
-- clear out old files to save space (on a timer?)
-- retrieve whole edit on receipt of just id
-- sendgrid email
+- clear out old files to save space -- DO THIS ON AUDIO
+- lock files and touches on audio
+- large file uploads to dropbox

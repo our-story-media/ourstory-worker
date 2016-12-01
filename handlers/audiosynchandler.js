@@ -22,11 +22,11 @@ AWS.config.region = config.S3_REGION;
 var fs = require('fs-extra');
 var FFmpeg = require('fluent-ffmpeg');
 
-var nodemailer = require('nodemailer');
-var directTransport = require('nodemailer-direct-transport');
-var transporter = nodemailer.createTransport(directTransport({
-    debug: true, //this!!!
-  }));
+// var nodemailer = require('nodemailer');
+// var directTransport = require('nodemailer-direct-transport');
+// var transporter = nodemailer.createTransport(directTransport({
+//     debug: true, //this!!!
+//   }));
 
 
 

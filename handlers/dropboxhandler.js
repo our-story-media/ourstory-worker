@@ -4,11 +4,10 @@ var request = require('request');
 var _ = require('lodash');
 var async = require('async');
 var fs = require('fs-extra');
-var uploaddir = "/upload/";
+var uploaddir = "/../.tmp/";
 var ss3 = require('s3');
 var path = require('path');
 var Dropbox = require('dropbox');
-var maindir = ".tmp/";
 var moment = require('moment');
 var path = require('path');
 var uuid = require('uuid');
@@ -17,13 +16,8 @@ var thedb = null;
 var connection = null;
 var logger = null;
 var AWS = require('aws-sdk');
+var touch = require("touch");
 AWS.config.region = config.S3_REGION;
-
-var nodemailer = require('nodemailer');
-var directTransport = require('nodemailer-direct-transport');
-var transporter = nodemailer.createTransport(directTransport({
-    debug: true, //this!!!
-  }));
 
 var reportprogress = function(conf)
 {
@@ -57,7 +51,23 @@ var checkcancel = function(conf,cb)
   });
 }
 
-var dodirs = function(pf, dir, calls, dbclient, s3,conf)
+function clearOut(conf)
+{
+    var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
+
+    // Remove all the lock files for this edit
+    _.each(conf.lockfiles,function(m){
+        fs.closeSync(m); 
+    });
+
+    _.each(conf.lockfile_names,function(m){
+      fs.unlinkSync(m);           
+    });
+
+    cleanOutAll();
+}
+
+var dodirs = function(pf, dir, calls, dbclient, s3, conf)
   {
       //console.log("path: " + pf);
       _.each(dir,function(val,key){
@@ -71,20 +81,21 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
             calls.push(function(cb)
             {
               //var pp = p;
-              var tdir = pf+key;
-              dbclient.readdir(tdir,function(err,existing){
-                if (!existing)
-                {
-                  console.log('creating '+tdir);
-                  dbclient.mkdir(tdir,function(err,stat)
+              var tdir = '/' + pf+key;
+              //console.log(tdir);
+              dbclient.filesGetMetadata({path:tdir}).then(function(existing){
+                //console.log(err);
+                //console.log(existing);
+                cb();
+              }).catch(function(err)
+              {
+                console.log('Dir does not exist');
+                dbclient.filesCreateFolder({path:tdir}).then(function(stat)
                   {
-                    cb(err);
+                    cb();
+                  }).catch(function(err){
+                    cb(err); 
                   });
-                }
-                else {
-                  console.log('exists '+tdir);
-                  cb();
-                }
               });
             });
             //console.log(val);
@@ -96,20 +107,6 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
             if (val.remote)
             {
               conf.total++;
-              //var p = pf+key;
-              //download from s3
-
-              // SET REAL VALUE OF REMOTE:
-              // var options = {
-              //     keypairId: config.CLOUDFRONT_KEY, 
-              //     privateKeyPath: config.CLOUDFRONT_KEYFILE,
-              //     expireTime: moment().add(1, 'day')
-              // }
-
-              // console.log(val);
-
-              // val.remote = cloudfront.getSignedUrl(config.S3_CLOUD_URL + val.id + ".mp4.mp4", options);
-              // val.homog = cloudfront.getSignedUrl(config.S3_TRANSCODE_URL + val.id + "_homog.mp4", options);
 
               // get the real path information from the db:
                calls.push(
@@ -125,8 +122,6 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   });
                 });
 
-              // console.log(val.remote);
-
               // CHECK CANCEL
               calls.push(
                 function (cb){
@@ -140,15 +135,19 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                   var filename = val;
                   //check if the file exists:
                   
-                  
                   //TODO -- if its an image or audio, ignore and dont do homog...
                   console.log("looking for "+val.homog);
                   var j = request.jar();
                   var cookie = request.cookie('sails.sid='+conf.session);
-                  request({method:'HEAD',uri:config.master_url + '/media/homog/' + filename.id + '&apikey='+ config.CURRENT_EDIT_KEY, jar: j},function(err,response,data)
+                  j.setCookie(cookie, config.master_url);
+
+                  // console.log(config.master_url + ':' + config.master_url_port + '/media/homog/' + filename.id + '?apikey='+ config.CURRENT_EDIT_KEY);
+                  request({method:'HEAD', url: config.master_url + ':' + config.master_url_port + '/media/homog/' + filename.id + '?apikey='+ config.CURRENT_EDIT_KEY, jar: j},function(err,resp,data)
                   {
-                    console.log('code: '+response.statusCode);
-                    if (err || response.statusCode != 200)
+                    // console.log(err);
+                    // console.log(resp);
+                    // console.log('code: '+resp.statusCode);
+                    if (err || resp.statusCode != 200)
                     {
                       //console.log(err);
                       //console.log(data);
@@ -210,79 +209,142 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
               calls.push(function(cb)
               {
                 var filename = val;
-                var thepath = pf;
+                var thepath = '/' + pf;
                 //download file
-                dbclient.stat(thepath + '/' + filename.local,function(err,stat){
+                dbclient.filesGetMetadata({path: thepath + filename.local}).then(function(stat){
                    //console.log(stat);
-                    if (!stat || stat.isRemoved)
-                    {
-                      console.log('not in dest');
-                      //file not in destination, so download to tmp
-                      filename.tmp = uuid.v4();
-                      if (conf.homog)
-                      {
-                        //console.log("looking for "+filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'+' on s3');
-                          var params = {
-                            localFile: path.normalize(tempdir+"/"+filename.tmp),
-                            s3Params: {
-                              Bucket: config.S3_TRANSCODE_BUCKET_NAME,
-                              Key: "upload/"+ filename.remote + '_homog.mp4',
-                            },
-                          };
-                        }
-                        else {
-                          var params = {
-                            localFile: path.normalize(tempdir+"/"+filename.tmp),
-                            s3Params: {
-                              Bucket: config.S3_BUCKET,
-                              Key: "upload/"+filename.remote,
-                            },
-                          };
-                        }
-                      //console.log("from: "+"upload/"+filename.remote);
-                     console.log(params);
-
-                      var downloader = s3.downloadFile(params);
-                      downloader.on('error', function(err) {
-                        console.log(err);
-                        reportprogress(conf);
-                        cb();
-                      });
-                      downloader.on('progress', function() {
-                        var prog = (downloader.progressAmount/downloader.progressTotal);
-                        //console.log(prog);
-                      });
-                      downloader.on('end', function() {
-                        reportprogress(conf);
-                        cb();
-                      });
-                    }
-                    else
-                    {
-                      console.log("file exists in dropbox");
+                    //if (!stat || stat.isRemoved)
+                    //{
+                      // console.log(err);
+                      console.log(thepath + filename.local + " exists in dropbox");
+                      
                       reportprogress(conf);
                       cb();
-                    }
+                    }).catch(function(err)
+                    {
+                      console.log(thepath + filename.local + 'not in dropbox already');
+                      //file not in destination, so download to tmp
+                      if (conf.homog)
+                      {
+                        filename.local_file = filename.remote + '_homog.mp4';
+                      }
+                      else
+                      {
+                        filename.local_file = filename.remote;
+                      }
+
+                      var localfile = path.normalize(tempdir+'/'+filename.local_file);
+                      //conf.files_in_use.push(localfile);
+                      var lockfile = localfile + '.' + uuid() + '.lock';
+                      
+                      conf.lockfiles.push(fs.openSync(lockfile,'w'));
+                      conf.lockfile_names.push(lockfile);
+
+                      //check the file does not exist locally:
+                      console.log(localfile);
+
+                      if (fs.existsSync(localfile))
+                      {
+                        //exists locally
+                        touch.sync(localfile);
+                        console.log('exists locally');
+                        reportprogress(conf);
+                        cb();
+                      }
+                      else
+                      {
+                        
+                        var uuid_tmp = uuid();
+                        
+                        if (conf.homog)
+                        {
+                          //console.log("looking for "+filename.remote.replace(config.S3_CLOUD_URL,'') + '_homog.mp4'+' on s3');
+                            var params = {
+                              localFile: localfile + '_' +  uuid_tmp  + '.part',
+                              s3Params: {
+                                Bucket: config.S3_TRANSCODE_BUCKET_NAME,
+                                Key: "upload/"+ filename.remote + '_homog.mp4',
+                              },
+                            };
+                          }
+                          else {
+                            var params = {
+                              localFile: localfile + '_' +  uuid_tmp  + '.part',
+                              s3Params: {
+                                Bucket: config.S3_BUCKET,
+                                Key: "upload/"+filename.remote,
+                              },
+                            };
+                          }
+
+                        var downloader = s3.downloadFile(params);
+                        downloader.on('error', function(err) {
+                          console.log(err);
+                          reportprogress(conf);
+                          cb();
+                        });
+                        downloader.on('progress', function() {
+                          var prog = (downloader.progressAmount/downloader.progressTotal);
+                        });
+                        downloader.on('end', function() {
+                          try
+                          {
+                              // console.log('renaming ' + uuid_tmp + '_' + localfile + '.part to' localfile);
+                              fs.renameSync(params.localFile, localfile);
+                          }
+                          catch (e){
+                              logger.info('Download thrown away ' + localfile + '_' +  uuid_tmp + '.part');
+                              fs.unlinkSync(localfile + '_' +  uuid_tmp + '.part');
+                          }
+
+                          touch.sync(localfile);
+                          reportprogress(conf);
+                          cb();
+                        });
+
+                      }//end of if download
                 });
               });
-              //upload to dropbox
+
+              //check cancel
               calls.push(
                 function (cb){
                   checkcancel(conf,cb);
                 });
+
+              //upload to dropbox
               calls.push(function(cb)
               {
                   var filename = val;
-                  var thepath = pf;
+                  var thepath = '/' + pf;
                   //console.log("tmp: " + path.normalize(tempdir+"/"+filename.tmp));
-                  if (filename.tmp && fs.existsSync(path.normalize(tempdir+"/"+filename.tmp)))
+                  if (filename.local_file && fs.existsSync(path.normalize(tempdir+"/"+filename.local_file)))
                   {
-                    console.log('file exists locally, uploading now');
-                     fs.readFile(path.normalize(tempdir+"/"+filename.tmp), function(error, data) {
-                        dbclient.writeFile(thepath + "/" + filename.local, data, function(error, stat) {
-                          reportprogress(conf);
-                          cb(error);
-                        });
+                     console.log('file exists locally, uploading now');
+                     
+                     fs.readFile(path.normalize(tempdir+"/"+filename.local_file), function(error, data) {
+                       //HACK -- LIMITED TO 150Mb uploads using this method!!
+                       dbclient.filesUpload({path:thepath + filename.local,contents:data}).then(function(result){
+                         reportprogress(conf);
+                         cb();
+                       }).catch(function(err){
+                         reportprogress(conf);                         
+                         cb(err);
+                       });
+
+                      //  dbclient.filesUploadSessionStart({
+                        //  contents:first150
+                      //  }).then(function(ok){
+                         //upload file
+                        //  var sessionid = ok.session_id;
+                        //  console.log("session: " + sessionid);
+                        //  dbclient.filesUploadSessionFinish({session_id:sessionid}).then(function(ok){
+                        //     reportprogress(conf);
+                        //     cb(error);
+                        //  }).catch(function(err){
+                        //    cb(err);
+                        //  });
+                      //  });
                      });
                   }
                   else {
@@ -290,11 +352,14 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
                     cb();
                   }
               });
-              //delete local file
+
+              //check cancel
               calls.push(
                 function (cb){
                   checkcancel(conf,cb);
                 });
+
+              //delete local file
               calls.push(function(cb)
               {
                   var filename = val;
@@ -316,33 +381,25 @@ var dodirs = function(pf, dir, calls, dbclient, s3,conf)
       });
   }
 
-
-module.exports = function(winston, thedb)
+module.exports = function(winston, db)
 {
-
+  thedb = db;
     function DoEditHandler()
     {
         this.type = 'dropbox';
-        connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
-
-        //console.log(__dirname + '/' + dir);
-        fs.mkdirsSync(__dirname + '/' + maindir);
-        tempdir = path.normalize(__dirname + '/' + maindir);
-
-
-      // //console.log('mongodb://'+config.db_user+':'+config.db_password+'@'+config.db_host+':'+config.db_port+'/'+config.db_database);
-      //   MongoClient.connect(connection, function(err, db) {
-      //      // MongoClient.connect('mongodb://localhost/bootlegger', function(err, db) {
-      //       if(err) throw err;
-      //       thedb = db;
-      //     });
+        fs.mkdirsSync(__dirname + '/' + uploaddir);
+        tempdir = path.normalize(__dirname + '/' + uploaddir);
     }
 
     DoEditHandler.prototype.work = function(conf, callback)
     {
       try{
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         logger.info('starting dropbox sync',conf);
+
+        conf.files_in_use = [];
+        conf.lockfile_names = [];
+        conf.lockfiles = [];
 
         //go get the directory structure:
         //needs cookie:
@@ -353,12 +410,8 @@ module.exports = function(winston, thedb)
         var url = config.master_url;
 
         j.setCookie(cookie, url);
-        request({url: config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template+'&apikey='+ config.CURRENT_EDIT_KEY, jar: j}, function (err,resp,body) {
-          //request(config.master_url+ '/media/directorystructure/'+conf.event_id+'/?template='+conf.template).on('response', function(response) {
-            //console.log("directory struct:");
-            //console.log(body);
-            //console.log(resp.statusCode);
-            //console.log(err);
+        request({url: config.master_url + ':' + config.master_url_port + '/media/directorystructure/'+conf.event_id+'/?template='+conf.template+'&apikey='+ config.CURRENT_EDIT_KEY, jar: j}, function (err,resp,body) {
+
             if (err || resp.statusCode !=200)
             {
               logger.error(err,body);
@@ -378,11 +431,9 @@ module.exports = function(winston, thedb)
               return;
             }
 
-            var dbClient = new Dropbox.Client({
-              key         : config.dropbox_clientid,
-              secret      : config.dropbox_clientsecret,
+            var dbClient = new Dropbox({
               sandbox     : false,
-              token       : conf.dropbox_token.accessToken,
+              accessToken       : conf.dropbox_token.accessToken,
             });
 
             var s3 = ss3.createClient({
@@ -397,8 +448,6 @@ module.exports = function(winston, thedb)
             var thecalls = [];
             conf.done = 0;
             conf.total = 0;
-            //var total = _.merge(allmedia);
-            //console.log(total);
 
             try{
               dodirs('',allmedia,thecalls,dbClient,s3,conf);
@@ -421,12 +470,15 @@ module.exports = function(winston, thedb)
             //recurse through the dir
               //for each dir, create
               //for each file, download
-
+              console.log('Starting processing ' + _.size(thecalls) + ' calls');
               async.series(thecalls,function(err)
               {
                 logger.error(err);
                 //FINISHED:
                 var collection = thedb.collection('user');
+
+                clearOut(conf);
+
                 if (err)
                 {
                   var replacement = {};
@@ -440,7 +492,7 @@ module.exports = function(winston, thedb)
                       //done update...
                       console.log(err);
                       //console.log(result);
-                      logger.info('Dropbox Sync Complete');
+                      logger.info('Dropbox Sync Error');
                       sendEmail(conf.user_id,'Dropbox Sync','Your Dropbox Sync has been Cancelled or is Incomplete. Error: '+err);
                       callback('bury');
                     });

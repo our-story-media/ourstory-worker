@@ -26,6 +26,7 @@ module.exports = {
     CLOUDFRONT_KEY:'',
     CLOUDFRONT_KEYFILE:'',
     MIN_CLIP_COUNT:2,
+    MAX_CACHE:20*1024*1024*1024,
     email:{
         SENDGRID_ID:'',
         SENDGRID_TEMPLATE:''

@@ -43,98 +43,13 @@ module.exports = function(winston, thedb)
         });
         
         //2. remove resulting file
-        console.log('edit file: ' + edit.tmp_filename);
+        //onsole.log('edit file: ' + edit.tmp_filename);
         if (fs.existsSync(edit.tmp_filename))
         {
             fs.unlinkSync(edit.tmp_filename);
         }
-
-        // List all files 
-        var allfiles = fs.readdirSync(path.normalize(path.dirname(require.main.filename) + uploaddir));
-
-        //3 hours ago
-        var ZOMBIE_TIMEOUT = Date.now() - (3 * 3600000);
-
-        //Remove all lock files from anywhere older then 3 hours (for failed things half way through)
-        var zombie_lockfiles = _.filter(allfiles,function(f){
-            var stats = fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
-            //console.log(stats.atime.getTime())
-            return stats.atime.getTime() < ZOMBIE_TIMEOUT && (_.endsWith('.part') || _.endsWith('.lock'));
-        });
-
-        logger.info('Removing Zombies: ' + _.size(zombie_lockfiles));
-        _.each(zombie_lockfiles,function(f){
-            //console.log(f);
-            fs.unlinkSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
-        });
-
-
-
-
-        // ONLY delete video files with no lock files
-
-        //TODO -- only delete files with NO lock files
-        var allmp4s = _.filter(allfiles,function(f){
-            return _.endsWith(f,'.mp4') && !_.endsWith(f,'.edit.mp4');
-        });
-
-        var nolockfiles = _.filter(allmp4s,function(f){
-            var matchinglockfiles = _.find(allfiles,function(ff){
-                return _.startsWith(ff,f) && _.endsWith(ff,'.lock');
-            });
-            return _.size(matchinglockfiles) == 0;
-        });
-
-        logger.info('Files with no lock: ' + _.size(nolockfiles));
-        _.each(nolockfiles,function(f){
-            console.log(f);
-        });
-
-        var statfiles = _.map(nolockfiles,function(f){
-            return {file:path.normalize(path.dirname(require.main.filename) + uploaddir) + f,stats:fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f)};
-        });
-
-        // console.log(allfiles_nolock);
-        var ordered = _.orderBy(statfiles,'stats.atime.getTime()','desc');
-        // console.log('ordered:');
-        // _.each(ordered,function(f){
-        //     console.log(f.file + ' ' + f.stats.atime);
-        // });
-
-
-        var keep = [];
-        var remove = [];
-        //20GB
-        var space_avail = 20*1024*1024*1024;
-        //var space_avail = 20*1024*1024;
-        var sizecounter = space_avail;
-        var index = 0;
-
-        while (sizecounter > 0 && index < _.size(ordered))
-        {
-            keep.push(ordered[index]);
-            // console.log(ordered[index].stats.size);
-            sizecounter -= ordered[index].stats.size;
-            index++;
-        }
-
-        remove = _.slice(ordered,index);
-
-        logger.info("Keeping " + _.size(keep) + ' files within the '+(space_avail/(1024*1024)) + 'MB cap');
-        _.each(keep,function(f){
-             //console.log(f.file);
-        });
-
-        logger.info('Removing ' + _.size(remove) + ' files');
-        _.each(remove,function(f){
-            //console.log(f.file);
-            fs.unlinkSync(f.file);
-        });
-
-        // console.log(keep);
-        // - order files by last touched date
-        // - ignore files with lock files present
-        // - sum size of files up to the max, then remove the rest.
+        
+        cleanOutAll();
     }
 
     DoEditHandler.prototype.work = function(edit, callback)

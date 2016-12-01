@@ -23,11 +23,9 @@
     "dropbox": "*",
     "moment":"*",
     "uuid":"*",
-    "nodemailer":"*",
-    "nodemailer-direct-transport":"*",
     "shell-escape":"*",
     "touch":"1.0.0",
-    "sendgrid":"4.7.1"
+    "sendgrid":"~2.0.0"
 	},
   "scripts": {
     "start":"node index.js"
