@@ -4,11 +4,10 @@ var request = require('request');
 var _ = require('lodash');
 var async = require('async');
 var fs = require('fs-extra');
-// var uploaddir = "/upload/";
 var ss3 = require('s3');
 var path = require('path');
 var Dropbox = require('dropbox');
-var maindir = ".tmp";
+var maindir = "/../.tmp/";
 var moment = require('moment');
 var path = require('path');
 var uuid = require('uuid');
@@ -21,14 +20,6 @@ var AWS = require('aws-sdk');
 AWS.config.region = config.S3_REGION;
 var fs = require('fs-extra');
 var FFmpeg = require('fluent-ffmpeg');
-
-// var nodemailer = require('nodemailer');
-// var directTransport = require('nodemailer-direct-transport');
-// var transporter = nodemailer.createTransport(directTransport({
-//     debug: true, //this!!!
-//   }));
-
-
 
 var reportprogress = function(conf)
 {
@@ -58,21 +49,21 @@ var checkcancel = function(conf,cb)
     });
 }
 
-module.exports = function(winston, thedb)
+module.exports = function(winston, db)
 {
     function DoAudioHandler()
     {
         this.type = 'audiosync';
-        if (os.platform()=="win32")
-        {
-            process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-            process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-        }
-        else
-        {
-            process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-            process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-        }
+        // if (os.platform()=="win32")
+        // {
+        //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
+        //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
+        // }
+        // else
+        // {
+        //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
+        //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
+        // }
 
 
         // connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
@@ -80,7 +71,7 @@ module.exports = function(winston, thedb)
         //console.log(__dirname + '/' + dir);
         fs.mkdirsSync(__dirname + '/' + maindir);
         tempdir = path.normalize(__dirname + '/' + maindir);
-
+        thedb = db;
     }
 
     DoAudioHandler.prototype.work = function(conf, callback)
@@ -112,6 +103,7 @@ module.exports = function(winston, thedb)
             });
 
             var calls = [];
+            //check cancel
             calls.push(
               function (cb){
                 checkcancel(conf,cb);
@@ -147,69 +139,81 @@ module.exports = function(winston, thedb)
                 function (cb){
                   checkcancel(conf,cb);
                 });
+
+                if (m.path)
+                {
+
               calls.push(function(cb){
                   var file = m;
 
-                  request({method:'HEAD',uri:config.S3_TRANSCODE_BUCKET + 'audio/' + m.path + '.mp3'},function(err,response,data)
-                  {
+                  // console.log(file);
+
+                  var j = request.jar();
+                  var cookie = request.cookie('sails.sid='+conf.session);
+                  // console.log(conf.session);
+                  j.setCookie(cookie, config.master_url);
+
+                  // console.log(config.master_url + ':' + config.master_url_port + '/media/homog/' + filename.id + '?apikey='+ config.CURRENT_EDIT_KEY);
+                  console.log(config.master_url + ':' + config.master_url_port + '/media/audio/' + file._id + '?apikey='+ config.CURRENT_EDIT_KEY);
+                  request({method:'HEAD', url: config.master_url + ':' + config.master_url_port + '/media/audio/' + file._id + '?apikey='+ config.CURRENT_EDIT_KEY, jar: j},function(err,resp,data){
                     //console.log(err)
-                    console.log('code: '+response.statusCode);
-                    if (err || response.statusCode != 200)
+                    // console.log('code: '+resp.statusCode);
+                    if (err || resp.statusCode != 200)
                     {
-
-                  console.log("starting transcode");
-                  AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
-                  var elastictranscoder = new AWS.ElasticTranscoder();
-                  elastictranscoder.createJob({
-                    PipelineId: config.ELASTIC_PIPELINE,
-                    //InputKeyPrefix: '/upload',
-                    OutputKeyPrefix: 'audio/',
-                    Input: {Key: 'upload/' + file.path },
-                    Output: {
-                      Key: file.path + '.mp3',
-                      // CreateThumbnails:false,
-                      PresetId: config.AUDIO_PRESET, // specifies the output video format
-                  }
-                    }, function(error, data) {
-                      if (error)
-                      {
-                          logger.error(error);
-                          cb(error);
-                      }
-                      else
-                      {
-                         logger.info("Audio Transcode submitted");
-                          //console.log(data);
-                          var params = {
-                            Id: data.Job.Id /* required */
-                          };
-                          elastictranscoder.waitFor('jobComplete', params, function(err, data) {
-                            if (err)
+                        console.log("starting transcode");
+                        AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
+                        var elastictranscoder = new AWS.ElasticTranscoder();
+                        elastictranscoder.createJob({
+                          PipelineId: config.ELASTIC_PIPELINE,
+                          OutputKeyPrefix: 'upload/',
+                          Input: { Key: 'upload/' + file.path },
+                          Output: {
+                            Key: file.path + '.mp3',
+                            // CreateThumbnails:false,
+                            PresetId: config.AUDIO_PRESET, // specifies the output video format
+                        }
+                          }, function(error, data) {
+                            if (error)
                             {
-                              console.log(err, err.stack); // an error occurred
-                              cb();
+                                logger.error(error);
+                                cb(error);
                             }
-                            else{
-                              console.log(data);           // successful response
-                              cb();
+                            else
+                            {
+                              logger.info("Audio Transcode submitted");
+                                //console.log(data);
+                                var params = {
+                                  Id: data.Job.Id /* required */
+                                };
+                                elastictranscoder.waitFor('jobComplete', params, function(err, data) {
+                                  if (err)
+                                  {
+                                    console.log(err, err.stack); // an error occurred
+                                    cb();
+                                  }
+                                  else{
+                                    // console.log(data);           // successful response
+                                    cb();
+                                  }
+                                });
                             }
-                          });
-                      }
+                        });
+                    }
+                    else {
+                      console.log('no transcode required');
+                      cb();
+                    }
                   });
-
-                }
-                else {
-                  console.log('no transcode required');
-                  cb();
-                }
               });
-              });
+                
 
-              //download file
+              //check cancel
               calls.push(
                 function (cb){
                   checkcancel(conf,cb);
                 });
+
+              //download file
               calls.push(function(cb){
                 var file = m;
                 console.log("starting download of audio");
@@ -217,7 +221,7 @@ module.exports = function(winston, thedb)
                   localFile: path.normalize(tempdir+"/"+file.path+'.mp3'),
                   s3Params: {
                     Bucket: config.S3_TRANSCODE_BUCKET_NAME,
-                    Key: 'audio/'+file.path+".mp3",
+                    Key: file.path+".mp3",
                   },
                 };
 
@@ -232,6 +236,7 @@ module.exports = function(winston, thedb)
                   cb();
                 });
               });
+              
 
               //convert to wav:
               calls.push(
@@ -247,7 +252,7 @@ module.exports = function(winston, thedb)
                   console.log("file found for conversion");
             			//calls.push(function(callback) {
             				//add to queue:
-            				console.log('converting '+ tempdir + '/' + m.path);
+            				console.log('converting '+ tempdir + '/' + m.path + '.mp3');
             				if (!fs.existsSync(tempdir + m.path + '.wav'))
             				{
             					var command = new FFmpeg({ source: tempdir + '/' + m.path + '.mp3'})
@@ -277,7 +282,10 @@ module.exports = function(winston, thedb)
                   cb();
                 }
               });
+              }//if no file exists to process...
             });
+
+            
 
             //process all files
             calls.push(
@@ -287,23 +295,23 @@ module.exports = function(winston, thedb)
             calls.push(function(cb){
               console.log("processing all files");
 
-              var clips = _.pluck(doc,'path');
+              var clips = _.map(_.filter(doc,'path'),'path');
               clips = _.map(clips,function(c)
               {
-                  return tempdir + '/' + c +'.wav';
+                  return path.normalize(tempdir + '/' + c +'.wav');
               });
-              console.log(clips);
+              // console.log(clips);
               //calls.push(function(cb) {
         			//do matlab processing:
         			var esc = require('shell-escape');
         			var exec = require('child_process').execFile;
               //console.log(tempdir + conf.audiofile);
         			var args = {groundTruthPath:tempdir + '/' + conf.audiofile, clips:clips};
-        			console.log(esc([JSON.stringify(args)]));
-        			var filename = tempdir + '/' + "input_" + conf.event + ".json";
+        			// console.log(esc([JSON.stringify(args)]));
+        			var filename = path.normalize(tempdir + '/' + "input_" + conf.event + ".json");
         			fs.writeFileSync(filename, JSON.stringify(args));
 
-        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',[filename], function callback(error, stdout, stderr){
+        			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',[filename],{ cwd:tempdir}, function callback(error, stdout, stderr){
         			    if (error)
         			    {
         			    	console.log(error);
@@ -314,7 +322,7 @@ module.exports = function(winston, thedb)
                     console.log("matlab script finished");
                     var updates = [];
                     //readthe data:
-                    var output = fs.readFileSync(path.normalize(path.dirname(require.main.filename)) + '/' + conf.audiofile.replace('.wav','.txt'));
+                    var output = fs.readFileSync(path.normalize(tempdir + '/' + conf.audiofile.replace('.wav','.txt')));
                     var data = JSON.parse(output);
                     //console.log(data);
                     medi = data[conf.audiofile.replace('.wav','')];
@@ -334,12 +342,13 @@ module.exports = function(winston, thedb)
                           console.log(filename + ' at '+o + " " + offset);
                           var collection = thedb.collection('media');
                           //remove the file:
-                          fs.unlinkSync(tempdir + '/' + filename);
+                          fs.unlinkSync(tempdir + '/' + filename + '.mp3');                          
+                          fs.unlinkSync(tempdir + '/' + filename + '.wav');
 
                           collection.update({"path": filename}, {$set:{offset:offset}}, {w:1}, function(err, result) {
                               //done update...
                               reportprogress(conf);
-                              console.log(result);
+                              // console.log(result);
                               cb(err);
                             });
                         });
@@ -349,6 +358,8 @@ module.exports = function(winston, thedb)
                     async.series(updates,function(err)
                     {
                       //remove all files:
+                      fs.unlinkSync(path.normalize(tempdir + '/' + conf.audiofile.replace('.wav','.txt')));
+                      fs.unlinkSync(path.normalize(tempdir + '/' + "input_" + conf.event + ".json"));                      
                       cb(err);
                     });
         			    }

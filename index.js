@@ -41,8 +41,8 @@ function start()
 			handlers:
 			{
 				//edit: require('./handlers/edithandler')(winston,db),
-				dropbox: require('./handlers/dropboxhandler')(winston,db,sendEmail),
-				//audio: require('./handlers/audiosynchandler')(winston,db)
+				//dropbox: require('./handlers/dropboxhandler')(winston,db),
+				audio: require('./handlers/audiosynchandler')(winston,db)
 			},
 		});
 		runner.on('error',function(err)
