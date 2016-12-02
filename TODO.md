@@ -1,3 +1,1 @@
-- clear out old files to save space -- DO THIS ON AUDIO
-- lock files and touches on audio
 - large file uploads to dropbox

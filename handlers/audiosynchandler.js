@@ -26,7 +26,7 @@ var reportprogress = function(conf)
   var collection = thedb.collection('event');
   conf.done++;
   var progress = (conf.done / (conf.total*3))*100;
-  console.log(progress + "%");
+  //console.log(progress + "%");
   collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosync:{msg:'sync in progress',status:'progress',percentage:progress}}}, {w:1}, function(err, result) {
       //done update...
     });
@@ -40,7 +40,8 @@ var checkcancel = function(conf,cb)
     //console.log(doc);
        if (doc.audiosynccancel)
        {
-         console.log('cancelled');
+         logger.info('Cancelled');
+        //  console.log('cancelled');
          cb(true)
        }
        else {
@@ -54,21 +55,6 @@ module.exports = function(winston, db)
     function DoAudioHandler()
     {
         this.type = 'audiosync';
-        // if (os.platform()=="win32")
-        // {
-        //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-        //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-        // }
-        // else
-        // {
-        //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-        //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-        // }
-
-
-        // connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
-
-        //console.log(__dirname + '/' + dir);
         fs.mkdirsSync(__dirname + '/' + maindir);
         tempdir = path.normalize(__dirname + '/' + maindir);
         thedb = db;
@@ -81,15 +67,8 @@ module.exports = function(winston, db)
 
         logger.info('starting audio sync',conf);
 
-        //return callback('success');
-
-          //var tmpdir = path.normalize(path.dirname(require.main.filename) + uploaddir);
-
-          var collection = thedb.collection('media');
-          collection.find({"event_id": conf.event}).toArray(function(err, doc) {
-            //console.log("eventid: "+conf.event);
-            //console.log(err);
-            //console.log(doc.length + " media files");
+        var collection = thedb.collection('media');
+        collection.find({"event_id": conf.event}).toArray(function(err, doc) {
             conf.total = doc.length;
             conf.done = 0;
             //console.log(doc);
@@ -112,7 +91,7 @@ module.exports = function(winston, db)
             //download master audio
             calls.push(function(cb)
             {
-              console.log("starting download master audio");
+              // logger.info("Starting download master audio");
               var params = {
                 localFile: path.normalize(tempdir+"/"+conf.audiofile),
                 s3Params: {
@@ -123,11 +102,12 @@ module.exports = function(winston, db)
 
               var downloader = s3.downloadFile(params);
               downloader.on('error', function(err) {
-                console.log(err);
+                // console.log(err);
+                logger.error(err);
                 cb(err);
               });
               downloader.on('end', function() {
-                console.log("downloaded master audio")
+                logger.info("Downloaded master audio");
                 cb();
               });
             });
@@ -154,13 +134,13 @@ module.exports = function(winston, db)
                   j.setCookie(cookie, config.master_url);
 
                   // console.log(config.master_url + ':' + config.master_url_port + '/media/homog/' + filename.id + '?apikey='+ config.CURRENT_EDIT_KEY);
-                  console.log(config.master_url + ':' + config.master_url_port + '/media/audio/' + file._id + '?apikey='+ config.CURRENT_EDIT_KEY);
+                  // console.log(config.master_url + ':' + config.master_url_port + '/media/audio/' + file._id + '?apikey='+ config.CURRENT_EDIT_KEY);
                   request({method:'HEAD', url: config.master_url + ':' + config.master_url_port + '/media/audio/' + file._id + '?apikey='+ config.CURRENT_EDIT_KEY, jar: j},function(err,resp,data){
                     //console.log(err)
                     // console.log('code: '+resp.statusCode);
                     if (err || resp.statusCode != 200)
                     {
-                        console.log("starting transcode");
+                        // console.log("starting transcode");
                         AWS.config.update({accessKeyId: config.AWS_ACCESS_KEY_ID, secretAccessKey: config.AWS_SECRET_ACCESS_KEY});
                         var elastictranscoder = new AWS.ElasticTranscoder();
                         elastictranscoder.createJob({
@@ -200,7 +180,7 @@ module.exports = function(winston, db)
                         });
                     }
                     else {
-                      console.log('no transcode required');
+                      // console.log('no transcode required');
                       cb();
                     }
                   });
@@ -216,7 +196,7 @@ module.exports = function(winston, db)
               //download file
               calls.push(function(cb){
                 var file = m;
-                console.log("starting download of audio");
+                // console.log("starting download of audio");
                 var params = {
                   localFile: path.normalize(tempdir+"/"+file.path+'.mp3'),
                   s3Params: {
@@ -227,7 +207,8 @@ module.exports = function(winston, db)
 
                 var downloader = s3.downloadFile(params);
                 downloader.on('error', function(err) {
-                  console.log(err);
+                  // console.log(err);
+                  logger.error(err);
                   reportprogress(conf);
                   cb(err);
                 });
@@ -245,24 +226,25 @@ module.exports = function(winston, db)
                 });
               calls.push(function(cb){
                 var file = m;
-                console.log('starting ffmpeg conversion');
+                // console.log('starting ffmpeg conversion');
                 //console.log(tempdir + m.path + '.mp3');
             		if (m.path && fs.existsSync(tempdir + '/' + m.path + '.mp3'))
             		{
-                  console.log("file found for conversion");
+                  // console.log("file found for conversion");
             			//calls.push(function(callback) {
             				//add to queue:
-            				console.log('converting '+ tempdir + '/' + m.path + '.mp3');
+            				logger.info('converting '+ tempdir + '/' + m.path + '.mp3');
             				if (!fs.existsSync(tempdir + m.path + '.wav'))
             				{
             					var command = new FFmpeg({ source: tempdir + '/' + m.path + '.mp3'})
             					.on('error', function(err) {
-            		        		console.log('Cannot convert to wav: ' + err.message);
+                          logger.error('Cannot convert to wav: ' + err.message);
+            		        		// console.log('Cannot convert to wav: ' + err.message);
                             reportprogress(conf);
             		        		cb(err);
             		    		})
             		    		.on('end', function() {
-            		        		console.log('Conversion to wav finished successfully');
+            		        		logger.info('Conversion to wav finished successfully');
             		        		//adjust progress:
                             reportprogress(conf);
             		        		cb();
@@ -277,7 +259,7 @@ module.exports = function(winston, db)
             			//});
             		}
                 else {
-                  console.log("no file found for conversion");
+                  logger.error("no file found for conversion");
                   reportprogress(conf);
                   cb();
                 }
@@ -293,7 +275,8 @@ module.exports = function(winston, db)
                 checkcancel(conf,cb);
               });
             calls.push(function(cb){
-              console.log("processing all files");
+              logger.info("processing all files")
+              // console.log("processing all files");
 
               var clips = _.map(_.filter(doc,'path'),'path');
               clips = _.map(clips,function(c)
@@ -314,12 +297,13 @@ module.exports = function(winston, db)
         			exec(path.normalize(path.dirname(require.main.filename)) + '/sync_audio/SyncClips',[filename],{ cwd:tempdir}, function callback(error, stdout, stderr){
         			    if (error)
         			    {
-        			    	console.log(error);
+                    logger.error(error);
+        			    	// console.log(error);
         			    	cb(error);
         			    }
         			    else
         			    {
-                    console.log("matlab script finished");
+                    logger.info("Processing script finished");
                     var updates = [];
                     //readthe data:
                     var output = fs.readFileSync(path.normalize(tempdir + '/' + conf.audiofile.replace('.wav','.txt')));
@@ -339,7 +323,7 @@ module.exports = function(winston, db)
                           var off = o.split(':');
                           var offset = (parseInt(off[3])/100.0) + parseInt(off[2]) + (parseInt(off[1])*60) + (parseInt(off[0]) * 60 * 60);
 
-                          console.log(filename + ' at '+o + " " + offset);
+                          logger.info(filename + ' at '+o + " " + offset);
                           var collection = thedb.collection('media');
                           //remove the file:
                           fs.unlinkSync(tempdir + '/' + filename + '.mp3');                          
@@ -379,7 +363,8 @@ module.exports = function(winston, db)
                 };
                 collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Cancelled',status:'cancelled',percentage:0,stopped:true,error:err_obj}}}, {w:1}, function(err, result) {
                     //done update...
-                    console.log(err);
+                    logger.error(err);
+                    // console.log(err);
                     //console.log(result);
                     logger.info('Audio Sync Complete');
                     sendEmail(conf.user_id,'Audio Sync Error','Your Audio Sync has been Cancelled or is Incomplete. Error: '+err);
@@ -390,7 +375,8 @@ module.exports = function(winston, db)
               {
                 collection.update({"_id": new ObjectId(conf.event)}, {$set:{audiosynccancel:false,audiosync:{msg:'Complete',status:'done',percentage:100,stopped:true}}}, {w:1}, function(err, result) {
                     //done update...
-                    console.log(err);
+                    logger.error(err);                    
+                    // console.log(err);
                     //console.log(result);
                     logger.info('Audio Sync Complete');
                     sendEmail(conf.user_id,'Audio Sync Complete!','Your Bootlegger audio sync is complete.');
