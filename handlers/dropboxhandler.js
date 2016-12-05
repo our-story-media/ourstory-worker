@@ -380,10 +380,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3, conf)
                                     }); // end append
                                   });
                                 });
-
                           }
-
-                          // }); //end of file read
 
                           subcalls.push(function(cb){
                             // console.log(_.size(data));
@@ -413,9 +410,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3, conf)
                             
                             cb(err);
                           });
-                       
-                        //  console.log("session: " + sessionid);
-                        
+
                       //  });
                      }).catch(function(err){
                        console.log(err);
