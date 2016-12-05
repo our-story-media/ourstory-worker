@@ -222,7 +222,7 @@ var dodirs = function(pf, dir, calls, dbclient, s3, conf)
                       cb();
                     }).catch(function(err)
                     {
-                      console.log(thepath + filename.local + 'not in dropbox already');
+                      console.log(thepath + filename.local + ' not in dropbox already');
                       //file not in destination, so download to tmp
                       if (conf.homog)
                       {
@@ -322,30 +322,104 @@ var dodirs = function(pf, dir, calls, dbclient, s3, conf)
                   {
                      console.log('file exists locally, uploading now');
                      
-                     fs.readFile(path.normalize(tempdir+"/"+filename.local_file), function(error, data) {
-                       //HACK -- LIMITED TO 150Mb uploads using this method!!
-                       dbclient.filesUpload({path:thepath + filename.local,contents:data}).then(function(result){
-                         reportprogress(conf);
-                         cb();
-                       }).catch(function(err){
-                         reportprogress(conf);                         
-                         cb(err);
-                       });
+                    var fullpath = path.normalize(tempdir+"/"+filename.local_file);
 
-                      //  dbclient.filesUploadSessionStart({
-                        //  contents:first150
-                      //  }).then(function(ok){
-                         //upload file
-                        //  var sessionid = ok.session_id;
+                    //  fs.readFile(path.normalize(tempdir+"/"+filename.local_file), function(error, data) {
+
+                      dbclient.filesUploadSessionStart({contents:new Buffer(0)}).then(function(ok){
+                          console.log('upload session started');
+
+                          var sessionid = ok.session_id;
+                          var chunk_length = 1024*1024*100;
+                          // var position = 0;
+                          var session_id = null;
+                          var subcalls = [];
+
+                          //calculate size of file...
+                          var sizeoffile = fs.statSync(fullpath).size;
+                          var fd = fs.openSync(fullpath,'r');
+                          var chunks = (sizeoffile / chunk_length);
+
+                          console.log('file of ' + sizeoffile + ' in ' + chunks + ' chunks');
+
+                          var bytespushed = 0;
+                          //for each chunk, read and upload
+
+                          for(var counter = 0;counter<chunks;counter++)
+                          {
+                              console.log('chunk upload ' + counter + ' registered');
+
+                              subcalls.push(function(cb){
+                                //var thecounter = counter;
+                                console.log('chunk upload ' + thecounter + ' processing');
+                                
+                                var position = thecounter * chunk_length;
+                                thecounter++;
+                                
+                                var data = new Buffer(chunk_length);
+                                //fd, buffer, offset, length, position, callback
+                                fs.read(fd, data, 0, chunk_length, position, function(err, bytesread, buffer){
+                                    // position += bytesread;
+                                    // console.log('read ' + bytesread + ' bytes');
+                                    //do the push to dropbox.
+                                    
+                                    // console.log(_.size(buffer) + ' should be ' + bytesread);
+
+                                    dbclient.filesUploadSessionAppendV2({
+                                      cursor:
+                                      {
+                                        session_id: sessionid,
+                                        offset: bytespushed
+                                      },
+                                      contents: buffer.slice(0,bytesread)
+                                    }).then(function(ok){
+                                      bytespushed += bytesread;
+                                      cb();
+                                    }).catch(function(err){
+                                      cb(err);
+                                    }); // end append
+                                  });
+                                });
+
+                          }
+
+                          // }); //end of file read
+
+                          subcalls.push(function(cb){
+                            // console.log(_.size(data));
+                            console.log('Finishing upload session at length: '+ bytespushed);
+                            dbclient.filesUploadSessionFinish({
+                              commit:
+                              {
+                                path:thepath + filename.local
+                              },
+                              cursor:
+                              {
+                                  session_id:sessionid,
+                                  offset: sizeoffile
+                              }
+                              }).then(function(ok){
+                                reportprogress(conf);
+                                cb();
+                            }).catch(function(err){
+                              cb(err);
+                            });
+                          });
+
+                          console.log('Processing ' + _.size(subcalls) + ' upload calls');
+                          thecounter = 0;
+                          async.series(subcalls,function(err){
+                            // console.log(err);
+                            
+                            cb(err);
+                          });
+                       
                         //  console.log("session: " + sessionid);
-                        //  dbclient.filesUploadSessionFinish({session_id:sessionid}).then(function(ok){
-                        //     reportprogress(conf);
-                        //     cb(error);
-                        //  }).catch(function(err){
-                        //    cb(err);
-                        //  });
+                        
                       //  });
-                     });
+                     }).catch(function(err){
+                       console.log(err);
+                     }); // end of db session start
                   }
                   else {
                     reportprogress(conf);

@@ -40,8 +40,8 @@ function start()
 			ignoreDefault:true,
 			handlers:
 			{
-				//edit: require('./handlers/edithandler')(winston,db),
-				//dropbox: require('./handlers/dropboxhandler')(winston,db),
+				edit: require('./handlers/edithandler')(winston,db),
+				dropbox: require('./handlers/dropboxhandler')(winston,db),
 				audio: require('./handlers/audiosynchandler')(winston,db)
 			},
 		});
