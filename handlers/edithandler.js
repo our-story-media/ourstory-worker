@@ -10,11 +10,25 @@ var config = require('../config/local.js');
 AWS.config.region = config.S3_REGION;
 var _ = require('lodash');
 var async = require('async');
-var PythonShell = require('python-shell');
 var ObjectId = require('mongodb').ObjectID;
 var child_process = require('child_process');
 var touch = require("touch");
 var uuid = require('uuid');
+
+function chunkString(str, len) {
+  var _size = Math.ceil(str.length/len),
+      _ret  = new Array(_size),
+      _offset
+  ;
+
+  for (var _i=0; _i<_size; _i++) {
+    _offset = _i * len;
+    _ret[_i] = str.substring(_offset, _offset + len);
+  }
+
+  return _ret;
+}
+
 
 module.exports = function(winston, thedb)
 {
@@ -38,15 +52,18 @@ module.exports = function(winston, thedb)
 
         // Remove all the lock files for this edit
         _.each(edit.media,function(m){
-           fs.closeSync(m.lock_file);
-           fs.unlinkSync(m.lock_file_name);
+            if (m.id)
+            {
+                fs.closeSync(m.lock_file);
+                fs.unlinkSync(m.lock_file_name);
+            }
         });
         
         //2. remove resulting file
         //onsole.log('edit file: ' + edit.tmp_filename);
         if (fs.existsSync(edit.tmp_filename))
         {
-            fs.unlinkSync(edit.tmp_filename);
+            //s.unlinkSync(edit.tmp_filename);
         }
         
         cleanOutAll();
@@ -79,7 +96,6 @@ module.exports = function(winston, thedb)
 
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
-            //TODO -- TAKE THIS OUT!
             if (edit.media.length<config.MIN_CLIP_COUNT)
             {
                 logger.error("Less than "+config.MIN_CLIP_COUNT+" clips.");
@@ -96,74 +112,77 @@ module.exports = function(winston, thedb)
             {
                 //download                
                 _.each(edit.media,function(m,index){
-                    calls.push(function(cb){
-                        var media = m;
+                    if (m.id)
+                    {
+                        calls.push(function(cb){
+                            var media = m;
 
-                        //if there is a file lock, then change the name of the local file we are using
-                        var localfile = path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/',''));                  
+                            //if there is a file lock, then change the name of the local file we are using
+                            var localfile = path.normalize(dir+"/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/',''));                  
 
-                        //create lock
-                        // touch.sync(localfile + '.lock');
-                        edit.files_in_use.push(localfile);
+                            //create lock
+                            // touch.sync(localfile + '.lock');
+                            edit.files_in_use.push(localfile);
 
-                        //if no file
-                        var lockfile =localfile + '.' + uuid() + '.lock'; 
-                        edit.media[index].lock_file = fs.openSync(lockfile,'w');
-                        edit.media[index].lock_file_name = lockfile;
-                        if (fs.existsSync(localfile))
-                        {
-                            //edit.media[index].file_handle = fs.openSync(localfile,'r');
-                            logger.info("Using Cache: " + localfile);
-                            //update file with last time it was accessed
-                            touch.sync(localfile);
-                            cb();
-                        }
-                        else
-                        {                   
-                            //download from s3
-                            var s3 = ss3.createClient({
-                                s3Options: {
-                                accessKeyId: config.AWS_ACCESS_KEY_ID,
-                                secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
-                                region: config.S3_REGION
-                                },
-                            });
-
-                            var uuid_tmp = uuid();
-                            var params = {
-                                localFile: localfile + '_' +  uuid_tmp  + '.part',
-                                s3Params: {
-                                Bucket: config.S3_BUCKET,
-                                Key: "upload/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
-                                },
-                            };
-                            //console.log(params);
-                            logger.info('Downloading: ' + localfile);
-                            var downloader = s3.downloadFile(params);
-
-                            downloader.on('error', function(err) {
-                                //console.log("s3 error "+err);
-                                cb(err.toString());
-                                //release file lock
-                                //fs.unlink(localfile + '.lock');
-                            });
-                            downloader.on('end', function() {          
-                                try
-                                {
-                                    // console.log('renaming ' + uuid_tmp + '_' + localfile + '.part to' localfile);
-                                    fs.renameSync(localfile + '_' +  uuid_tmp + '.part', localfile);
-                                }
-                                catch (e){
-                                    logger.info('Download thrown away ' + localfile + '_' +  uuid_tmp + '.part');
-                                    fs.unlinkSync(localfile + '_' +  uuid_tmp + '.part');
-                                }
-
+                            //if no file
+                            var lockfile =localfile + '.' + uuid() + '.lock'; 
+                            edit.media[index].lock_file = fs.openSync(lockfile,'w');
+                            edit.media[index].lock_file_name = lockfile;
+                            if (fs.existsSync(localfile))
+                            {
                                 //edit.media[index].file_handle = fs.openSync(localfile,'r');
+                                logger.info("Using Cache: " + localfile);
+                                //update file with last time it was accessed
                                 touch.sync(localfile);
                                 cb();
-                            });
-                        }
-                    });
+                            }
+                            else
+                            {                   
+                                //download from s3
+                                var s3 = ss3.createClient({
+                                    s3Options: {
+                                    accessKeyId: config.AWS_ACCESS_KEY_ID,
+                                    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+                                    region: config.S3_REGION
+                                    },
+                                });
+
+                                var uuid_tmp = uuid();
+                                var params = {
+                                    localFile: localfile + '_' +  uuid_tmp  + '.part',
+                                    s3Params: {
+                                    Bucket: config.S3_BUCKET,
+                                    Key: "upload/"+media.path.replace(config.S3_CLOUD_URL,'').replace(config.master_url+'/media/preview/','')
+                                    },
+                                };
+                                //console.log(params);
+                                logger.info('Downloading: ' + localfile);
+                                var downloader = s3.downloadFile(params);
+
+                                downloader.on('error', function(err) {
+                                    //console.log("s3 error "+err);
+                                    cb(err.toString());
+                                    //release file lock
+                                    //fs.unlink(localfile + '.lock');
+                                });
+                                downloader.on('end', function() {          
+                                    try
+                                    {
+                                        // console.log('renaming ' + uuid_tmp + '_' + localfile + '.part to' localfile);
+                                        fs.renameSync(localfile + '_' +  uuid_tmp + '.part', localfile);
+                                    }
+                                    catch (e){
+                                        logger.info('Download thrown away ' + localfile + '_' +  uuid_tmp + '.part');
+                                        fs.unlinkSync(localfile + '_' +  uuid_tmp + '.part');
+                                    }
+
+                                    //edit.media[index].file_handle = fs.openSync(localfile,'r');
+                                    touch.sync(localfile);
+                                    cb();
+                                });
+                            }
+                        });
+                    }
                 });
 
                 calls.push(function(cb){
@@ -180,19 +199,53 @@ module.exports = function(winston, thedb)
                     //TESTING:
                     var testcommand = [];
 
+                    testcommand.push('colour:black out=15');
+                    // testcommand.push('-mix 10');
+                    // testcommand.push('-mixer luma');                    
+
                     _.each(edit.media,function(m)
                     {
-                        testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
-                        if (m.inpoint)
-                            testcommand.push('in="'+m.inpoint+'"');
-                        if (m.outpoint && m.outpoint!="00:00:00")
-                            testcommand.push('out="'+m.outpoint+'"');
-                        testcommand.push("-mix 10");
-                        // testcommand.push("-mixer luma");
+                        if (m.id) //if video:
+                        {
+                            testcommand.push(path.normalize(dir+"/"+m.path.replace(config.S3_CLOUD_URL,'')));
+                            if (m.inpoint)
+                                testcommand.push('in="'+m.inpoint+'"');
+                            if (m.outpoint && m.outpoint!="00:00:00")
+                                testcommand.push('out="'+m.outpoint+'"');
+                            testcommand.push("-mix 10");
+                            testcommand.push("-mixer luma");
+                        }
+                        else //if title:
+                        {
+                            var txt = m.titletext;
+                            var words = _.chunk(_.split(txt,' '),4);
+                            // console.log(words);
+                            var lines = _.map(words,(w)=>{
+                                return _.join(w,' ');
+                            });
+                            // console.log(lines);
+                            var chunked = _.join(lines,'~');
+                            // console.log(chunked);
+                            testcommand.push('"+'+chunked+'.txt"');
+                            testcommand.push('fgcolor=0xffffffff');
+                            testcommand.push('bgcolor=0x000000ff');
+                            // testcommand.push('force_aspect_ratio=1.77');                            
+                            
+                            testcommand.push('size=500');
+                            testcommand.push('align=centre');
+                            // testcommand.push('width_fit=1');             
+                            testcommand.push('pad=600');
+                            // testcommand.push('out="'+m.outpoint+'"');
+                            testcommand.push('out=90'); //3 seconds:
+                            testcommand.push("-mix 10");
+                            testcommand.push("-mixer luma");
+                        }
                     });
 
+                    testcommand.push('colour:black out=15 -mix 10 -mixer luma');                    
+
                     testcommand.push('-progress');
-                    testcommand.push('-consumer avformat:' + videoFilename + " strict=experimental");// b=3000 frag_duration=30");
+                    testcommand.push('-consumer avformat:' + videoFilename + " width=1920 height=1080 strict=experimental");// b=3000 frag_duration=30");
 
                     logger.info('Editing. Please be Patient!');
 
