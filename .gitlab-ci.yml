@@ -1,0 +1,26 @@
+image: docker:git
+services:
+  - docker:dind
+
+cache:
+  paths:
+  - node_modules/
+
+stages:
+- build
+
+variables:
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+
+before_script:
+  - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" $CI_REGISTRY
+
+build:
+  stage: build
+  tags:
+    - local
+  script:
+    - docker build -t $CONTAINER_RELEASE_IMAGE .
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - master
