@@ -29,5 +29,6 @@ COPY package.json /usr/src/app/
 RUN npm i --silent
 
 # COPY config/local.js /tmp
+COPY . /usr/src/app
 
 CMD [ "npm", "start" ]

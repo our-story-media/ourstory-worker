@@ -4,7 +4,7 @@ services:
     restart: always
     image: bootlegger/transcode-server:latest
     volumes:
-      - ./config/local-ifrc.js:/usr/src/app/config/local.js    
+      - ./config/local.js:/usr/src/app/config/local.js    
   worker-ifrc:
     restart: always
     image: bootlegger/transcode-server:latest    

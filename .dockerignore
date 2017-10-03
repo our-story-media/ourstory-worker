@@ -2,3 +2,4 @@
 node_modules
 .git
 sync_audio
+config/local.js
