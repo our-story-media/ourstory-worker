@@ -1,0 +1,14 @@
+version: '2'
+services:
+  worker:
+    restart: always
+    image: bootlegger/bootlegger/transcode-server:latest
+    command: node index.js
+    volumes:
+      - ./config/local-ifrc.js:/usr/src/app/config/local.js    
+  worker-ifrc:
+    restart: always
+    image: bootlegger/bootlegger/transcode-server:latest    
+    command: node index.js
+    volumes:
+      - ./config/local-ifrc.js:/usr/src/app/config/local.js

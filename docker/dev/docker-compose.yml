@@ -1,7 +1,8 @@
 version: '2'
 services:
   worker:
-    build: .
+    build: ../..
+    image: bootlegger/transcode-server:latest
     command: nodemon --debug=5859
     ports:
       - "5859:5859"

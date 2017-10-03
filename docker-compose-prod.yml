@@ -1,9 +1,0 @@
-version: '2'
-services:
-  worker:
-    restart: always
-    build: .
-    command: node index.js
-    volumes:
-      - .:/usr/src/app/
-      - /usr/src/app/node_modules
