@@ -7,9 +7,9 @@ services:
     ports:
       - "5859:5859"
     volumes:
-      - .:/usr/src/app/
+      - ../..:/usr/src/app/
       - /usr/src/app/node_modules
-networks:
-  default:
-    external:
-      name: serverapp_bootlegger-network
+# networks:
+#   default:
+#     external:
+#       name: serverapp_bootlegger-network
