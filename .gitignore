@@ -31,4 +31,5 @@ node_modules
 .vagrant
 
 config/local.js
+config/*.js
 ssl

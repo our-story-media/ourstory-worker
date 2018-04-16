@@ -4,7 +4,8 @@ var fivebeans = require('fivebeans').worker;
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 var config = require('./config/local.js');
-var sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
+if (!config.LOCALONLY)
+    var sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
 var moment = require('moment');
 var uploaddir = "/.tmp/";
 var fs = require('fs-extra');
@@ -32,18 +33,31 @@ function start()
 		if(err) throw err;
 		thedb = db;
    		winston.info("Database connection established");
-		
+        
+        var handlers = {};
+        if (config.LOCALONLY)
+        {
+            handers = {
+                edit: require('./handlers/edithandler')(winston,db),
+                transcode: require('./handlers/transcodehandler')(winston,db)
+            }
+        }
+        else
+        {
+            handlers = 
+			{
+				edit: require('./handlers/edithandler')(winston,db),
+				dropbox: require('./handlers/dropboxhandler')(winston,db),
+				audio: require('./handlers/audiosynchandler')(winston,db)
+			}
+        }
+
 		var runner = new fivebeans({
 			id:'transcode-server',
 			host:config.BEANSTALK_HOST,
 			port:config.BEANSTALK_PORT,
 			ignoreDefault:true,
-			handlers:
-			{
-				edit: require('./handlers/edithandler')(winston,db),
-				dropbox: require('./handlers/dropboxhandler')(winston,db),
-				audio: require('./handlers/audiosynchandler')(winston,db)
-			},
+			handlers: handlers
 		});
 		runner.on('error',function(err)
 		{
