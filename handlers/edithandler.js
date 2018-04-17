@@ -109,7 +109,7 @@ module.exports = function (winston, thedb) {
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
             if (config.LOCALONLY)
                 //volume map to the same location as the uploads dir on the disk...
-                dir = path.normalize(path.dirname(require.main.filename) + '/uploads');
+                dir = path.normalize(path.dirname(require.main.filename) + '/upload');
 
             if (edit.media.length < config.MIN_CLIP_COUNT) {
                 logger.error("Less than " + config.MIN_CLIP_COUNT + " clips.");
@@ -212,7 +212,7 @@ module.exports = function (winston, thedb) {
 
                     var videoFilename = path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + '.' + uuid() + ".edit.mp4");
                     if (config.LOCALONLY)
-                        videoFilename = path.normalize(path.dirname(require.main.filename) + '/uploads/' + edit.code + '.' + uuid() + ".edit.mp4");
+                        videoFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + '.' + uuid() + ".edit.mp4");
 
                     edit.tmp_filename = videoFilename;
 
@@ -328,8 +328,11 @@ module.exports = function (winston, thedb) {
 
                     if (config.LOCALONLY) {
                         //copy the file to the right location:
-                        fs.moveSync(edit.tmp_filename, path.normalize(__dirname + '/upload/' + edit.code + ".mp4"));
+                        fs.moveSync(edit.tmp_filename, path.normalize(__dirname + '/../upload/' + edit.code + ".mp4"),{
+                            overwrite:true
+                        });
                         console.log('Local file moved');
+                        cb();
                     }
                     else {
                         var knox_params = {
@@ -361,11 +364,11 @@ module.exports = function (winston, thedb) {
                     //return cb(null);
 
                     if (config.LOCALONLY) {
-                        //TODO: run to local transcoder:
-
+                        //run to local transcoder:
+                        winston.info("Transcoding Edit");
                         //push new transcode onto queue:s
-                        var input = path.normalize(__dirname + '/upload/' + edit.code + ".mp4");
-                        var output = path.normalize(__dirname + '/upload/transcode/upload/' + edit.code + ".mp4");
+                        var input = path.normalize(edit.code + ".mp4");
+                        var output = path.normalize(edit.code + ".mp4");
                         var payload = {
                             input:input,
                             output:output
