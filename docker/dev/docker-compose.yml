@@ -8,8 +8,10 @@ services:
       - "5859:5859"
     volumes:
       - ../..:/usr/src/app/
+      - ./.tmp:/.tmp
       - /usr/src/app/node_modules
       - ./upload:/usr/src/app/upload
+      - ./music:/usr/src/app/music
 networks:
   default:
     external:

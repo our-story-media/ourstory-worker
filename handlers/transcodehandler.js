@@ -78,6 +78,7 @@ module.exports = function (winston, thedb) {
             });
             command.on('end',function(stdout,stderr){
                 // winston.error(stderr);
+                winston.info('Transcode Complete');                
                 callback('success');
             })
             .save(outputpath);

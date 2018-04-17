@@ -93,28 +93,31 @@ client.on('connect', function()
                     "thumb" : null, 
                     "event_id" : "", 
                     "lowres" : null, 
-                    "titletext" : "First Title"
+                    "titletext" : "First Title",
+                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3"
                 }, 
                 {
                     "id" : "5965fe86453a892000e59ab0", 
-                    "path" : "inputfile.mp4", 
+                    "path" : "input2.mp4", 
                     "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:06.1180000", 
+                    "outpoint" : "00:00:10.1", 
                     "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
                     "event_id" : "595f4dd21ece1d2100425a37", 
                     "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
-                    "titletext" : null
+                    "titletext" : null,
+                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3"
                 }, 
-                {
-                    "id" : null, 
-                    "path" : "", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:03", 
-                    "thumb" : null, 
-                    "event_id" : "", 
-                    "lowres" : null, 
-                    "titletext" : "This is a really long and boring title that should cover two lines"
-                }, 
+                // {
+                //     "id" : null, 
+                //     "path" : "", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:03", 
+                //     "thumb" : null, 
+                //     "event_id" : "", 
+                //     "lowres" : null, 
+                //     "titletext" : "This is a really long and boring title that should cover two lines",
+                //     // "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3"
+                // }, 
                 // {
                 //     "id" : "596646b3453a892000e59aba", 
                 //     "path" : "636355453373956120_636354753902218340.mp4", 
@@ -125,16 +128,16 @@ client.on('connect', function()
                 //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/596646b3453a892000e59aba", 
                 //     "titletext" : null
                 // },
-                {
-                    "id" : null, 
-                    "path" : "", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:03", 
-                    "thumb" : null, 
-                    "event_id" : "", 
-                    "lowres" : null, 
-                    "titletext" : "Second Title"
-                }, 
+                // {
+                //     "id" : null, 
+                //     "path" : "", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:03", 
+                //     "thumb" : null, 
+                //     "event_id" : "", 
+                //     "lowres" : null, 
+                //     "titletext" : "Second Title"
+                // }, 
                 {
                     "id" : null, 
                     "path" : "", 

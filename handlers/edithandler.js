@@ -34,6 +34,30 @@ function chunkString(str, len) {
     return _ret;
 }
 
+function calcTime(s_in,s_out)
+{
+    // console.log(s_in);
+    // console.log(s_out);
+    s_in = _.split(s_in,':');
+    let i_in = s_in[2] + s_in[1]*60 + s_in[0]*3600;
+    s_out = _.split(s_out,':');
+    let i_out = s_out[2] + s_out[1]*60 + s_out[0]*3600;
+
+    //in seconds
+    return i_out-i_in;
+}
+
+function calcTS(ts)
+{
+    console.log(ts);
+    //ts in secs
+    let hours = Math.floor(ts/3600);
+    let mins = Math.floor((ts - (hours*3600)) / 60);
+    let secs = Math.floor(ts % 60);
+    let subs = (ts%60 - secs).toString();
+    console.log(hours, mins, secs, subs);
+    return `${_.padStart(hours,2,'0')}:${_.padStart(mins,2,'0')}:${_.padStart(secs,2,'0')}.${subs.substring(2)}`;
+}
 
 module.exports = function (winston, thedb) {
     var connection = null;
@@ -209,7 +233,6 @@ module.exports = function (winston, thedb) {
                     //return cb(null);
 
                     //OUTPUT:
-
                     var videoFilename = path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + '.' + uuid() + ".edit.mp4");
                     if (config.LOCALONLY)
                         videoFilename = path.normalize(path.dirname(require.main.filename) + '/upload/' + edit.code + '.' + uuid() + ".edit.mp4");
@@ -221,53 +244,69 @@ module.exports = function (winston, thedb) {
 
                     testcommand.push('colour:black out=15');
 
+                    var bedtrack = null;
+
+                    var totallength = 0;
+
                     _.each(edit.media, function (m) {
+
+                        if (m.audio)
+                        {
+                            // console.log(m.audio);
+                            var musicfile = path.normalize(__dirname + '/../music/' + m.audio);
+                            // console.log(musicfile);
+                            bedtrack = musicfile;
+                        }
+
                         if (m.id) //if video:
                         {
                             var footagefilename = path.normalize(dir + "/" + m.path.replace(config.S3_CLOUD_URL, ''));
                             testcommand.push(footagefilename);
+                            
 
                             if (m.inpoint)
                                 testcommand.push('in="' + m.inpoint + '"');
                             if (m.outpoint && m.outpoint != "00:00:00")
                                 testcommand.push('out="' + m.outpoint + '"');
+                                
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
-
-                            //TODO: add audio track if this video item has audio data within it...
-
+                            testcommand.push('-filter volume normalise=');
+                            totallength+= calcTime(m.inpoint,m.outpoint);//-5 for the mix overlap with other clips
                         }
                         else //if title:
                         {
-                            var txt = m.titletext;
-                            var words = _.chunk(_.split(txt, ' '), 4);
-                            // console.log(words);
-                            var lines = _.map(words, (w) => {
-                                return _.join(w, ' ');
-                            });
-                            // console.log(lines);
-                            var chunked = _.join(lines, '~');
-                            // console.log(chunked);
-                            testcommand.push('"+' + chunked + '.txt"');
-                            testcommand.push('fgcolor=0xffffffff');
-                            testcommand.push('bgcolor=0x000000ff');
-                            // testcommand.push('force_aspect_ratio=1.77');                            
-
-                            testcommand.push('size=500');
-                            testcommand.push('align=centre');
-                            // testcommand.push('width_fit=1');             
-                            testcommand.push('pad=600');
-                            // testcommand.push('out="'+m.outpoint+'"');
-                            testcommand.push('out=90'); //3 seconds:
+                            let titlefile = path.normalize(uploaddir + '/' + uuid.v1() + '.bmp');
+                            // console.log('starting title');
+                            //convert to image:
+                            const spawnSync = require('child_process').execSync;
+                            let code = spawnSync(`convert -background black -fill white -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 120 caption:"${m.titletext}" ${titlefile}`);
+                            testcommand.push(titlefile);
+                            testcommand.push('out=75'); //3 seconds:
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
+                            totallength += 70/25;//minus the luma overlaps
                         }
                     });
 
                     testcommand.push('colour:black out=15 -mix 10 -mixer luma');
 
+                    console.log("totalframes:" + totallength);
+
+                    if (bedtrack)
+                    {
+                        testcommand.push('-audio-track ' + bedtrack);
+                        // let output = 
+                        testcommand.push('out="' + calcTS(totallength) + '"');
+                        // testcommand.push("-mix 10");
+                        testcommand.push('-attach-track volume:0.3');
+                        // testcommand.push('-attach volume:0db end:-70db in='+(totallength-100)+' out='+(totallength+3));
+                        testcommand.push('-filter volume in='+(totallength*25-100)+' out="'+calcTS(totallength)+'" track=1 gain=1.0 end=0');
+                        testcommand.push('-transition mix in=0');
+                    }
+
                     testcommand.push('-progress');
-                    testcommand.push('-consumer avformat:' + videoFilename + " width=1920 height=1080 strict=experimental");// b=3000 frag_duration=30");
+                    testcommand.push('-consumer avformat:' + videoFilename + " r=25 width=1920 height=1080 strict=experimental");// b=3000 frag_duration=30");
 
                     logger.info('Editing. Please be Patient!');
 
