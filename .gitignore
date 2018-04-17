@@ -34,3 +34,5 @@ config/local.js
 config/*.js
 ssl
 docker/dev/upload
+docker/dev/music
+docker/dev/music2
