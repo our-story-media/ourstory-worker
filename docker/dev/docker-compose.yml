@@ -12,7 +12,8 @@ services:
       - ./.tmp:/.tmp
       - /usr/src/app/node_modules
       - ./upload:/usr/src/app/upload
-      - ./music:/usr/src/app/music
+      # ///usr/src/app/www
+      - ./music:/usr/src/app/www/music
 networks:
   default:
     external:

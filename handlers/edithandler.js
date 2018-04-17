@@ -253,7 +253,7 @@ module.exports = function (winston, thedb) {
                         if (m.audio)
                         {
                             // console.log(m.audio);
-                            var musicfile = path.normalize(__dirname + '/../music/' + m.audio);
+                            var musicfile = path.normalize('/usr/src/app/www/music/' + m.audio);
                             // console.log(musicfile);
                             bedtrack = musicfile;
                         }
