@@ -7,7 +7,8 @@ services:
     ports:
       - "5859:5859"
     volumes:
-      - ../..:/usr/src/app/
+      # - ../..:/usr/src/app/
+      - ../../config/local.js:/usr/src/app/config/local.js
       - ./.tmp:/.tmp
       - /usr/src/app/node_modules
       - ./upload:/usr/src/app/upload
