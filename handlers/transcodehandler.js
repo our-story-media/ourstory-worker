@@ -1,4 +1,4 @@
-var uploaddir = "/.tmp/";
+// var uploaddir = "/.tmp/";
 var path = require('path');
 var fs = require('fs-extra');
 var ffmpeg = require('fluent-ffmpeg');
@@ -33,14 +33,24 @@ module.exports = function (winston, thedb) {
 
     function TranscodeHandler() {
         this.type = 'transcode';
-        fs.mkdirsSync(__dirname + '/..' + uploaddir);
+        fs.mkdirsSync(path.normalize(__dirname + '/../upload/'));
+        fs.mkdirsSync(path.normalize(__dirname + '/../upload/transcode/upload/'));
+        
     }
 
     TranscodeHandler.prototype.work = function (job, callback) {
-        edit.files_in_use = [];
 
         try {
-            logger.info("Transcode Started: " + job.input + " -> " + job.output);
+
+            var inputpath = path.normalize(__dirname + '/../upload/' + job.input);
+            var outputpath = path.normalize(__dirname + '/../upload/transcode/upload/' + job.output);
+
+            logger.info("Transcode Started: " + inputpath + " -> " + outputpath);
+
+            if (!fs.existsSync(inputpath))
+            {
+                throw "Input file does not exist";
+            }
 
             // //console.log(os.platform());
             if (os.platform() == "win32") {
@@ -53,19 +63,21 @@ module.exports = function (winston, thedb) {
             }
 
 
-            var inputpath = path.normalize(__dirname + '/upload/' + job.input);
-            var outputpath = path.normalize(__dirname + '/upload/transcode/upload/' + job.output);
-
-            var command = ffmpeg();
-            command.input(inputpath);
+            var command = ffmpeg(inputpath);
             command.videoCodec('libx264');
-            command.videoBitrate('1000k');
-            command.size('320x?');
+            command.outputOptions('-g 7');
+            command.fps(15);
+            command.size('240x?');
+            command.audioChannels(1);
             command.on('progress',function(progress){
                 console.log(progress.percent + '% done')
             });
+            command.on('error',function(err){
+                winston.error(err);
+                callback('bury');
+            });
             command.on('end',function(stdout,stderr){
-                winston.error(stderr);
+                // winston.error(stderr);
                 callback('success');
             })
             .save(outputpath);

@@ -50,7 +50,7 @@ module.exports = function (winston, thedb) {
         client.on('connect', function()
         {
             // client can now be used
-            console.log('Beanstalk client connected')
+            winston.info('Beanstalk client connected')
         })
         .on('error', function(err)
         {
@@ -313,8 +313,11 @@ module.exports = function (winston, thedb) {
                         // console.log("edit return code " + code);
                         //sucess!
                         //fs.renameSync(edit.)
-
-                        cb();
+                        if (code != 0)
+                            cb("MLT FAIL");
+                        else
+                            cb();
+                        
                     });
                 });
 

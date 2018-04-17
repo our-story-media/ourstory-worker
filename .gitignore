@@ -33,3 +33,4 @@ node_modules
 config/local.js
 config/*.js
 ssl
+docker/dev/upload

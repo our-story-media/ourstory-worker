@@ -9,7 +9,8 @@ services:
     volumes:
       - ../..:/usr/src/app/
       - /usr/src/app/node_modules
-# networks:
-#   default:
-#     external:
-#       name: serverapp_bootlegger-network
+      - ./upload:/usr/src/app/upload
+networks:
+  default:
+    external:
+      name: local_default

@@ -37,7 +37,7 @@ function start()
         var handlers = {};
         if (config.LOCALONLY)
         {
-            handers = {
+            handlers = {
                 edit: require('./handlers/edithandler')(winston,db),
                 transcode: require('./handlers/transcodehandler')(winston,db)
             }

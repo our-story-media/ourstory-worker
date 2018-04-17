@@ -79,9 +79,19 @@ client.on('connect', function()
             "description" : ""
         };
 
-        client.put(10, 0, 1000000000, JSON.stringify(['edits', {type:'edit',payload:edit}]) , function(err, jobid) {
-            console.log("Test Edit Transmitted");
+        var transcode = {
+            input: 'inputfile.mp4',
+            output: 'preview_inputfile.mp4'
+        };
+
+        client.put(10, 0, 1000000000, JSON.stringify(['edits', {type:'transcode',payload:transcode}]) , function(err, jobid) {
+            console.log("Test Transcode Transmitted");
+            process.exit();
         });
+
+        // client.put(10, 0, 1000000000, JSON.stringify(['edits', {type:'edit',payload:edit}]) , function(err, jobid) {
+        //     console.log("Test Edit Transmitted");
+        // });
     });
 })
 .on('error', function(err)
