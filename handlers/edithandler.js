@@ -245,6 +245,7 @@ module.exports = function (winston, thedb) {
                     testcommand.push('colour:black out=15');
 
                     var bedtrack = null;
+                    var credits = null;
 
                     var totallength = 0;
 
@@ -256,6 +257,7 @@ module.exports = function (winston, thedb) {
                             var musicfile = path.normalize('/usr/src/app/www/music/' + m.audio);
                             // console.log(musicfile);
                             bedtrack = musicfile;
+                            credits = m.credits;
                         }
 
                         if (m.id) //if video:
@@ -289,9 +291,25 @@ module.exports = function (winston, thedb) {
                         }
                     });
 
-                    testcommand.push('colour:black out=15 -mix 10 -mixer luma');
-
+                    
                     console.log("totalframes:" + totallength);
+                    
+                    if (credits)
+                    {
+                        console.log('doing credits');
+                        let titlefile = path.normalize(uploaddir + '/' + uuid.v1() + '.bmp');
+                        // console.log('starting title');
+                        //convert to image:
+                        const spawnSync = require('child_process').execSync;
+                        let code = spawnSync(`convert -background black -fill white -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`);
+                        testcommand.push(titlefile);
+                        testcommand.push('out=75'); //3 seconds:
+                        testcommand.push("-mix 10");
+                        testcommand.push("-mixer luma");
+                        totallength += 70/25;//minus the luma overlaps
+                    }
+
+                    testcommand.push('colour:black out=15 -mix 10 -mixer luma');
 
                     if (bedtrack)
                     {

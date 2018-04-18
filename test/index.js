@@ -94,19 +94,19 @@ client.on('connect', function()
                     "event_id" : "", 
                     "lowres" : null, 
                     "titletext" : "First Title",
-                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3"
+                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3",
+                    "credits":"Music by This guy and this guy asdn aslkdjas lkdjaslkdjaslkdjalksdjalksdj alksjdlkas jdklasjd lkajslkd jaklsdjalksjd laksjlkas dj"
                 }, 
-                {
-                    "id" : "5965fe86453a892000e59ab0", 
-                    "path" : "input2.mp4", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:10.1", 
-                    "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
-                    "event_id" : "595f4dd21ece1d2100425a37", 
-                    "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
-                    "titletext" : null,
-                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3"
-                }, 
+                // {
+                //     "id" : "5965fe86453a892000e59ab0", 
+                //     "path" : "input2.mp4", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:10.1", 
+                //     "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
+                //     "event_id" : "595f4dd21ece1d2100425a37", 
+                //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
+                //     "titletext" : null
+                // }, 
                 // {
                 //     "id" : null, 
                 //     "path" : "", 
