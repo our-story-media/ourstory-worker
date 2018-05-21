@@ -24,16 +24,16 @@ client.on('connect', function()
                     "lowres" : null, 
                     "titletext" : "First Title"
                 }, 
-                {
-                    "id" : "5965fe86453a892000e59ab0", 
-                    "path" : "636354571613883880_636354569052157620.mp4", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:06.1180000", 
-                    "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
-                    "event_id" : "595f4dd21ece1d2100425a37", 
-                    "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
-                    "titletext" : null
-                }, 
+                // {
+                //     "id" : "5965fe86453a892000e59ab0", 
+                //     "path" : "636354571613883880_636354569052157620.mp4", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:06.1180000", 
+                //     "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
+                //     "event_id" : "595f4dd21ece1d2100425a37", 
+                //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
+                //     "titletext" : null
+                // }, 
                 {
                     "id" : null, 
                     "path" : "", 
@@ -44,16 +44,16 @@ client.on('connect', function()
                     "lowres" : null, 
                     "titletext" : "This is a really long and boring title that should cover two lines"
                 }, 
-                {
-                    "id" : "596646b3453a892000e59aba", 
-                    "path" : "636355453373956120_636354753902218340.mp4", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:02.1340000", 
-                    "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/596646b3453a892000e59aba", 
-                    "event_id" : "595f4dd21ece1d2100425a37", 
-                    "lowres" : "https://ifrc.bootlegger.tv/media/preview/596646b3453a892000e59aba", 
-                    "titletext" : null
-                },
+                // {
+                //     "id" : "596646b3453a892000e59aba", 
+                //     "path" : "636355453373956120_636354753902218340.mp4", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:02.1340000", 
+                //     "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/596646b3453a892000e59aba", 
+                //     "event_id" : "595f4dd21ece1d2100425a37", 
+                //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/596646b3453a892000e59aba", 
+                //     "titletext" : null
+                // },
                 {
                     "id" : null, 
                     "path" : "", 
@@ -94,19 +94,19 @@ client.on('connect', function()
                     "event_id" : "", 
                     "lowres" : null, 
                     "titletext" : "First Title",
-                    "audio":"Christian_Bjoerklund_-_01_-_Hallon.mp3",
-                    "credits":"Music by This guy and this guy asdn aslkdjas lkdjaslkdjaslkdjalksdjalksdj alksjdlkas jdklasjd lkajslkd jaklsdjalksjd laksjlkas dj"
+                    "audio":"short.wav",
+                    "credits":"Test of short music"
                 }, 
-                {
-                    "id" : "5965fe86453a892000e59ab0", 
-                    "path" : "input2.mp4", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:10.1", 
-                    "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
-                    "event_id" : "595f4dd21ece1d2100425a37", 
-                    "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
-                    "titletext" : null
-                }, 
+                // {
+                //     "id" : "5965fe86453a892000e59ab0", 
+                //     "path" : "input2.mp4", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:10.1", 
+                //     "thumb" : "https://ifrc.bootlegger.tv/media/thumbnail/5965fe86453a892000e59ab0", 
+                //     "event_id" : "595f4dd21ece1d2100425a37", 
+                //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/5965fe86453a892000e59ab0", 
+                //     "titletext" : null
+                // }, 
                 // {
                 //     "id" : null, 
                 //     "path" : "", 
@@ -128,16 +128,16 @@ client.on('connect', function()
                 //     "lowres" : "https://ifrc.bootlegger.tv/media/preview/596646b3453a892000e59aba", 
                 //     "titletext" : null
                 // },
-                // {
-                //     "id" : null, 
-                //     "path" : "", 
-                //     "inpoint" : "00:00:00", 
-                //     "outpoint" : "00:00:03", 
-                //     "thumb" : null, 
-                //     "event_id" : "", 
-                //     "lowres" : null, 
-                //     "titletext" : "Second Title"
-                // }, 
+                {
+                    "id" : null, 
+                    "path" : "", 
+                    "inpoint" : "00:00:00", 
+                    "outpoint" : "00:00:03", 
+                    "thumb" : null, 
+                    "event_id" : "", 
+                    "lowres" : null, 
+                    "titletext" : "Second Title"
+                }, 
                 {
                     "id" : null, 
                     "path" : "", 

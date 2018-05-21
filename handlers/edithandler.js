@@ -314,10 +314,12 @@ module.exports = function (winston, thedb) {
                     if (bedtrack)
                     {
                         testcommand.push('-audio-track ' + bedtrack);
+                        // testcommand.push('-repeat 6')
                         // let output = 
                         testcommand.push('out="' + calcTS(totallength) + '"');
                         // testcommand.push("-mix 10");
                         testcommand.push('-attach-track volume:0.3');
+                        // testcommand.push('-filter aloop')
                         // testcommand.push('-attach volume:0db end:-70db in='+(totallength-100)+' out='+(totallength+3));
                         testcommand.push('-filter volume in='+(totallength*25-100)+' out="'+calcTS(totallength)+'" track=1 gain=1.0 end=0');
                         testcommand.push('-transition mix in=0');
@@ -354,7 +356,7 @@ module.exports = function (winston, thedb) {
                                 //update db if progress changed:
                                 lastprogress = perc[1];
                                 var collection = thedb.collection('edits');
-                                collection.update({ code: edit.code }, { $set: { progress: lastprogress } }, { w: 1 }, function (err, result) {
+                                collection.update({ code: edit.code }, { $set: { progress: 100 } }, { w: 1 }, function (err, result) {
                                     //done collection update
                                 });
                             }

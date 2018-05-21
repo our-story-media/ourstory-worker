@@ -66,9 +66,9 @@ module.exports = function (winston, thedb) {
             var command = ffmpeg(inputpath);
             command.videoCodec('libx264');
             command.outputOptions('-g 7');
-            command.fps(15);
-            command.size('240x?');
-            command.audioChannels(1);
+            command.fps(config.OUTPUT_FPS || 15);
+            command.size((config.OUTPUT_WIDTH || '480') + 'x?');
+            command.audioChannels(config.OUTPUT_CHANNELS || 1);
             command.on('progress',function(progress){
                 console.log(progress.percent + '% done')
             });
