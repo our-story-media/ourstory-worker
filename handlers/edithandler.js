@@ -356,7 +356,7 @@ module.exports = function (winston, thedb) {
                                 //update db if progress changed:
                                 lastprogress = perc[1];
                                 var collection = thedb.collection('edits');
-                                collection.update({ code: edit.code }, { $set: { progress: 100 } }, { w: 1 }, function (err, result) {
+                                collection.update({ code: edit.code }, { $set: { progress: lastprogress } }, { w: 1 }, function (err, result) {
                                     //done collection update
                                 });
                             }
@@ -524,7 +524,7 @@ module.exports = function (winston, thedb) {
                         edit.path = edit.shortlink + '.mp4';
 
                         var collection = thedb.collection('edits');
-                        collection.update({ code: edit.code }, { $set: { path: edit.path }, $unset: { failed: false, failereason: false, error: false } }, { w: 1 }, function (err, result) {
+                        collection.update({ code: edit.code }, { $set: { path: edit.path, progress:100 }, $unset: { failed: false, failereason: false, error: false } }, { w: 1 }, function (err, result) {
                             //done update...
                             if (err) logger.error(err);
                             //logger.info(result);
