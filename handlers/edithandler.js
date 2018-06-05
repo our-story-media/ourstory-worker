@@ -248,6 +248,7 @@ module.exports = function (winston, thedb) {
                     var credits = null;
 
                     var totallength = 0;
+                    var failedit = false;
 
                     _.each(edit.media, function (m) {
 
@@ -278,19 +279,30 @@ module.exports = function (winston, thedb) {
                         }
                         else //if title:
                         {
-                            let titlefile = path.normalize(uploaddir + '/' + uuid.v1() + '.bmp');
-                            // console.log('starting title');
-                            //convert to image:
-                            const spawnSync = require('child_process').execSync;
-                            let code = spawnSync(`convert -background black -fill white -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 120 caption:"${m.titletext}" ${titlefile}`);
-                            testcommand.push(titlefile);
-                            testcommand.push('out=75'); //3 seconds:
-                            testcommand.push("-mix 10");
-                            testcommand.push("-mixer luma");
-                            totallength += 70/25;//minus the luma overlaps
+                            try
+                            {
+                                let titlefile = path.normalize(uploaddir + '/' + uuid.v1() + '.bmp');
+                                // console.log('starting title');
+                                //convert to image:
+                                const spawnSync = require('child_process').execSync;
+                                let code = spawnSync(`convert -background black -fill white -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 caption:"${m.titletext}" ${titlefile}`);
+                                testcommand.push(titlefile);
+                                testcommand.push('out=75'); //3 seconds:
+                                testcommand.push("-mix 10");
+                                testcommand.push("-mixer luma");
+                                totallength += 70/25;//minus the luma overlaps
+                            }
+                            catch (e)
+                            {
+                                console.error(e);
+                                // console.log("EDIT FAIL");
+                                failedit = true;
+                            }
                         }
                     });
 
+                    if (failedit)
+                        return cb("Title generation failed");
                     
                     console.log("totalframes:" + totallength);
                     

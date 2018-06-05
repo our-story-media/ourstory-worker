@@ -85,18 +85,18 @@ client.on('connect', function()
             "shortlink":'/v/ABCDE',            
             "user_id" : "596895c9f0741120006cf30d",
             "media" : [
-                {
-                    "id" : null, 
-                    "path" : "", 
-                    "inpoint" : "00:00:00", 
-                    "outpoint" : "00:00:03", 
-                    "thumb" : null, 
-                    "event_id" : "", 
-                    "lowres" : null, 
-                    "titletext" : "First Title",
-                    "audio":"short.wav",
-                    "credits":"Test of short music"
-                }, 
+                // {
+                //     "id" : null, 
+                //     "path" : "", 
+                //     "inpoint" : "00:00:00", 
+                //     "outpoint" : "00:00:03", 
+                //     "thumb" : null, 
+                //     "event_id" : "", 
+                //     "lowres" : null, 
+                //     "titletext" : "First Title",
+                //     "audio":"short.wav",
+                //     "credits":"Test of short music"
+                // }, 
                 // {
                 //     "id" : "5965fe86453a892000e59ab0", 
                 //     "path" : "input2.mp4", 
@@ -136,7 +136,7 @@ client.on('connect', function()
                     "thumb" : null, 
                     "event_id" : "", 
                     "lowres" : null, 
-                    "titletext" : "Second Title"
+                    "titletext" : "Second 😁 Title"
                 }, 
                 {
                     "id" : null, 
