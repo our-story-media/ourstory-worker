@@ -274,7 +274,7 @@ module.exports = function (winston, thedb) {
                                 
                             testcommand.push("-mix 10");
                             testcommand.push("-mixer luma");
-                            testcommand.push('-filter volume normalise=');
+                            // testcommand.push('-filter volume normalise=');
                             totallength+= calcTime(m.inpoint,m.outpoint);//-5 for the mix overlap with other clips
                         }
                         else //if title:
@@ -330,7 +330,7 @@ module.exports = function (winston, thedb) {
                         // let output = 
                         testcommand.push('out="' + calcTS(totallength) + '"');
                         // testcommand.push("-mix 10");
-                        testcommand.push('-attach-track volume:0.3');
+                        testcommand.push('-attach-track volume:0.4');
                         // testcommand.push('-filter aloop')
                         // testcommand.push('-attach volume:0db end:-70db in='+(totallength-100)+' out='+(totallength+3));
                         testcommand.push('-filter volume in='+(totallength*25-100)+' out="'+calcTS(totallength)+'" track=1 gain=1.0 end=0');
