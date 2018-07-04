@@ -4,3 +4,8 @@ node_modules
 sync_audio
 config/*
 docker
+.tmp
+ssl
+test
+upload
+www

@@ -1,26 +1,21 @@
-image: docker:git
+variables:
+  DOCKER_DRIVER: overlay2
+
 services:
   - docker:dind
 
-cache:
-  paths:
-  - node_modules/
-
 stages:
-- build
+  - build
 
-variables:
-  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
-
-before_script:
-  - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" $CI_REGISTRY
-
-build:
+build_img:
   stage: build
   tags:
-    - local
+    - dind
   script:
-    - docker build -t $CONTAINER_RELEASE_IMAGE .
-    - docker push $CONTAINER_RELEASE_IMAGE
-  only:
-    - master
+    - if [ -z "$CI_COMMIT_TAG" ]; then exit 0; fi
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - echo "Building image $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" || true
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
