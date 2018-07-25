@@ -351,12 +351,12 @@ module.exports = function(winston, thedb)
                         //CreateThumbnails:true,
                         ThumbnailPattern: edit.code + '-{count}',
                         PresetId: config.TRANSCODE_PRESET, // specifies the output video format
-                        Rotate: 'auto',
-                        Watermarks:[
-                        {
-                           "InputKey":"logos/logo.png",
-                           "PresetWatermarkId":"BottomRight"
-                        }]
+                        Rotate: 'auto'
+                        // Watermarks:[
+                        // {
+                        //    "InputKey":"logos/logo.png",
+                        //    "PresetWatermarkId":"BottomRight"
+                        // }]
                     } 
                       }, function(error, data) { 
                         // handle callback 
