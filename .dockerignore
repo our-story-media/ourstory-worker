@@ -2,4 +2,10 @@
 node_modules
 .git
 sync_audio
-config/local.js
+config/*
+docker
+.tmp
+ssl
+test
+upload
+www
