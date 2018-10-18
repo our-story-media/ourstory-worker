@@ -16,13 +16,13 @@ client.on('connect', function()
             "media" : [
                 {
                     "id" : null, 
-                    "path" : "", 
+                    "path" : "",
                     "inpoint" : "00:00:00", 
                     "outpoint" : "00:00:03", 
                     "thumb" : null, 
                     "event_id" : "", 
                     "lowres" : null, 
-                    "titletext" : "First Title"
+                    "titletext" : "123456-123456-123456-123456-123456-123456-123456\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8"
                 }, 
                 // {
                 //     "id" : "5965fe86453a892000e59ab0", 
@@ -164,7 +164,7 @@ client.on('connect', function()
         //     process.exit();
         // });
 
-        client.put(10, 0, 1000000000, JSON.stringify(['edits', {type:'edit',payload:edit2}]) , function(err, jobid) {
+        client.put(10, 0, 1000000000, JSON.stringify(['edits', {type:'edit',payload:edit}]) , function(err, jobid) {
             console.log("Test Edit Transmitted");
             process.exit();
         });
