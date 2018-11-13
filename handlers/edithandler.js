@@ -285,7 +285,7 @@ module.exports = function (winston, thedb) {
                                 // console.log('starting title');
                                 //convert to image:
                                 const spawnSync = require('child_process').execSync;
-                                let code = spawnSync(`convert -background black -fill white -font /usr/src/app/fonts/Lato-Regular.ttf -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 80 caption:"${m.titletext}" ${titlefile}`);
+                                let code = spawnSync(`convert -background black -fill white -font /usr/src/app/fonts/Cairo-Regular.ttf -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 80 caption:"${m.titletext}" ${titlefile}`);
                                 testcommand.push(titlefile);
                                 testcommand.push('out=75'); //3 seconds:
                                 testcommand.push("-mix 10");

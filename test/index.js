@@ -22,7 +22,7 @@ client.on('connect', function()
                     "thumb" : null, 
                     "event_id" : "", 
                     "lowres" : null, 
-                    "titletext" : "123456-123456-123456-123456-123456-123456-123456\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8"
+                    "titletext" : "ترجمة الاختبار"
                 }, 
                 // {
                 //     "id" : "5965fe86453a892000e59ab0", 

@@ -12,9 +12,10 @@ services:
       - ./.tmp:/.tmp
       - /usr/src/app/node_modules
       - ./upload:/usr/src/app/upload
+      - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
       - ./music:/usr/src/app/www/music
 networks:
   default:
     external:
-      name: build_default
+      name: install_default
