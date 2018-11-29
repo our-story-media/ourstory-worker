@@ -4,7 +4,6 @@ This nodejs application provides a scalable platform to perform synchronus jobs 
 
 - Editing
 - Dropbox Sync
-- Audio to Video Time Sync
 
 # Docker Usage
 
