@@ -1,4 +1,4 @@
-# Bootlegger Work Server
+# Our Story Work Server
 
 This nodejs application provides a scalable platform to perform synchronus jobs submitted by a Bootlegger Server. It pulls jobs from a Beanstalkd queue, and has handlers for the following:
 
