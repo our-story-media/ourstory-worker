@@ -11,7 +11,7 @@ Use `docker-compose up` to start an instance of the server. This is setup to ass
 
 # Dependencies
 
-`These should match the details in your bootlegger configuration`
+`These should match the details in your our story configuration`
 
 - NodeJS ~ 0.12
 - Beanstalkd
