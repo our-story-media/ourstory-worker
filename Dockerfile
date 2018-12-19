@@ -34,4 +34,6 @@ RUN npm i -g nodemon --silent && npm i --silent && npm cache clean --force
 # COPY config/local.js /tmp
 COPY . /usr/src/app
 
+RUN mkdir ~/.fonts && cp -r /usr/src/app/fonts/* ~/.fonts && chmod -R 644 ~/.fonts && fc-cache 
+
 CMD [ "npm", "start" ]
