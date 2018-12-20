@@ -8,7 +8,6 @@ var uploaddir = "/../.tmp/";
 var ss3 = require('s3');
 var path = require('path');
 var Dropbox = require('dropbox');
-var moment = require('moment');
 var path = require('path');
 var uuid = require('uuid');
 var tempdir;

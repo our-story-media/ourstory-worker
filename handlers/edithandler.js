@@ -2,15 +2,12 @@ var uploaddir = "/.tmp/";
 var ss3 = require('s3');
 var path = require('path');
 var fs = require('fs-extra');
-var ffmpeg = require('fluent-ffmpeg');
 var knox = require('knox-s3');
 var AWS = require('aws-sdk');
 var os = require('os');
 var config = require('../config/local.js');
 var _ = require('lodash');
 var async = require('async');
-var ObjectId = require('mongodb').ObjectID;
-var child_process = require('child_process');
 var touch = require("touch");
 var uuid = require('uuid');
 
@@ -20,19 +17,6 @@ var client;
 
 AWS.config.region = config.S3_REGION;
 
-function chunkString(str, len) {
-    var _size = Math.ceil(str.length / len),
-        _ret = new Array(_size),
-        _offset
-        ;
-
-    for (var _i = 0; _i < _size; _i++) {
-        _offset = _i * len;
-        _ret[_i] = str.substring(_offset, _offset + len);
-    }
-
-    return _ret;
-}
 
 function calcTime(s_in,s_out)
 {
@@ -60,7 +44,6 @@ function calcTS(ts)
 }
 
 module.exports = function (winston, thedb) {
-    var connection = null;
     //var thedb = null;
     var logger = null;
 
@@ -76,7 +59,7 @@ module.exports = function (winston, thedb) {
             // client can now be used
             winston.info('Beanstalk client connected')
         })
-        .on('error', function(err)
+        .on('error', function()
         {
             // connection failure
         })
@@ -89,7 +72,6 @@ module.exports = function (winston, thedb) {
 
     function clearOut(edit) {
         if (!config.LOCALONLY) {
-            var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
             // Remove all the lock files for this edit
             _.each(edit.media, function (m) {
@@ -116,19 +98,18 @@ module.exports = function (winston, thedb) {
             logger.info("Edit Started: " + edit.id + " / " + edit.code);
 
             // //console.log(os.platform());
-            if (os.platform() == "win32") {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            }
-            else {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            }
+            // if (os.platform() == "win32") {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
+            // }
+            // else {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
+            // }
 
             //download files from s3
             //join files
             var calls = [];
-            var thenewpath = '';
 
             var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
@@ -145,7 +126,7 @@ module.exports = function (winston, thedb) {
                     code: 601,
                     reason: 'Less than ' + config.MIN_CLIP_COUNT + ' clips'
                 };
-                collection.update({ code: edit.code }, { $set: { fail: true, failreason: 'Less than ' + config.MIN_CLIP_COUNT + ' clips', error: err_obj }, $unset: { path: "" } }, { w: 1 }, function (err, result) {
+                collection.update({ code: edit.code }, { $set: { fail: true, failreason: 'Less than ' + config.MIN_CLIP_COUNT + ' clips', error: err_obj }, $unset: { path: "" } }, { w: 1 }, function () {
                     callback('bury');
                 });
             }
@@ -417,7 +398,7 @@ logger.info(`Items: ${edit.media.length}`);
                     var totalperc = 0;
                     var exec = require('child_process').exec;
                     console.log('melt ' + maineditcommand.join(' '));
-                    var child = exec(`melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`, { maxBuffer: 1024 * 1024 }, function (err, o, e) {
+                    var child = exec(`melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`, { maxBuffer: 1024 * 1024 }, function (err) {
                         logger.info('Done Editing');
                         if (err)
                             logger.error(err);
@@ -444,7 +425,7 @@ logger.info(`Items: ${edit.media.length}`);
                                 // console.log(totalperc);
                                 
                                 var collection = thedb.collection('edits');
-                                collection.update({ code: edit.code }, { $set: { progress: totalperc/2 } }, { w: 1 }, function (err, result) {
+                                collection.update({ code: edit.code }, { $set: { progress: totalperc/2 } }, { w: 1 }, function () {
                                     //done collection update
                                 });
 
@@ -497,7 +478,7 @@ logger.info(`Items: ${edit.media.length}`);
 
                         //   console.log(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4"));
                         client.putFile(edit.tmp_filename, 'upload/edits/' + edit.code + ".mp4", { 'x-amz-acl': 'public-read' },
-                            function (err, result) {
+                            function (err) {
                                 //console.log(err);
                                 if (err) {
                                     logger.error(err);
@@ -506,7 +487,7 @@ logger.info(`Items: ${edit.media.length}`);
                                 else {
                                     logger.info("Uploaded Mainfile");
                                     client.putFile(edit.tmp_filename + '.tagged.mp4', 'upload/edits/' + edit.code + ".tagged.mp4", { 'x-amz-acl': 'public-read' },
-                                        function (err, result) {
+                                        function (err) {
                                             //console.log(err);
                                             if (err) {
                                                 logger.error(err);
@@ -539,8 +520,8 @@ logger.info(`Items: ${edit.media.length}`);
                             output:output
                         };
 
-                        client.use("edits", function (err, tubename) {
-                            client.put(10, 0, 1000000000, JSON.stringify(['edits', { type: 'transcode', payload: payload }]), function (err, jobid) {
+                        client.use("edits", function () {
+                            client.put(10, 0, 1000000000, JSON.stringify(['edits', { type: 'transcode', payload: payload }]), function (err) {
                                 if (!err)
                                     winston.info("Transcode submitted");
                                 else
@@ -575,7 +556,7 @@ logger.info(`Items: ${edit.media.length}`);
                                 PresetId: config.TRANSCODE_PRESET, // specifies the output video format
                                 Rotate: 'auto'
                             }
-                        }, function (error, data) {
+                        }, function (error) {
                             // handle callback 
 
                             //console.log(data);
@@ -614,7 +595,7 @@ logger.info(`Items: ${edit.media.length}`);
                             code: 600,
                             reason: err
                         };
-                        collection.update({ code: edit.code }, { $set: { failed: true, failreason: err, error: err_obj }, $unset: { path: "" } }, { w: 1 }, function (err, result) {
+                        collection.update({ code: edit.code }, { $set: { failed: true, failreason: err, error: err_obj }, $unset: { path: "" } }, { w: 1 }, function (err) {
                             //done update...
                             logger.error(err);
                             callback('bury');
@@ -625,7 +606,7 @@ logger.info(`Items: ${edit.media.length}`);
                         edit.path = edit.shortlink + '.mp4';
 
                         var collection = thedb.collection('edits');
-                        collection.update({ code: edit.code }, { $set: { path: edit.path, progress:100 }, $unset: { failed: false, failereason: false, error: false } }, { w: 1 }, function (err, result) {
+                        collection.update({ code: edit.code }, { $set: { path: edit.path, progress:100 }, $unset: { failed: false, failereason: false, error: false } }, { w: 1 }, function (err) {
                             //done update...
                             if (err) logger.error(err);
                             //logger.info(result);

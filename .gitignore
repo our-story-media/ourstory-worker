@@ -4,6 +4,7 @@ logs
 
 local.js
 .tmp
+.env
 
 # Runtime data
 pids

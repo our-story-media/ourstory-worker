@@ -3,18 +3,21 @@ services:
   worker:
     build: ../..
     image: bootlegger/transcode-server:latest
-    command: nodemon --debug=5859
+    command: nodemon --inspect=5859
     ports:
       - "5859:5859"
     volumes:
-      - ../..:/usr/src/app/
-      - ../../config/local.js:/usr/src/app/config/local.js
+      - ../../handlers:/usr/src/app/handlers
+      - ../../index.js:/usr/src/app/index.js
+      - ../../test:/usr/src/app/test
+      # - ../../config/local.js:/usr/src/app/config/local.js
       - ./.tmp:/.tmp
-      - /usr/src/app/node_modules
+      # - /usr/src/app/node_modules
       - /Users/ntlb1/Documents/Research/bootlegger/server-app-clean/docker/build/upload:/usr/src/app/upload
       - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
       - ./music:/usr/src/app/www/music
+    env_file: ../../.env
 networks:
   default:
     external:

@@ -15,9 +15,7 @@
     "lodash": "4.17.4",
     "async": "2.5.0",
     "mongodb": "2.2.33",
-    "python-shell": "0.4.0",
     "fs-extra": "4.0.2",
-    "mlt": "1.1.0",
     "request": "2.83.0",
     "tough-cookie": "2.3.3",
     "dropbox": "2.5.12",
@@ -25,7 +23,8 @@
     "uuid": "3.1.0",
     "shell-escape": "0.2.0",
     "touch": "1.0.0",
-    "sendgrid": "~2.0.0"
+    "sendgrid": "~2.0.0",
+    "dotenv":"6.2.0"
   },
   "scripts": {
     "start": "node index.js"

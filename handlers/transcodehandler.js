@@ -4,30 +4,10 @@ var fs = require('fs-extra');
 var ffmpeg = require('fluent-ffmpeg');
 var os = require('os');
 var config = require('../config/local.js');
-var _ = require('lodash');
-var async = require('async');
-var ObjectId = require('mongodb').ObjectID;
-var child_process = require('child_process');
-var touch = require("touch");
-var uuid = require('uuid');
-
-function chunkString(str, len) {
-    var _size = Math.ceil(str.length / len),
-        _ret = new Array(_size),
-        _offset
-        ;
-
-    for (var _i = 0; _i < _size; _i++) {
-        _offset = _i * len;
-        _ret[_i] = str.substring(_offset, _offset + len);
-    }
-
-    return _ret;
-}
 
 
-module.exports = function (winston, thedb) {
-    var connection = null;
+
+module.exports = function (winston) {
     //var thedb = null;
     var logger = null;
 
@@ -53,14 +33,14 @@ module.exports = function (winston, thedb) {
             }
 
             // //console.log(os.platform());
-            if (os.platform() == "win32") {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            }
-            else {
-                process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-                process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            }
+            // if (os.platform() == "win32") {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
+            // }
+            // else {
+            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
+            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
+            // }
 
 
             var command = ffmpeg(inputpath);
@@ -76,7 +56,7 @@ module.exports = function (winston, thedb) {
                 winston.error(err);
                 callback('bury');
             });
-            command.on('end',function(stdout,stderr){
+            command.on('end',function(){
                 // winston.error(stderr);
                 winston.info('Transcode Complete');                
                 callback('success');

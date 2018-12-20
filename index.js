@@ -4,6 +4,8 @@ var fivebeans = require('fivebeans').worker;
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 var config = require('./config/local.js');
+var evnconfig = require('dotenv').config();
+//TODO: merge config with envconfig
 if (!config.LOCALONLY)
     var sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
 var moment = require('moment');
@@ -11,6 +13,7 @@ var uploaddir = "/.tmp/";
 var fs = require('fs-extra');
 var path = require('path');
 var _ = require('lodash');
+
 
 //ENTRY POINT:
 start();
@@ -47,8 +50,7 @@ function start()
             handlers = 
 			{
 				edit: require('./handlers/edithandler')(winston,db),
-				dropbox: require('./handlers/dropboxhandler')(winston,db),
-				audio: require('./handlers/audiosynchandler')(winston,db)
+				dropbox: require('./handlers/dropboxhandler')(winston,db)
 			}
         }
 

@@ -26,6 +26,7 @@ client.on('connect', function () {
                     "outpoint": "00:00:03",
                     "event_id": "5be888ef48f9d42500ba490c",
                     "titletext": "اعرف الصح",
+                    // "titletext": "Title 1",
                     "audio": "Blue_Dot_Sessions_-_06_-_Pat_Dog.mp3",
                     "credits": "Music by Blue Dot Sessions"
                 },
