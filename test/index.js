@@ -7,6 +7,8 @@ client.on('connect', function () {
     // client can now be used
     client.use("edits", function (err, tubename) {
 
+        var realedit3 = { "_id": "5beaa66a6f0bf71e009af941", "user_id": "5bea08c46f0bf71e009ae522", "createdAt": "2018-11-13T10:24:42.842Z", "updatedAt": "2018-11-13T13:35:41.090Z", "description": "", "media": [{ "path": "", "inpoint": "00:00:00", "outpoint": "00:00:03", "event_id": "5be888ef48f9d42500ba490c", "titletext": "إيدكم في إيدينا", "audio": "Squire_Tuck_-_01_-_Thank_Your_Lucky_Stars.mp3", "credits": "Music by Squire Tuck" }, { "id": "5bea99576f0bf71e009af3a2", "path": "636776983628171260_636776980434359380.mp4", "inpoint": "00:00:00", "outpoint": "00:01:29.7340000", "thumb": "http://10.10.10.1/media/thumbnail/5bea99576f0bf71e009af3a2", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5bea99576f0bf71e009af3a2" }, { "id": "5beaa01a6f0bf71e009af640", "path": "636777003830457940_636776998550166620.mp4", "inpoint": "00:00:00", "outpoint": "00:00:09", "thumb": "http://10.10.10.1/media/thumbnail/5beaa01a6f0bf71e009af640", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5beaa01a6f0bf71e009af640" }, { "id": "5be941b96ea7952600590449", "path": "636776615744904430_636776157849374240.mp4", "inpoint": "00:00:22.2860000", "outpoint": "00:01:29.7340000", "thumb": "http://10.10.10.1/media/thumbnail/5be941b96ea7952600590449", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5be941b96ea7952600590449" }, { "id": "5bea83fe6f0bf71e009aec8a", "path": "636776940044367520_636776925780495660.mp4", "inpoint": "00:00:00", "outpoint": "00:01:30.0670000", "thumb": "http://10.10.10.1/media/thumbnail/5bea83fe6f0bf71e009aec8a", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5bea83fe6f0bf71e009aec8a" }, { "id": "5be93e8a6ea79526005901d6", "path": "636776163834488860_636776125871907510.mp4", "inpoint": "00:00:06.7860000", "outpoint": "00:00:37.9340000", "thumb": "http://10.10.10.1/media/thumbnail/5be93e8a6ea79526005901d6", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5be93e8a6ea79526005901d6" }, { "id": "5be93e956ea79526005901e4", "path": "636776164079704730_636776126586955100.mp4", "inpoint": "00:00:00", "outpoint": "00:01:29.6670000", "thumb": "http://10.10.10.1/media/thumbnail/5be93e956ea79526005901e4", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5be93e956ea79526005901e4" }, { "id": "5beaa1f26f0bf71e009af734", "path": "636777004084593560_636777002461062210.mp4", "inpoint": "00:00:00", "outpoint": "00:01:26.7070000", "thumb": "http://10.10.10.1/media/thumbnail/5beaa1f26f0bf71e009af734", "event_id": "5be888ef48f9d42500ba490c", "lowres": "http://10.10.10.1/media/preview/5beaa1f26f0bf71e009af734" }, { "path": "", "inpoint": "00:00:00", "outpoint": "00:00:03", "event_id": "5be888ef48f9d42500ba490c", "titletext": "Mona Mahmoud\nNajwa Mohammed Hassan\nFatma Abdel Fattah Ali" }], "title": "peer education", "code": "rzD2esXrH", "progress": 100, "shortlink": "rzD2esXrH", "path": "http://10.10.10.1/v/rzD2esXrH.mp4" };
+
         var realedit2 = {
             "_id": "5c13b9924d3e2667006127c1",
             "user_id": "5bea0b516f0bf71e009ae562",
@@ -31,6 +33,16 @@ client.on('connect', function () {
                     "credits": "Music by Blue Dot Sessions"
                 },
                 {
+                    "path": "",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:03",
+                    "event_id": "5be888ef48f9d42500ba490c",
+                    "titletext":"হ্যালো সেখানে",
+                    // "titletext": "Title 1",
+                    // "audio": "Blue_Dot_Sessions_-_06_-_Pat_Dog.mp3",
+                    // "credits": "Music by Blue Dot Sessions"
+                },
+                {
                     "id": "5be93fc16ea7952600590325",
                     "path": "636776618902596700_636776110464530760.mp4",
                     "inpoint": "00:00:00",
@@ -38,11 +50,11 @@ client.on('connect', function () {
                     "thumb": "http://10.10.10.1/media/thumbnail/5be93fc16ea7952600590325",
                     "event_id": "5be888ef48f9d42500ba490c",
                     "lowres": "http://10.10.10.1/media/preview/5be93fc16ea7952600590325",
-                    "tag":{
-                        "id":0,
-                        "color":"#00ffff",
-                        "values":{
-                            "en":"اعرف الصح"
+                    "tag": {
+                        "id": 0,
+                        "color": "#00ffff",
+                        "values": {
+                            "en": "اعرف الصح"
                         }
                     }
                 },
@@ -54,18 +66,18 @@ client.on('connect', function () {
                     "thumb": "http://10.10.10.1/media/thumbnail/5be940726ea79526005903da",
                     "event_id": "5be888ef48f9d42500ba490c",
                     "lowres": "http://10.10.10.1/media/preview/5be940726ea79526005903da",
-                    "tag":{
-                        "id":0,
-                        "color":"#ffff00",
-                        "values":{
-                            "en":"Tag 2"
+                    "tag": {
+                        "id": 0,
+                        "color": "#ffff00",
+                        "values": {
+                            "en": "Tag 2"
                         }
                     }
                 }
             ]
         };
 
-       var realedit1 = {
+        var realedit1 = {
             "_id": "5c13b9924d3e2667006127c1",
             "user_id": "5bea0b516f0bf71e009ae562",
             "createdAt": "2018-12-14T14:09:22.980Z",

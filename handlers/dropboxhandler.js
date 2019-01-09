@@ -1,4 +1,3 @@
-var config = require('../config/local.js');
 var ObjectId = require('mongodb').ObjectID;
 var request = require('request');
 var _ = require('lodash');

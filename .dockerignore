@@ -9,3 +9,4 @@ upload
 www
 .env
 .dockerignore
+.sailsrc

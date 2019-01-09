@@ -1,19 +1,24 @@
 //edit file:
-var winston = require('winston');
-var fivebeans = require('fivebeans').worker;
-var MongoClient = require('mongodb').MongoClient;
-var ObjectId = require('mongodb').ObjectId;
-var config = require('./config/local.js');
-var evnconfig = require('dotenv').config();
-//TODO: merge config with envconfig
-if (!config.LOCALONLY)
-    var sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
-var moment = require('moment');
-var uploaddir = "/.tmp/";
-var fs = require('fs-extra');
-var path = require('path');
-var _ = require('lodash');
+const winston = require('winston');
+const _ = require('lodash');
+const fivebeans = require('fivebeans').worker;
+const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
+let config = require('./config/local.js').config;
 
+// console.log(config);
+
+global.config = config;
+
+require('rc')('sails', config);
+let sendgrid;
+
+if (!config.LOCALONLY)
+    sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
+const moment = require('moment');
+const uploaddir = "/.tmp/";
+const fs = require('fs-extra');
+const path = require('path');
 
 //ENTRY POINT:
 start();

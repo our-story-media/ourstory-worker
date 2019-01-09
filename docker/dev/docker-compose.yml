@@ -17,7 +17,8 @@ services:
       - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
       - ./music:/usr/src/app/www/music
-    env_file: ../../.env
+      # - ../../.sailsrc:/usr/src/app/.sailsrc
+    # env_file: ../../.env
 networks:
   default:
     external:

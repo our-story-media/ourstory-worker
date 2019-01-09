@@ -4,8 +4,6 @@ var path = require('path');
 var fs = require('fs-extra');
 var knox = require('knox-s3');
 var AWS = require('aws-sdk');
-var os = require('os');
-var config = require('../config/local.js');
 var _ = require('lodash');
 var async = require('async');
 var touch = require("touch");
@@ -285,7 +283,7 @@ module.exports = function (winston, thedb) {
                                 // console.log('starting title');
                                 //convert to image:
                                 const spawnSync = require('child_process').execSync;
-                                let code = spawnSync(`convert -size 1720x880 xc:black -background black -fill white -bordercolor black -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/Cairo-Regular.ttf pango:"${m.titletext}" \\) -composite ${titlefile}`);
+                                let code = spawnSync(`convert -size 1720x880 xc:black -background black -fill white -bordercolor black -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${m.titletext}" \\) -composite ${titlefile}`);
                                 thecommand.push(titlefile);
                                 // console.log(m.outpoint);
                                 // console.log(calcTime(m.outpoint));

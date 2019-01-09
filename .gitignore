@@ -2,7 +2,6 @@
 logs
 *.log
 
-local.js
 .tmp
 .env
 
@@ -33,9 +32,8 @@ build/Release
 node_modules
 .vagrant
 
-config/local.js
-config/*.js
 ssl
 docker/dev/upload
 docker/dev/music
 docker/dev/music2
+.sailsrc

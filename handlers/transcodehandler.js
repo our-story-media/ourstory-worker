@@ -2,10 +2,6 @@
 var path = require('path');
 var fs = require('fs-extra');
 var ffmpeg = require('fluent-ffmpeg');
-var os = require('os');
-var config = require('../config/local.js');
-
-
 
 module.exports = function (winston) {
     //var thedb = null;
