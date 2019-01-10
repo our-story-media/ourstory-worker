@@ -51,6 +51,8 @@ module.exports = function (winston, thedb) {
         this.type = 'edit';
 
         fs.mkdirsSync(__dirname + '/..' + uploaddir);
+        fs.mkdirsSync(__dirname + '/..' + uploaddir + '/edits');
+
         client = new fivebeans.client(config.BEANSTALK_HOST,config.BEANSTALK_PORT);
         client.on('connect', function()
         {
