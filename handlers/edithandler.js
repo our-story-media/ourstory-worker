@@ -360,7 +360,7 @@ module.exports = function (winston, thedb) {
                     taggedcommand.push('-transition composite fill=0 a_track=0 b_track=1');
                     taggedcommand.push('-progress');
                     taggedcommand.push('-profile hdv_720_25p');
-                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + ".tagged.mp4 real_time=-2 r=25 width=1920 height=1080 strict=experimental -serialize command.melt");// b=3000 frag_duration=30");
+                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + ".tags.mp4 real_time=-2 r=25 width=1920 height=1080 strict=experimental -serialize command.melt");// b=3000 frag_duration=30");
 
 
                     if (bedtrack)
@@ -462,7 +462,7 @@ logger.info(`Items: ${edit.media.length}`);
                         fs.moveSync(edit.tmp_filename, path.normalize(__dirname + '/../upload/edits/' + edit.code + ".mp4"),{
                             overwrite:true
                         });
-                        fs.moveSync(edit.tmp_filename+'.tagged.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + ".tagged.mp4"),{
+                        fs.moveSync(edit.tmp_filename+'.tags.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + ".tags.mp4"),{
                             overwrite:true
                         });
                         console.log('Local file moved');
@@ -477,7 +477,7 @@ logger.info(`Items: ${edit.media.length}`);
                         var client = knox.createClient(knox_params);
 
                         //   console.log(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4"));
-                        client.putFile(edit.tmp_filename, 'upload/edits/' + edit.code + ".mp4", { 'x-amz-acl': 'public-read' },
+                        client.putFile(edit.tmp_filename, 'upload/edits/' + edit.code + ".mp4",
                             function (err) {
                                 //console.log(err);
                                 if (err) {
@@ -486,7 +486,7 @@ logger.info(`Items: ${edit.media.length}`);
                                 }
                                 else {
                                     logger.info("Uploaded Mainfile");
-                                    client.putFile(edit.tmp_filename + '.tagged.mp4', 'upload/edits/' + edit.code + ".tagged.mp4", { 'x-amz-acl': 'public-read' },
+                                    client.putFile(edit.tmp_filename + '.tags.mp4', 'upload/edits/' + edit.code + ".tags.mp4",
                                         function (err) {
                                             //console.log(err);
                                             if (err) {
@@ -540,7 +540,7 @@ logger.info(`Items: ${edit.media.length}`);
                         elastictranscoder.createJob({
                             PipelineId: config.ELASTIC_PIPELINE,
                             //InputKeyPrefix: '/upload',
-                            OutputKeyPrefix: 'upload/edits',
+                            // OutputKeyPrefix: 'upload/edits',
                             Input: {
                                 Key: 'upload/edits/' + edit.code + '.mp4',
                                 FrameRate: 'auto',
@@ -550,9 +550,9 @@ logger.info(`Items: ${edit.media.length}`);
                                 Container: 'auto'
                             },
                             Output: {
-                                Key: edit.code + '.mp4',
+                                Key: 'upload/edits/' + edit.code + '.mp4',
                                 //CreateThumbnails:true,
-                                ThumbnailPattern: edit.code + '-{count}',
+                                // ThumbnailPattern: edit.code + '-{count}',
                                 PresetId: config.TRANSCODE_PRESET, // specifies the output video format
                                 Rotate: 'auto'
                             }
