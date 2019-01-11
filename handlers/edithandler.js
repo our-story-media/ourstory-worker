@@ -360,7 +360,7 @@ module.exports = function (winston, thedb) {
                     taggedcommand.push('-transition composite fill=0 a_track=0 b_track=1');
                     taggedcommand.push('-progress');
                     taggedcommand.push('-profile hdv_720_25p');
-                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + ".tags.mp4 real_time=-2 r=25 width=1920 height=1080 strict=experimental -serialize command.melt");// b=3000 frag_duration=30");
+                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + "_tags.mp4 real_time=-2 r=25 width=1920 height=1080 strict=experimental -serialize command.melt");// b=3000 frag_duration=30");
 
 
                     if (bedtrack)
@@ -462,7 +462,7 @@ logger.info(`Items: ${edit.media.length}`);
                         fs.moveSync(edit.tmp_filename, path.normalize(__dirname + '/../upload/edits/' + edit.code + ".mp4"),{
                             overwrite:true
                         });
-                        fs.moveSync(edit.tmp_filename+'.tags.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + ".tags.mp4"),{
+                        fs.moveSync(edit.tmp_filename+'_tags.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + "_tags.mp4"),{
                             overwrite:true
                         });
                         console.log('Local file moved');
@@ -486,7 +486,7 @@ logger.info(`Items: ${edit.media.length}`);
                                 }
                                 else {
                                     logger.info("Uploaded Mainfile");
-                                    client.putFile(edit.tmp_filename + '.tags.mp4', 'upload/edits/' + edit.code + ".tags.mp4",
+                                    client.putFile(edit.tmp_filename + '_tags.mp4', 'upload/edits/' + edit.code + "_tags.mp4",
                                         function (err) {
                                             //console.log(err);
                                             if (err) {
