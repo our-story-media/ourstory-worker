@@ -243,9 +243,15 @@ module.exports = function (winston, thedb) {
                         if (m.audio)
                         {
                             // console.log(m.audio);
-                            var musicfile = path.normalize(config.MUSIC_LOCATION + m.audio);
-                            // console.log(musicfile);
-                            bedtrack = musicfile;
+                            if (config.LOCALONLY)
+                            {
+                                var musicfile = path.normalize(config.MUSIC_LOCATION + m.audio);
+                                bedtrack = musicfile;
+                            }
+                            else
+                            {
+                                bedtrack = `${config.master_url}/music/looped/${m.audio}`;
+                            }
                             credits = m.credits;
                         }
 
