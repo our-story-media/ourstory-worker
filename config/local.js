@@ -16,5 +16,6 @@ module.exports.config = {
     CURRENT_EDIT_KEY:'replaceme',
     MIN_CLIP_COUNT:1,
     MAX_CACHE:10*1024*1024*1024,
-    MUSIC_LOCATION:'/usr/src/app/www/music/looped/'
+    MUSIC_LOCATION:'/usr/src/app/www/music/looped/',
+    MUSIC_VOLUME:'0.2'
 }
