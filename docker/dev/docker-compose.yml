@@ -13,13 +13,14 @@ services:
       # - ../../config/local.js:/usr/src/app/config/local.js
       - ./.tmp:/.tmp
       # - /usr/src/app/node_modules
-      - /Users/ntlb1/Documents/Research/bootlegger/server-app-clean/docker/build/upload:/usr/src/app/upload
+      - /Users/tombartindale/Documents/Research/ourstory-server/docker/dev/upload:/usr/src/app/upload
       - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
-      - ./music:/usr/src/app/www/music
-      - ../../.sailsrc:/usr/src/app/.sailsrc
+      - /Users/tombartindale/Documents/Research/ourstory-server/assets/music:/usr/src/app/www/music
+      # - ./music:/usr/src/app/www/music
+      # - ../../.sailsrc:/usr/src/app/.sailsrc
     # env_file: ../../.env
 networks:
   default:
     external:
-      name: build_default
+      name: dev_default
