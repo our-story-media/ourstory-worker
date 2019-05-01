@@ -28,16 +28,9 @@ module.exports = function (winston) {
                 throw "Input file does not exist";
             }
 
-            // //console.log(os.platform());
-            // if (os.platform() == "win32") {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            // }
-            // else {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            // }
-
+            let destfolder = path.normalize(__dirname + '/../upload/transcode/upload/' + path.dirname(job.output));
+            // console.log(destfolder);
+            fs.mkdirsSync(destfolder);
 
             var command = ffmpeg(inputpath);
             command.videoCodec('libx264');
