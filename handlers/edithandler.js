@@ -51,7 +51,10 @@ module.exports = function (winston, thedb) {
         this.type = 'edit';
 
         fs.mkdirsSync(__dirname + '/..' + uploaddir);
-        fs.mkdirsSync(__dirname + '/..' + uploaddir + '/edits');
+        if (config.LOCALONLY)
+            fs.mkdirsSync('/usr/src/app/upload/edits');
+        else
+            fs.mkdirsSync(__dirname + '/..' + uploaddir + '/edits');
 
         client = new fivebeans.client(config.BEANSTALK_HOST,config.BEANSTALK_PORT);
         client.on('connect', function()
@@ -451,7 +454,7 @@ logger.info(`Items: ${edit.media.length}`);
                         //sucess!
                         //fs.renameSync(edit.)
                         if (code != 0)
-                            cb("MLT FAIL");
+                            cb("Editing Failed");
                         else
                             cb();
                         
