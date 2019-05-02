@@ -8,13 +8,13 @@ services:
       - "5859:5859"
     volumes:
       - ../../handlers:/usr/src/app/handlers
-      - ../../index.js:/usr/src/app/index.js
+      # - ../../index.js:/usr/src/app/index.js
       - ../../test:/usr/src/app/test
       # - ../../config/local.js:/usr/src/app/config/local.js
-      - ./.tmp:/.tmp
+      # - ./.tmp:/.tmp
       # - /usr/src/app/node_modules
       - /Users/tombartindale/Documents/Research/ourstory-server/docker/dev/upload:/usr/src/app/upload
-      - ./fonts:/user/src/app/fonts
+      # - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
       - /Users/tombartindale/Documents/Research/ourstory-server/assets/music:/usr/src/app/www/music
       # - ./music:/usr/src/app/www/music

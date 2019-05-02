@@ -52,9 +52,13 @@ module.exports = function (winston, thedb) {
 
         fs.mkdirsSync(__dirname + '/..' + uploaddir);
         if (config.LOCALONLY)
+        {
             fs.mkdirsSync('/usr/src/app/upload/edits');
+        }
         else
+        {
             fs.mkdirsSync(__dirname + '/..' + uploaddir + '/edits');
+        }
 
         client = new fivebeans.client(config.BEANSTALK_HOST,config.BEANSTALK_PORT);
         client.on('connect', function()
@@ -271,10 +275,11 @@ module.exports = function (winston, thedb) {
                             if (m.tag)
                             {
                                 //FOR TAGGING:
-                                let labelfile = path.normalize(uploaddir + '/' + totalclips + '.svg');
+                                let labelfile = path.normalize(path.dirname(require.main.filename) + uploaddir + '/' + totalclips + '.svg');
                                 let contents = fs.readFileSync('labels.svg', 'utf8');
                                 contents = contents.replace('$$lable$$',m.tag.values['en']);
                                 contents = contents.replace('$$color$$',m.tag.color);
+                                console.log(labelfile)
                                 fs.writeFileSync(labelfile, contents);
                                 tagtrack.push(labelfile);
                                 tagtrack.push(`out=${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);

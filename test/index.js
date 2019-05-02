@@ -7,8 +7,59 @@ client.on('connect', function () {
     // client can now be used
     client.use("edits", function (err, tubename) {
 
+        var localedit = {
+            "_id": "5cc99ea5660a7710004e168e",
+            "user_id": "5cc986955f9e695c0076d4c9",
+            "shortlink": "8f468PodH",
+            "media": [
+                {
+                    "id": "5cc932433bd887a600e83d17",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:06.0281559",
+                    "path": "636923222813130830_636923222690710000.mp4",
+                    "thumb": "http://10.10.10.1/media/thumbnail/5cc932433bd887a600e83d17",
+                    "event_id": "5cc8e8914aa25a10012a50fe",
+                    "lowres": "http://10.10.10.1/media/preview/5cc932433bd887a600e83d17",
+                    "tag": {
+                        "id": "1",
+                        "color": "#ab47bc",
+                        "burn": true,
+                        "values": {
+                            "en": "Coverage",
+                            "ae": ""
+                        }
+                    }
+                },
+                {
+                    "id": "5cc9352af36467b801031421",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:05.2482111",
+                    "path": "636923230258362070_636923230130471950.mp4",
+                    "thumb": "http://10.10.10.1/media/thumbnail/5cc9352af36467b801031421",
+                    "event_id": "5cc8e8914aa25a10012a50fe",
+                    "lowres": "http://10.10.10.1/media/preview/5cc9352af36467b801031421",
+                    "tag": {
+                        "id": "4",
+                        "color": "#d4e157",
+                        "burn": true,
+                        "values": {
+                            "en": "Sustainability",
+                            "ae": ""
+                        }
+                    }
+                }
+            ],
+            "code": "8f468PodH",
+            "title": "2 vids",
+            "description": "",
+            "createdAt": "2019-05-01T13:27:01.335Z",
+            "updatedAt": "2019-05-01T13:27:01.343Z",
+            "progress": 100,
+            "path": "http://10.10.10.1/v/8f468PodH.mp4"
+        };
+
         var realedit4 = {
-            "id":"5c377213479edc1a00c90ecd",
+            "id": "5c377213479edc1a00c90ecd",
             "user_id": "5c3759dfeda38c2a009a8757",
             "media": [
                 {
@@ -82,7 +133,7 @@ client.on('connect', function () {
                     "inpoint": "00:00:00",
                     "outpoint": "00:00:03",
                     "event_id": "5be888ef48f9d42500ba490c",
-                    "titletext":"হ্যালো সেখানে",
+                    "titletext": "হ্যালো সেখানে",
                     // "titletext": "Title 1",
                     // "audio": "Blue_Dot_Sessions_-_06_-_Pat_Dog.mp3",
                     // "credits": "Music by Blue Dot Sessions"
@@ -631,7 +682,7 @@ client.on('connect', function () {
         //     process.exit();
         // });
 
-        client.put(10, 0, 1000000000, JSON.stringify(['edits', { type: 'edit', payload: realedit4 }]), function (err, jobid) {
+        client.put(10, 0, 1000000000, JSON.stringify(['edits', { type: 'edit', payload: localedit }]), function (err, jobid) {
             console.log("Test Edit Transmitted");
             process.exit();
         });
