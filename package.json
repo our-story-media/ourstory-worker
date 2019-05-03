@@ -24,7 +24,8 @@
     "shell-escape": "0.2.0",
     "touch": "1.0.0",
     "sendgrid": "~2.0.0",
-    "rc": "1.2.8"
+    "rc": "1.2.8",
+    "he":"1.2.0"
   },
   "scripts": {
     "start": "node index.js"
