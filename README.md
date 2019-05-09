@@ -1,4 +1,4 @@
-#Our Story Worker
+# Our Story Worker
 
 Headless worker that takes jobs from a queue and performs them:
 
