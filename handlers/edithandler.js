@@ -26,6 +26,8 @@ function calcTime(s_in,s_out)
     s_out = _.split(s_out,':');
     let i_out = parseFloat(s_out[2]) + parseInt(s_out[1])*60 + parseInt(s_out[0])*3600;
 
+    console.log(i_out);
+
     //in seconds
     return i_out-i_in;
 }
@@ -114,6 +116,8 @@ module.exports = function (winston, thedb) {
             //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
             //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
             // }
+
+            // console.log(edit);
 
             //download files from s3
             //join files
@@ -280,12 +284,19 @@ module.exports = function (winston, thedb) {
                                 let contents = fs.readFileSync('labels.svg', 'utf8');
                                 contents = contents.replace('$$lable$$',m.tag.values['en']);
                                 contents = contents.replace('$$color$$',m.tag.color);
-                                console.log(labelfile)
+                                // console.log(labelfile)
                                 fs.writeFileSync(labelfile, contents);
                                 tagtrack.push(labelfile);
+                                // tagtrack.push(`in=${totallength}`);
                                 tagtrack.push(`out=${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);
                                 tagtrack.push("-mix 10");
                                 tagtrack.push("-mixer luma");
+
+                                // console.log(`Label ${labelfile} ${totallength} - ${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);
+                            }
+                            else
+                            {
+                                tagtrack.push(`-blank ${(calcTime(m.inpoint,m.outpoint)-.2)*25}`)
                             }
 
                             totallength+= calcTime(m.inpoint,m.outpoint);
