@@ -26,10 +26,20 @@ function calcTime(s_in,s_out)
     s_out = _.split(s_out,':');
     let i_out = parseFloat(s_out[2]) + parseInt(s_out[1])*60 + parseInt(s_out[0])*3600;
 
-    console.log(i_out);
+    // console.log(i_out);
 
     //in seconds
     return i_out-i_in;
+}
+
+function normaliseTime(s_in)
+{
+    // console.log(s_in);
+    // console.log(s_out);
+    s_in = _.split(s_in,':');
+    let i_in = parseFloat(s_in[2]) + parseInt(s_in[1])*60 + parseInt(s_in[0])*3600;
+
+    return calcTS(i_in);
 }
 
 function calcTS(ts)
@@ -272,8 +282,11 @@ module.exports = function (winston, thedb) {
                             var footagefilename = path.normalize(dir + "/" + m.path.replace(config.S3_CLOUD_URL, ''));
                             thecommand.push(footagefilename);
                             
-                            thecommand.push('in="' + m.inpoint + '"');
-                            thecommand.push('out="' + m.outpoint + '"');
+                            var inpoint = normaliseTime(m.inpoint);
+                            var outpoint = normaliseTime(m.outpoint);
+
+                            thecommand.push('in="' + inpoint + '"');
+                            thecommand.push('out="' + outpoint + '"');
                             thecommand.push("-mix 10");
                             thecommand.push("-mixer luma");
                             
