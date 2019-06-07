@@ -1,6 +1,6 @@
 {
   "name": "transcode-server",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Worker server for Bootlegger platform.",
   "main": "index.js",
   "readme": "README.md",
