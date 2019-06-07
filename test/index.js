@@ -9,24 +9,25 @@ client.on('connect', function () {
 
         var localedit = {
             "_id": "5cc99ea5660a7710004e168e",
+            "defaulttopiclang":"ae",
             "user_id": "5cc986955f9e695c0076d4c9",
-            "shortlink": "8f468PodH",
+            "shortlink": "XXXXXX",
             "media": [
-                {
-                    "path": "",
-                    "inpoint": "00:00:00",
-                    "outpoint": "00:00:03",
-                    "event_id": "5c2d3aceb10aac1a00538ba4",
-                    "titletext":"áéíñóúü¿«"
-                    // "titletext": "title !@£$%&*^() ?\"'|][}{~±§<>,.}] 1 ampersand"
-                    // "titletext": "اعرف الصح",
-                    // "titletext":"\uD800\uDC01"
-                },
+                // {
+                //     "path": "",
+                //     "inpoint": "00:00:00",
+                //     "outpoint": "00:00:03",
+                //     "event_id": "5cc8e8914aa25a10012a50fe",
+                //     "titletext":"áéíñóúü¿«"
+                //     // "titletext": "title !@£$%&*^() ?\"'|][}{~±§<>,.}] 1 ampersand"
+                //     // "titletext": "اعرف الصح",
+                //     // "titletext":"\uD800\uDC01"
+                // },
                 {
                     "id": "5cc932433bd887a600e83d17",
                     "inpoint": "00:00:00",
-                    "outpoint": "00:00:06.0281559",
-                    "path": "636923222813130830_636923222690710000.mp4",
+                    "outpoint": "00:00:05.000",
+                    "path": "636923049886883230_636923049750205940.mp4",
                     "thumb": "http://10.10.10.1/media/thumbnail/5cc932433bd887a600e83d17",
                     "event_id": "5cc8e8914aa25a10012a50fe",
                     "lowres": "http://10.10.10.1/media/preview/5cc932433bd887a600e83d17",
@@ -36,30 +37,30 @@ client.on('connect', function () {
                         "burn": true,
                         "values": {
                             "en": "Coverage",
-                            "ae": ""
+                            "ae": "IN ARABIC"
+                        }
+                    }
+                },
+                {
+                    "id": "5cc9352af36467b801031421",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:05.000",
+                    "path": "636923049886883230_636923049750205940.mp4",
+                    "thumb": "http://10.10.10.1/media/thumbnail/5cc9352af36467b801031421",
+                    "event_id": "5cc8e8914aa25a10012a50fe",
+                    "lowres": "http://10.10.10.1/media/preview/5cc9352af36467b801031421",
+                    "tag": {
+                        "id": "4",
+                        "color": "#d4e157",
+                        "burn": true,
+                        "values": {
+                            "en": "Sustainability",
+                            "ae": "IN ARABIC"
                         }
                     }
                 }
-                // {
-                //     "id": "5cc9352af36467b801031421",
-                //     "inpoint": "00:00:00",
-                //     "outpoint": "00:00:05.2482111",
-                //     "path": "636923230258362070_636923230130471950.mp4",
-                //     "thumb": "http://10.10.10.1/media/thumbnail/5cc9352af36467b801031421",
-                //     "event_id": "5cc8e8914aa25a10012a50fe",
-                //     "lowres": "http://10.10.10.1/media/preview/5cc9352af36467b801031421",
-                //     "tag": {
-                //         "id": "4",
-                //         "color": "#d4e157",
-                //         "burn": true,
-                //         "values": {
-                //             "en": "Sustainability",
-                //             "ae": ""
-                //         }
-                //     }
-                // }
             ],
-            "code": "8f468PodH",
+            "code": "XXXXXXXX",
             "title": "2 vids",
             "description": "",
             "createdAt": "2019-05-01T13:27:01.335Z",

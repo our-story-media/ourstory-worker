@@ -295,7 +295,20 @@ module.exports = function (winston, thedb) {
                                 //FOR TAGGING:
                                 let labelfile = path.normalize(path.dirname(require.main.filename) + uploaddir + '/' + totalclips + '.svg');
                                 let contents = fs.readFileSync('labels.svg', 'utf8');
-                                contents = contents.replace('$$lable$$',m.tag.values['en']);
+                                let defaulttopiclang = edit.defaulttopiclang || 'en';
+                                
+                                let tagtext = '';
+                                // console.log(m.tag.values)
+                                if (_.has(m.tag.values,defaulttopiclang))
+                                {
+                                    tagtext = m.tag.values[defaulttopiclang];
+                                }
+                                else
+                                {
+                                    tagtext = m.tag.values['en'];
+                                }
+
+                                contents = contents.replace('$$lable$$',tagtext);
                                 contents = contents.replace('$$color$$',m.tag.color);
                                 // console.log(labelfile)
                                 fs.writeFileSync(labelfile, contents);
@@ -434,8 +447,8 @@ module.exports = function (winston, thedb) {
                     var lastprogress = 0;
 
 /** FOR TESTING */
-logger.info(`Total: ${totallength}`);
-logger.info(`Items: ${edit.media.length}`);
+// logger.info(`Total: ${totallength}`);
+// logger.info(`Items: ${edit.media.length}`);
 
 // cb('bury');
 
