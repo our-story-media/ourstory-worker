@@ -1,6 +1,6 @@
 {
   "name": "transcode-server",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Worker server for Bootlegger platform.",
   "main": "index.js",
   "readme": "README.md",
@@ -25,7 +25,7 @@
     "touch": "1.0.0",
     "sendgrid": "~2.0.0",
     "rc": "1.2.8",
-    "he":"1.2.0"
+    "he": "1.2.0"
   },
   "scripts": {
     "start": "node index.js"
