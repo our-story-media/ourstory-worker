@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -e
+# set -e
 
-# Tag and push image for each additional tag
-docker tag $IMAGE_NAME $DOCKER_REPO:latest
-docker push $DOCKER_REPO:latest
+# # Tag and push image for each additional tag
+# docker tag $IMAGE_NAME $DOCKER_REPO:latest
+# docker push $DOCKER_REPO:latest

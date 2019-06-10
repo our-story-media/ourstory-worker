@@ -1,0 +1,5 @@
+version: '2'
+services:
+  worker:
+    build: ../..
+    image: bootlegger/ourstory-worker:dev

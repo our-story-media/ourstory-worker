@@ -1,8 +1,0 @@
-version: '2'
-services:
-  worker:
-    restart: always
-    image: bootlegger/transcode-server:latest
-    volumes:
-      - ../../config/local.js:/usr/src/app/config/local.js  
-      - /.tmp/

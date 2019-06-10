@@ -1,38 +1,20 @@
 FROM node:8-stretch
-# FROM node:8-jessie
+
 LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
-
-# RUN echo 'deb http://ftp.uk.debian.org/debian jessie-backports main' >> /etc/apt/sources.list.d/ffmpeg.list
-
-RUN apt-get update -q && \
-	apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
-    Dpkg::Options::="--force-confold" \
-    # ffmpeg \
-    libav-tools \
-    melt
-
-# FROM node:8-jessie
-# LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
-
-# RUN echo 'deb http://ftp.uk.debian.org/debian jessie-backports main' >> /etc/apt/sources.list.d/ffmpeg.list
-
-# RUN apt-get update -q && \
-# 	apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
-#     Dpkg::Options::="--force-confold" \
-#     ffmpeg \
-#     # libav-tools \
-#     melt
-
-RUN mkdir -p /usr/src/app
-
-WORKDIR /usr/src/app
-
-COPY package.json /usr/src/app/
-
-RUN npm i -g nodemon --silent && npm i --silent
 
 COPY . /usr/src/app
 
-RUN mkdir ~/.fonts && cp -r /usr/src/app/fonts/* ~/.fonts && chmod -R 644 ~/.fonts && fc-cache 
+RUN mkdir -p /usr/src/app && \
+    apt-get update -q && \
+	apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
+    Dpkg::Options::="--force-confold" \
+    libav-tools \
+    melt && \
+    npm i -g nodemon --silent && \
+    npm i --silent && \
+    npm cache clean --force && \
+    mkdir ~/.fonts && cp -r /usr/src/app/fonts/* ~/.fonts && chmod -R 644 ~/.fonts && fc-cache
+
+WORKDIR /usr/src/app 
 
 CMD [ "npm", "start" ]

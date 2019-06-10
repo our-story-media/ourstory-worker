@@ -1,7 +1,9 @@
 version: '2'
 services:
   worker:
-    build: ../..
+    build: 
+      context: ../..
+      dockerfile: Dockerfile.dev
     image: bootlegger/ourstory-worker:latest
     command: nodemon --inspect=5859
     ports:
