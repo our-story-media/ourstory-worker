@@ -26,10 +26,10 @@ client.on('connect', function () {
                 {
                     "id": "5cc932433bd887a600e83d17",
                     "inpoint": "00:00:00",
-                    "outpoint": "00:00:05.000",
-                    "path": "636923049886883230_636923049750205940.mp4",
+                    "outpoint": "00:00:03.000",
+                    "path": "636930175646255520_636930134480821920.mp4",
                     "thumb": "http://10.10.10.1/media/thumbnail/5cc932433bd887a600e83d17",
-                    "event_id": "5cc8e8914aa25a10012a50fe",
+                    "event_id": "5cd3510fde3d322a000ecbaa",
                     "lowres": "http://10.10.10.1/media/preview/5cc932433bd887a600e83d17",
                     "tag": {
                         "id": "1",
@@ -42,12 +42,19 @@ client.on('connect', function () {
                     }
                 },
                 {
+                    "path": "",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:05",
+                    "event_id": "5c2d3aceb10aac1a00538ba4",
+                    "titletext": "title 1"
+                },
+                {
                     "id": "5cc9352af36467b801031421",
                     "inpoint": "00:00:00",
-                    "outpoint": "00:00:05.000",
-                    "path": "636923049886883230_636923049750205940.mp4",
+                    "outpoint": "00:00:03.000",
+                    "path": "636930214725884000_636930196346527800.mp4",
                     "thumb": "http://10.10.10.1/media/thumbnail/5cc9352af36467b801031421",
-                    "event_id": "5cc8e8914aa25a10012a50fe",
+                    "event_id": "5cd3510fde3d322a000ecbaa",
                     "lowres": "http://10.10.10.1/media/preview/5cc9352af36467b801031421",
                     "tag": {
                         "id": "4",
@@ -58,7 +65,33 @@ client.on('connect', function () {
                             "ae": "IN ARABIC"
                         }
                     }
-                }
+                },
+                {
+                    "path": "",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:05",
+                    "event_id": "5c2d3aceb10aac1a00538ba4",
+                    "titletext": "title 2"
+                },
+                {
+                    "id": "5cc9352af36467b801031421",
+                    "inpoint": "00:00:00",
+                    "outpoint": "00:00:03.000",
+                    "path": "636930214725884000_636930196346527800.mp4",
+                    "thumb": "http://10.10.10.1/media/thumbnail/5cc9352af36467b801031421",
+                    "event_id": "5cd3510fde3d322a000ecbaa",
+                    "lowres": "http://10.10.10.1/media/preview/5cc9352af36467b801031421",
+                    "tag": {
+                        "id": "4",
+                        "color": "#d4e157",
+                        "burn": true,
+                        "values": {
+                            "en": "Sustainability",
+                            "ae": "IN ARABIC"
+                        }
+                    }
+                },
+
             ],
             "code": "XXXXXXXX",
             "title": "2 vids",
