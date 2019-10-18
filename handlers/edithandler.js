@@ -456,7 +456,7 @@ module.exports = function (winston, thedb) {
                     var totalperc = 0;
                     var exec = require('child_process').exec;
                     console.log('melt ' + maineditcommand.join(' '));
-                    var child = exec(`melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`, { maxBuffer: 1024 * 1024 }, function (err) {
+                    var child = exec(`melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`, { maxBuffer: 1024 * 1024 * 1024 * 1024}, function (err) {
                         logger.info('Done Editing');
                         if (err)
                             logger.error(err);
