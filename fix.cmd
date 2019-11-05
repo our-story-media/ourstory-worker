@@ -1,0 +1,1 @@
+docker exec bootleggerlocal_worker_1 sed -i 's/1024 \* 1024/1024 * 1024 * 1024 * 1024/g' handlers/edithandler.js
