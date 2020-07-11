@@ -9,6 +9,7 @@ client.on('connect', function () {
 
         var localedit = {
             "_id": "5cc99ea5660a7710004e168e",
+            "mode":"original",
             "defaulttopiclang":"ae",
             "user_id": "5cc986955f9e695c0076d4c9",
             "shortlink": "XXXXXX",

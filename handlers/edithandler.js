@@ -117,16 +117,6 @@ module.exports = function (winston, thedb) {
         try {
             logger.info("Edit Started: " + edit.id + " / " + edit.code);
 
-            // //console.log(os.platform());
-            // if (os.platform() == "win32") {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg.exe');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe.exe');
-            // }
-            // else {
-            //     process.env.FFMPEG_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffmpeg');
-            //     process.env.FFPROBE_PATH = path.normalize(path.dirname(require.main.filename) + '/ffmpeg/ffprobe');
-            // }
-
             // console.log(edit);
 
             //download files from s3
@@ -418,8 +408,7 @@ module.exports = function (winston, thedb) {
                     taggedcommand.push('-transition composite fill=0 a_track=0 b_track=1');
                     taggedcommand.push('-progress');
                     taggedcommand.push('-profile hdv_720_25p');
-                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + "_tags.mp4 real_time=-2 r=25 width=1920 height=1080 strict=experimental -serialize command.melt");// b=3000 frag_duration=30");
-
+                    taggedcommand.push('-consumer avformat:' + edit.tmp_filename + `_tags.mp4 real_time=-2 r=25 width=${edit.width || '1920'} height=${edit.height || '1080'} strict=experimental`);
 
                     if (bedtrack)
                     {
@@ -436,8 +425,8 @@ module.exports = function (winston, thedb) {
                     }
 
                     maineditcommand.push('-progress');
-                    maineditcommand.push('-profile hdv_720_25p');
-                    maineditcommand.push('-consumer avformat:' + videoFilename + " real_time=-2 r=25 width=1920 height=1080 strict=experimental");// b=3000 frag_duration=30");
+                    maineditcommand.push(`-profile ${edit.profile || 'hdv_720_25p'}`);
+                    maineditcommand.push('-consumer avformat:' + videoFilename + ` real_time=-2 r=25 width=${edit.width || '1920'} height=${edit.height || '1080'} strict=experimental`);
                     // maineditcommand.push('-consumer xml:' + videoFilename + ".xml");// b=3000 frag_duration=30");
 
                     // console.log(taggedcommand.join(' '));
@@ -456,11 +445,15 @@ module.exports = function (winston, thedb) {
                     var totalperc = 0;
                     var exec = require('child_process').exec;
                     console.log('melt ' + maineditcommand.join(' '));
-                    var child = exec(`melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`, { maxBuffer: 1024 * 1024 * 1024 * 1024}, function (err) {
+
+                    var actualcmd = `melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`;
+                    if (edit.mode && edit.mode=='original')
+                        actualcmd = `melt ${maineditcommand.join(' ')}`;
+
+                    var child = exec(actualcmd, { maxBuffer: 1024 * 1024 * 1024 * 1024}, function (err) {
                         logger.info('Done Editing');
                         if (err)
                             logger.error(err);
-                        //cb(code!=0);
                     });
 
                     child.stdout.on('data', function (data) {
@@ -520,10 +513,13 @@ module.exports = function (winston, thedb) {
                         fs.moveSync(edit.tmp_filename, path.normalize(__dirname + '/../upload/edits/' + edit.code + ".mp4"),{
                             overwrite:true
                         });
-                        fs.moveSync(edit.tmp_filename+'_tags.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + "_tags.mp4"),{
-                            overwrite:true
-                        });
-                        console.log('Local file moved');
+                        if (fs.existsSync(edit.tmp_filename+'_tags.mp4'))
+                        {
+                            fs.moveSync(edit.tmp_filename+'_tags.mp4', path.normalize(__dirname + '/../upload/edits/' + edit.code + "_tags.mp4"),{
+                                overwrite:true
+                            });
+                        }
+                        console.log('Local file(s) moved');
                         cb();
                     }
                     else {

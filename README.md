@@ -7,3 +7,9 @@ Headless worker that takes jobs from a queue and performs them:
 
 - Editing
 - Video Transcode
+
+## Config
+
+- Override output profile using `edit.profile` (replaces melt command output profile)
+- Disable rendering tagged output using `edit.mode` ('original' just renders original (not tagged), otherwise defaults to rendering both)
+
