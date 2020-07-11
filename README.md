@@ -12,4 +12,5 @@ Headless worker that takes jobs from a queue and performs them:
 
 - Override output profile using `edit.profile` (replaces melt command output profile)
 - Disable rendering tagged output using `edit.mode` ('original' just renders original (not tagged), otherwise defaults to rendering both)
+- Override output width and height using `edit.width` and `edit.height`.
 
