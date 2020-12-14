@@ -73,21 +73,21 @@ module.exports = function (winston, thedb) {
             fs.mkdirsSync(__dirname + '/..' + uploaddir + '/edits');
         }
 
-        client = new fivebeans.client(config.BEANSTALK_HOST,config.BEANSTALK_PORT);
-        client.on('connect', function()
-        {
-            // client can now be used
-            winston.info('Beanstalk client connected')
-        })
-        .on('error', function()
-        {
-            // connection failure
-        })
-        .on('close', function()
-        {
-            // underlying connection has closed
-        })
-        .connect();
+        // client = new fivebeans.client(config.BEANSTALK_HOST,config.BEANSTALK_PORT);
+        // client.on('connect', function()
+        // {
+        //     // client can now be used
+        //     winston.info('Beanstalk client connected')
+        // })
+        // .on('error', function()
+        // {
+        //     // connection failure
+        // })
+        // .on('close', function()
+        // {
+        //     // underlying connection has closed
+        // })
+        // .connect();
     }
 
     function clearOut(edit) {
@@ -117,7 +117,7 @@ module.exports = function (winston, thedb) {
         try {
             logger.info("Edit Started: " + edit.id + " / " + edit.code);
 
-            // console.log(edit);
+            logger.info("Mode: " + edit.mode);
 
             //download files from s3
             //join files
@@ -365,7 +365,7 @@ module.exports = function (winston, thedb) {
                     
                     if (credits)
                     {
-                        console.log('doing credits');
+                        // console.log('doing credits');
                         let titlefile = path.normalize(path.dirname(require.main.filename) + uploaddir + '/' + uuid.v1() + '.bmp');
                         // console.log('starting title');
                         //convert to image:
@@ -390,7 +390,7 @@ module.exports = function (winston, thedb) {
                     totallength+=5.0/25;
                     totalclips++;
 
-                    console.log(totallength);
+                    // console.log(totallength);
                     
 
                     //ADJUST totaltime for transitions:
@@ -399,8 +399,7 @@ module.exports = function (winston, thedb) {
 
                     var maineditcommand = thecommand;
 
-                    console.log(tagtrack);
-                    
+                    // console.log(tagtrack);
 
                     var taggedcommand = [];
                     taggedcommand.push(edit.tmp_filename)
@@ -447,14 +446,38 @@ module.exports = function (winston, thedb) {
                     console.log('melt ' + maineditcommand.join(' '));
 
                     var actualcmd = `melt ${maineditcommand.join(' ')} && melt ${taggedcommand.join(' ')}`;
+
+                    // only render non-tagged version
                     if (edit.mode && edit.mode=='original')
                         actualcmd = `melt ${maineditcommand.join(' ')}`;
+
+                    //only render tagged version
+                    if (edit.mode && edit.mode=='tagged')
+                    {
+                        //normally we would be rendering the tagged version based on the previously created original -- in this case, we want to use a previously existing original and just add the tags:
+                        var pathtoorig = path.normalize(__dirname + '/../upload/edits/' + edit.code + ".mp4");
+                        if (!fs.existsSync(pathtoorig))
+                        {
+                            logger.error("Original file does not exist for creating tagged render");
+                            var collection = thedb.collection('edits');
+                            var err_obj = {
+                                code: 610,
+                                reason: 'Original file does not exist for creating tagged render'
+                            };
+                            collection.update({ code: edit.code }, { $set: { fail: true, failreason: err_obj.reason, error: err_obj }, $unset: { path: "" } }, { w: 1 }, function () {
+                                callback('bury');
+                            });
+                        }
+                        taggedcommand[0] = pathtoorig;
+                        
+                        actualcmd = `melt ${taggedcommand.join(' ')}`;
+                    }
 
                     var child = exec(actualcmd, { maxBuffer: 1024 * 1024 * 1024 * 1024}, function (err) {
                         logger.info('Done Editing');
                         if (err)
                             logger.error(err);
-                    });
+                        });
 
                     child.stdout.on('data', function (data) {
                         logger.info('' + data);
@@ -474,9 +497,16 @@ module.exports = function (winston, thedb) {
                                 lastprogress = perc[1];
 
                                 // console.log(totalperc);
+
+                                var updateprog = totalperc;
+                                if (edit.mode == 'tagged' || edit.mode == 'original')
+                                    updateprog = totalperc;
+                                else
+                                    updateprog = totalperc/2;
+
                                 
                                 var collection = thedb.collection('edits');
-                                collection.update({ code: edit.code }, { $set: { progress: totalperc/2 } }, { w: 1 }, function () {
+                                collection.update({ code: edit.code }, { $set: { progress: updateprog } }, { w: 1 }, function () {
                                     //done collection update
                                 });
 
@@ -658,6 +688,17 @@ module.exports = function (winston, thedb) {
                     else {
                         logger.info("Editing Done");
                         edit.path = edit.shortlink + '.mp4';
+                        if (!edit.mode)
+                        {
+                            edit.hastagged = true;
+                            edit.hasoriginal = true;
+                        }
+
+                        if (edit.mode && edit.mode == 'tagged')
+                            edit.hastagged = true;
+
+                        if (edit.mode && edit.mode == 'original')
+                            edit.hasoriginal = true;
 
                         var collection = thedb.collection('edits');
                         collection.update({ code: edit.code }, { $set: { path: edit.path, progress:100 }, $unset: { failed: false, failereason: false, error: false } }, { w: 1 }, function (err) {

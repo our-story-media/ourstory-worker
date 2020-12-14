@@ -15,10 +15,10 @@ services:
       # - ../../config/local.js:/usr/src/app/config/local.js
       - ./.tmp:/.tmp
       # - /usr/src/app/node_modules
-      - /Users/tbar0012/Documents/Research/ourstory-server/docker/dev/upload:/usr/src/app/upload
+      - /Users/tbar0012/Documents/Research/newserver/docker/dev/upload:/usr/src/app/upload
       # - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
-      - /Users/tbar0012/Documents/Research/ourstory-server/assets/music:/usr/src/app/www/music
+      - /Users/tbar0012/Documents/Research/newserver/assets/music:/usr/src/app/www/music
       # - ./music:/usr/src/app/www/music
       # - ../../.sailsrc:/usr/src/app/.sailsrc
     # env_file: ../../.env
