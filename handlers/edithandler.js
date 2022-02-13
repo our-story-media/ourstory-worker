@@ -112,9 +112,13 @@ module.exports = function (winston, thedb) {
     edit.files_in_use = [];
 
     try {
-      logger.info("Edit Started: " + edit.id + " / " + edit.code);
+      if (edit.mode == "") edit.mode == "original";
 
-      logger.info("Mode: " + edit.mode);
+      logger.info(
+        "Edit Started: " + edit.id + " / " + edit.code + " @ " + edit.mode
+      );
+
+      // logger.info("Mode: " + edit.mode);
       logger.info(`Profile: ${edit.profile}, ${edit.width}x${edit.height}`);
 
       //download files from s3
@@ -466,9 +470,9 @@ module.exports = function (winston, thedb) {
           taggedcommand.push(
             "-consumer avformat:" +
               edit.tmp_filename +
-              `_tags.mp4 real_time=-2 r=25 width=${
-                edit.width || "1920"
-              } height=${edit.height || "1080"} strict=experimental`
+              ` real_time=-2 r=25 width=${edit.width || "1920"} height=${
+                edit.height || "1080"
+              } strict=experimental`
           );
 
           if (bedtrack) {
@@ -525,14 +529,14 @@ module.exports = function (winston, thedb) {
           )} && melt ${taggedcommand.join(" ")}`;
 
           // only render non-tagged version
-          if (edit.mode && (edit.mode == "original" || edit.mode == "high"))
+          if (edit.mode == "original" || edit.mode == "high")
             actualcmd = `melt ${maineditcommand.join(" ")}`;
 
-          //only render tagged version
-          if (edit.mode && edit.mode == "tagged") {
+          //only render tagged version (needs hq to exist)
+          if (edit.mode == "tagged") {
             //normally we would be rendering the tagged version based on the previously created original -- in this case, we want to use a previously existing original and just add the tags:
             var pathtoorig = path.normalize(
-              __dirname + "/../upload/edits/" + edit.code + ".mp4"
+              __dirname + "/../upload/edits/" + edit.code + "_hq.mp4"
             );
             if (!fs.existsSync(pathtoorig)) {
               logger.error(
@@ -594,7 +598,11 @@ module.exports = function (winston, thedb) {
                 // console.log(totalperc);
 
                 var updateprog = totalperc;
-                if (edit.mode == "tagged" || edit.mode == "original")
+                if (
+                  edit.mode == "tagged" ||
+                  edit.mode == "original" ||
+                  edit.mode == "high"
+                )
                   updateprog = totalperc;
                 else updateprog = totalperc / 2;
 
@@ -634,26 +642,24 @@ module.exports = function (winston, thedb) {
 
           if (config.LOCALONLY) {
             //copy the file to the right location:
-            fs.moveSync(
-              edit.tmp_filename,
-              path.normalize(
-                __dirname + "/../upload/edits/" + edit.code + ".mp4"
-              ),
-              {
-                overwrite: true,
-              }
-            );
-            if (fs.existsSync(edit.tmp_filename + "_tags.mp4")) {
+            let name = ".mp4";
+
+            if (edit.mode == "high") name = "_hq.mp4";
+            if (edit.mode == "tagged") name = "_tags.mp4";
+            if (edit.mode == "original") name = ".mp4";
+
+            if (fs.existsSync(edit.tmp_filename)) {
               fs.moveSync(
-                edit.tmp_filename + "_tags.mp4",
+                edit.tmp_filename,
                 path.normalize(
-                  __dirname + "/../upload/edits/" + edit.code + "_tags.mp4"
+                  __dirname + "/../upload/edits/" + edit.code + name
                 ),
                 {
                   overwrite: true,
                 }
               );
             }
+
             console.log("Local file(s) moved");
             cb();
           } else {
@@ -701,34 +707,39 @@ module.exports = function (winston, thedb) {
           // FOR DEBUGGING
           //return cb(null);
 
+          //if its the original one, then we need a preview
           if (config.LOCALONLY) {
-            //run to local transcoder:
-            winston.info("Transcoding Edit");
-            //push new transcode onto queue:s
-            var input = path.normalize("edits/" + edit.code + ".mp4");
-            var output = path.normalize("edits/" + edit.code + ".mp4");
-            var payload = {
-              input: input,
-              output: output,
-            };
+            if (edit.mode == "original") {
+              //run to local transcoder:
+              winston.info("Transcoding Edit");
+              //push new transcode onto queue:s
+              var input = path.normalize("edits/" + edit.code + ".mp4");
+              var output = path.normalize("edits/" + edit.code + ".mp4");
+              var payload = {
+                input: input,
+                output: output,
+              };
 
-            client.use("edits", function () {
-              client.put(
-                10,
-                0,
-                1000000000,
-                JSON.stringify([
-                  "edits",
-                  { type: "transcode", payload: payload },
-                ]),
-                function (err) {
-                  if (!err) winston.info("Transcode submitted");
-                  else winston.error(err);
+              client.use("edits", function () {
+                client.put(
+                  10,
+                  0,
+                  1000000000,
+                  JSON.stringify([
+                    "edits",
+                    { type: "transcode", payload: payload },
+                  ]),
+                  function (err) {
+                    if (!err) winston.info("Transcode submitted");
+                    else winston.error(err);
 
-                  cb();
-                }
-              );
-            });
+                    cb();
+                  }
+                );
+              });
+            } else {
+              cb();
+            }
           } else {
             AWS.config.update({
               accessKeyId: config.AWS_ACCESS_KEY_ID,
@@ -809,13 +820,14 @@ module.exports = function (winston, thedb) {
           } else {
             logger.info("Editing Done");
 
+            edit.path = edit.shortlink + ".mp4";
+
             var updt = { path: edit.path, progress: 100 };
 
-            edit.path = edit.shortlink + ".mp4";
-            if (!edit.mode) {
-              updt.hastagged = true;
-              updt.hasoriginal = true;
-            }
+            // if (!edit.mode) {
+            //   updt.hastagged = true;
+            //   updt.hasoriginal = true;
+            // }
 
             if (edit.mode && edit.mode == "tagged") updt.hastagged = true;
 
