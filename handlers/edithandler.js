@@ -476,24 +476,32 @@ module.exports = function (winston, thedb) {
           );
 
           if (bedtrack) {
-            thecommand.push("-audio-track " + bedtrack);
+            maineditcommand.push("-audio-track " + bedtrack);
             // thecommand.push('-repeat 6')
             // let output =
-            thecommand.push('out="' + calcTS(totallength) + '"');
+            maineditcommand.push('out="' + calcTS(totallength) + '"');
             // thecommand.push("-mix 10");
-            thecommand.push(
+            maineditcommand.push(
               "-attach-track volume:" + (config.MUSIC_VOLUME || "0.3")
             );
             // thecommand.push('-filter aloop')
             // thecommand.push('-attach volume:0db end:-70db in='+(totallength-100)+' out='+(totallength+3));
-            thecommand.push(
+            maineditcommand.push(
               "-filter volume in=" +
                 (totallength * 25 - 100) +
                 ' out="' +
                 calcTS(totallength) +
                 '" track=1 gain=1.0 end=0'
             );
-            thecommand.push("-transition mix in=0");
+            maineditcommand.push("-transition mix in=0");
+          }
+
+          //if we are rendering the tagged version from scratch (not using HQ version)
+          if (edit.mode == "original") {
+            maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
+            maineditcommand.push(
+              "-transition composite fill=0 a_track=0 b_track=1"
+            );
           }
 
           maineditcommand.push("-progress");
@@ -524,12 +532,17 @@ module.exports = function (winston, thedb) {
           var exec = require("child_process").exec;
           console.log("melt " + maineditcommand.join(" "));
 
+          //render both the untagged and tagged video
           var actualcmd = `melt ${maineditcommand.join(
             " "
           )} && melt ${taggedcommand.join(" ")}`;
 
-          // only render non-tagged version
-          if (edit.mode == "original" || edit.mode == "high")
+          //render just the tagged video (assuming no priors exist)
+          if (edit.mode == "original")
+            actualcmd = `melt ${maineditcommand.join(" ")}`;
+
+          // only render non-tagged version in HQ
+          if (edit.mode == "high")
             actualcmd = `melt ${maineditcommand.join(" ")}`;
 
           //only render tagged version (needs hq to exist)
