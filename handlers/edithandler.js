@@ -290,10 +290,23 @@ module.exports = function (winston, thedb) {
           var tagtrack = [];
           var mix_adjust = 11.5 / 25;
 
-          // INITIAL BLACK SLIDE
-          thecommand.push("colour:black out=15");
-          totallength += 5.0 / 25;
+          //FIRST SLIDE:
+          if (
+            fs.existsSync(
+              path.dirname(require.main.filename) + "/upload/branding.png"
+            )
+          ) {
+            thecommand.push(
+              path.dirname(require.main.filename) +
+                "/upload/branding.png out=15 -mix 10 -mixer luma"
+            );
+          } else {
+            // INITIAL BLACK SLIDE
+            thecommand.push("colour:black out=15");
+          }
+
           tagtrack.push("-blank 15");
+          totallength += 5.0 / 25;
 
           _.each(edit.media, function (m) {
             if (m.audio) {
@@ -384,7 +397,7 @@ module.exports = function (winston, thedb) {
                 // titletext.replace(';','\;');
                 // console.log(titletext);
                 let code = spawnSync(
-                  `convert -size 1720x880 xc:black -background black -fill white -bordercolor black -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${titletext}" \\) -composite ${titlefile}`
+                  `convert -size 1720x880 xc:black -background white -fill black -bordercolor black -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${titletext}" \\) -composite ${titlefile}`
                 );
                 thecommand.push(titlefile);
                 // console.log(m.outpoint);
@@ -429,7 +442,7 @@ module.exports = function (winston, thedb) {
             //convert to image:
             const spawnSync = require("child_process").execSync;
             let code = spawnSync(
-              `convert -background black -fill white -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
+              `convert -background white -fill black -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
             );
             thecommand.push(titlefile);
             thecommand.push("out=75"); //3 seconds:
@@ -445,9 +458,22 @@ module.exports = function (winston, thedb) {
             totalclips++;
           }
 
-          //LAST FRAME
-          thecommand.push("colour:black out=15 -mix 10 -mixer luma");
-          totallength += 5.0 / 25;
+          //LAST LOGO/BLANK
+          if (
+            fs.existsSync(
+              path.dirname(require.main.filename) + "/upload/branding.png"
+            )
+          ) {
+            thecommand.push(
+              path.dirname(require.main.filename) +
+                "/upload/branding.png out=50 -mix 10 -mixer luma"
+            );
+            totallength += 5.0 / 25;
+          } else {
+            thecommand.push("colour:black out=15 -mix 10 -mixer luma");
+            totallength += 5.0 / 25;
+          }
+
           totalclips++;
 
           // console.log(totallength);
