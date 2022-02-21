@@ -13,3 +13,9 @@ Headless worker that takes jobs from a queue and performs them:
 - Override output profile using `edit.profile` (replaces melt command output profile)
 - Disable rendering tagged output using `edit.mode` ('original' just renders original (not tagged), otherwise defaults to rendering both)
 - Override output width and height using `edit.width` and `edit.height`.
+
+## Profiles
+
+- `original`: produces tagged version in HD from scratch, override width, height and profile to change output dimensions. This profile gets sent to the transcode queue on completion.
+- `high`: produces non-tagged HD version from scratch, not pushed onto transcode queue.
+- `tagged`: produces tagged HD version based on an existing HD version, not pushed onto transcode queue.
