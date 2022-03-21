@@ -16,49 +16,14 @@ var client;
 
 AWS.config.region = config.S3_REGION;
 
-function calcTime(s_in, s_out) {
-  // console.log(s_in);
-  // console.log(s_out);
-  s_in = _.split(s_in, ":");
-  let i_in =
-    parseFloat(s_in[2]) + parseInt(s_in[1]) * 60 + parseInt(s_in[0]) * 3600;
-  s_out = _.split(s_out, ":");
-  let i_out =
-    parseFloat(s_out[2]) + parseInt(s_out[1]) * 60 + parseInt(s_out[0]) * 3600;
-
-  // console.log(i_out);
-
-  //in seconds
-  return i_out - i_in;
-}
-
-function normaliseTime(s_in) {
-  // console.log(s_in);
-  // console.log(s_out);
-  s_in = _.split(s_in, ":");
-  let i_in =
-    parseFloat(s_in[2]) + parseInt(s_in[1]) * 60 + parseInt(s_in[0]) * 3600;
-
-  return calcTS(i_in);
-}
-
-function calcTS(ts) {
-  // console.log(ts);
-  //ts in secs
-  let hours = Math.floor(ts / 3600);
-  let mins = Math.floor((ts - hours * 3600) / 60);
-  let secs = Math.floor(ts % 60);
-  let subs = ((ts % 60) - secs).toString();
-  // console.log(hours, mins, secs, subs);
-  return `${_.padStart(hours, 2, "0")}:${_.padStart(mins, 2, "0")}:${_.padStart(
-    secs,
-    2,
-    "0"
-  )}.${subs.substring(2)}`;
-}
+const {
+  calcTime,
+  timecodeToTimestamp,
+  normaliseTime,
+  calcTS,
+} = require("../util/time");
 
 module.exports = function (winston, thedb) {
-  //var thedb = null;
   var logger = null;
 
   function DoEditHandler() {
@@ -104,7 +69,9 @@ module.exports = function (winston, thedb) {
         //s.unlinkSync(edit.tmp_filename);
       }
 
-      cleanOutAll();
+      //TODO: remove all BMP files:
+
+      // cleanOutAll();
     }
   }
 
@@ -288,9 +255,134 @@ module.exports = function (winston, thedb) {
           var failedit = false;
           var totalclips = 1;
           var tagtrack = [];
+          var subtitles = [];
           var mix_adjust = 11.5 / 25;
+          let to_burn = [];
+
+          //Generate Subtitles:
+          if (edit.transcription && edit.transcription.chunks) {
+            // console.log(edit.transcription);
+
+            edit.transcription.chunks.forEach((c) => {
+              if (c.review !== undefined) {
+                let text = c.transcriptions.filter(
+                  (t) => c.review.selectedtranscription === t.id
+                )[0].content;
+
+                let chunks = [];
+
+                // console.log(`ss: ${c.starttimestamp}`);
+
+                //mini-chunks:
+                let length = calcTime(
+                  timecodeToTimestamp(c.starttimestamp),
+                  timecodeToTimestamp(c.endtimestamp)
+                );
+                // console.log(
+                //   `length: ${length} from ${timecodeToTimestamp(
+                //     c.starttimestamp
+                //   )} to ${timecodeToTimestamp(c.endtimestamp)}`
+                // );
+                let start_time = calcTime(
+                  "00:00:00.00",
+                  timecodeToTimestamp(c.starttimestamp)
+                );
+                // console.log(`start: ${start_time}`);
+
+                const SPLIT_LENGTH = 4;
+                if (length < 6)
+                  //its less than 5 seconds:
+                  chunks.push({
+                    starts: timecodeToTimestamp(c.starttimestamp),
+                    ends: timecodeToTimestamp(c.endtimestamp),
+                    text: text,
+                  });
+                else {
+                  //how many sub-segments
+                  let minis = length / SPLIT_LENGTH;
+
+                  // how many rounded sub-segments (floored)
+                  let mini_round = Math.floor(minis);
+                  //split words into this many chunks:
+                  let words = text.split(" ");
+                  //how many words per sub-segment
+                  let words_per_block =
+                    Math.floor(words.length / mini_round) + 1;
+                  // console.log(`words: ${words_per_block}`);
+                  let counter = 0;
+                  let timer = 0;
+
+                  while (counter < words.length) {
+                    let subw = words.slice(counter, counter + words_per_block);
+                    counter += words_per_block;
+
+                    let starttime = start_time + timer;
+                    timer += SPLIT_LENGTH;
+
+                    let endtime = Math.min(start_time + timer, length);
+
+                    if (start_time + timer > length) endtime = length;
+
+                    chunks.push({
+                      starts: calcTS(starttime),
+                      ends: calcTS(endtime),
+                      text: subw.join(" "),
+                    });
+                  }
+                }
+
+                for (let chunk of chunks) {
+                  to_burn.push({
+                    starts: chunk.starts,
+                    ends: chunk.ends,
+                    text: chunk.text,
+                  });
+                }
+              }
+            });
+
+            console.log(to_burn);
+
+            //TODO: SUBTITLES:
+            if (to_burn.length > 0) {
+              // subtitles.push("-blank 15");
+              //for each subtitle, burn on text:
+              for (let i = 0; i < to_burn.length; i++) {
+                let title = to_burn[i];
+
+                let titlefile = path.normalize(
+                  path.dirname(require.main.filename) +
+                    uploaddir +
+                    "/" +
+                    uuid.v1() +
+                    ".png"
+                );
+                const spawnSync = require("child_process").execSync;
+                let titletext = he.encode(title.text, {
+                  encodeEverything: true,
+                });
+
+                let code = spawnSync(
+                  `convert -size 1920x1080 canvas:none -bordercolor transparent -border 200x50 -fill white \\( -size 1722 -gravity center -geometry +00+500 -bordercolor "#00000088" -background "#00000088" -compose atop -border 12x12 -pointsize 40 -font /usr/src/app/fonts/NotoSans-Regular.ttf -define pango:align=center pango:"${titletext}" \\) -compose over -composite ${titlefile}`
+                );
+                subtitles.push(
+                  `${titlefile} out=${
+                    calcTime(
+                      normaliseTime(title.starts),
+                      normaliseTime(title.ends)
+                    ) * 25
+                  }`
+                );
+              }
+            }
+
+            // console.log(subtitles);
+          }
+
+          return callback("bury");
 
           //FIRST SLIDE:
+          thecommand.push("-track");
           if (
             fs.existsSync(
               path.dirname(require.main.filename) + "/upload/branding.png"
@@ -301,8 +393,8 @@ module.exports = function (winston, thedb) {
                 "/upload/branding.png out=15 -mix 10 -mixer luma"
             );
           } else {
-            // INITIAL BLACK SLIDE
-            thecommand.push("colour:black out=15");
+            // INITIAL WHITE SLIDE
+            thecommand.push("colour:white out=15");
           }
 
           tagtrack.push("-blank 15");
@@ -397,7 +489,7 @@ module.exports = function (winston, thedb) {
                 // titletext.replace(';','\;');
                 // console.log(titletext);
                 let code = spawnSync(
-                  `convert -size 1720x880 xc:black -background white -fill black -bordercolor black -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${titletext}" \\) -composite ${titlefile}`
+                  `convert -size 1720x880 xc:white -background white -fill black -bordercolor white -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${titletext}" \\) -composite ${titlefile}`
                 );
                 thecommand.push(titlefile);
                 // console.log(m.outpoint);
@@ -470,7 +562,7 @@ module.exports = function (winston, thedb) {
             );
             totallength += 5.0 / 25;
           } else {
-            thecommand.push("colour:black out=15 -mix 10 -mixer luma");
+            thecommand.push("colour:white out=15 -mix 10 -mixer luma");
             totallength += 5.0 / 25;
           }
 
@@ -489,7 +581,7 @@ module.exports = function (winston, thedb) {
           taggedcommand.push(edit.tmp_filename);
           taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
           taggedcommand.push(
-            "-transition composite fill=0 a_track=0 b_track=1"
+            "-transition composite fill=0 a_track=0 b_track=2"
           );
           taggedcommand.push("-progress");
           taggedcommand.push("-profile hdv_720_25p");
@@ -522,16 +614,32 @@ module.exports = function (winston, thedb) {
             maineditcommand.push("-transition mix in=0");
           }
 
+          //ADD WHITE TRACK UNDERNEATH:
+          // maineditcommand.splice(
+          //   0,
+          //   0,
+          //   `-track color:white out="${calcTS(totallength)}"`
+          // );
+          // maineditcommand.insert(0,);
+
           //if we are rendering the tagged version from scratch (not using HQ version)
           if (edit.mode == "original") {
             maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
             maineditcommand.push(
-              "-transition composite fill=0 a_track=0 b_track=1"
+              "-transition composite fill=0 a_track=0 b_track=2"
             );
+
+            if (subtitles.length > 0) {
+              maineditcommand.push(`-video-track ${subtitles.join(" ")}`);
+              maineditcommand.push(
+                "-transition composite fill=0 a_track=0 b_track=3"
+              );
+            }
           }
 
           maineditcommand.push("-progress");
           maineditcommand.push(`-profile ${edit.profile || "hdv_720_25p"}`);
+
           maineditcommand.push(
             "-consumer avformat:" +
               videoFilename +
@@ -539,7 +647,7 @@ module.exports = function (winston, thedb) {
                 edit.height || "1080"
               } strict=experimental`
           );
-          // maineditcommand.push('-consumer xml:' + videoFilename + ".xml");// b=3000 frag_duration=30");
+          // maineditcommand.push("-consumer xml:" + videoFilename + ".xml"); // b=3000 frag_duration=30");
 
           // console.log(taggedcommand.join(' '));
 
@@ -873,6 +981,9 @@ module.exports = function (winston, thedb) {
             if (edit.mode && edit.mode == "original") updt.hasoriginal = true;
 
             if (edit.mode && edit.mode == "high") updt.hashighquality = true;
+
+            //TODO: MASSIVE HACK - REMOVE FOR USE
+            return callback("bury");
 
             var collection = thedb.collection("edits");
             collection.update(
