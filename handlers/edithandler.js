@@ -63,11 +63,11 @@ module.exports = function (winston, thedb) {
         }
       });
 
-      //2. remove resulting file
-      //onsole.log('edit file: ' + edit.tmp_filename);
-      if (fs.existsSync(edit.tmp_filename)) {
-        //s.unlinkSync(edit.tmp_filename);
-      }
+      // //2. remove resulting file
+      // //onsole.log('edit file: ' + edit.tmp_filename);
+      // if (fs.existsSync(edit.tmp_filename)) {
+      //   //s.unlinkSync(edit.tmp_filename);
+      // }
 
       //TODO: remove all BMP files:
 
@@ -289,8 +289,11 @@ module.exports = function (winston, thedb) {
                 );
                 // console.log(`start: ${start_time}`);
 
-                const SPLIT_LENGTH = 4;
-                if (length < 6)
+                const SPLIT_LENGTH = 8.0;
+
+                //if its more than 6 seconds:
+                let words = text.split(" ");
+                if (length < 6 || words.length < 8)
                   //its less than 5 seconds:
                   chunks.push({
                     starts: timecodeToTimestamp(c.starttimestamp),
@@ -298,30 +301,68 @@ module.exports = function (winston, thedb) {
                     text: text,
                   });
                 else {
+                  // console.log(`words: ${words.length}`);
+
+                  //find a nice number that does not leave a remainder:
+
+                  let segments = Math.floor(words.length / SPLIT_LENGTH);
+                  // console.log(`segments: ${segments}`);
+
                   //how many sub-segments
-                  let minis = length / SPLIT_LENGTH;
+                  // let minis = length / segments;
+
+                  // console.log(`minis: ${minis}`);
+
+                  // console.log(
+                  //   `mini: ${minis}, reminder: ${length % SPLIT_LENGTH}`
+                  // );
 
                   // how many rounded sub-segments (floored)
-                  let mini_round = Math.floor(minis);
+                  // let mini_round = Math.floor(minis);
+
                   //split words into this many chunks:
-                  let words = text.split(" ");
                   //how many words per sub-segment
-                  let words_per_block =
-                    Math.floor(words.length / mini_round) + 1;
+                  let words_per_block = Math.floor(words.length / segments);
+
+                  // let words_per_block =
+
                   // console.log(`words: ${words_per_block}`);
                   let counter = 0;
                   let timer = 0;
 
-                  while (counter < words.length) {
+                  let new_adjuster = length / segments;
+
+                  // console.log(`new_adjuster: ${new_adjuster}`);
+
+                  // while (counter < words.length) {
+                  for (let loop = 0; loop < segments; loop++) {
                     let subw = words.slice(counter, counter + words_per_block);
+
                     counter += words_per_block;
 
-                    let starttime = start_time + timer;
-                    timer += SPLIT_LENGTH;
+                    const starttime =
+                      Math.round((start_time + timer + Number.EPSILON) * 100) /
+                      100;
 
-                    let endtime = Math.min(start_time + timer, length);
+                    timer += new_adjuster;
 
-                    if (start_time + timer > length) endtime = length;
+                    // console.log(start_time, timer);
+
+                    const endtime =
+                      Math.round((start_time + timer + Number.EPSILON) * 100) /
+                      100;
+
+                    //if there is some remaining words (less than the segment):
+                    if (words.length - counter < SPLIT_LENGTH) {
+                      // console.log(
+                      //   `append ${
+                      //     words.length - counter
+                      //   } word to this one (${endtime})`
+                      // );
+                      let toadd = words.slice(counter - words.length);
+                      // console.log(`toadd: ${toadd}`);
+                      subw.push(...toadd);
+                    }
 
                     chunks.push({
                       starts: calcTS(starttime),
@@ -341,9 +382,9 @@ module.exports = function (winston, thedb) {
               }
             });
 
-            console.log(to_burn);
+            // console.log(to_burn);
 
-            //TODO: SUBTITLES:
+            //SUBTITLES:
             if (to_burn.length > 0) {
               // subtitles.push("-blank 15");
               //for each subtitle, burn on text:
@@ -363,7 +404,7 @@ module.exports = function (winston, thedb) {
                 });
 
                 let code = spawnSync(
-                  `convert -size 1920x1080 canvas:none -bordercolor transparent -border 200x50 -fill white \\( -size 1722 -gravity center -geometry +00+500 -bordercolor "#00000088" -background "#00000088" -compose atop -border 12x12 -pointsize 40 -font /usr/src/app/fonts/NotoSans-Regular.ttf -define pango:align=center pango:"${titletext}" \\) -compose over -composite ${titlefile}`
+                  `convert -size 1920x1080 canvas:none -bordercolor transparent -border 200x50 -fill white \\( -size 1400 -gravity center -geometry +00+500 -bordercolor "#00000088" -background "#00000088" -compose atop -border 12x12 -pointsize 40 -font /usr/src/app/fonts/NotoSans-Regular.ttf -define pango:align=center pango:"${titletext}" \\) -compose over -composite ${titlefile}`
                 );
                 subtitles.push(
                   `${titlefile} out=${
@@ -379,7 +420,7 @@ module.exports = function (winston, thedb) {
             // console.log(subtitles);
           }
 
-          return callback("bury");
+          // return callback("bury");
 
           //FIRST SLIDE:
           thecommand.push("-track");
@@ -577,22 +618,6 @@ module.exports = function (winston, thedb) {
 
           // console.log(tagtrack);
 
-          var taggedcommand = [];
-          taggedcommand.push(edit.tmp_filename);
-          taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
-          taggedcommand.push(
-            "-transition composite fill=0 a_track=0 b_track=2"
-          );
-          taggedcommand.push("-progress");
-          taggedcommand.push("-profile hdv_720_25p");
-          taggedcommand.push(
-            "-consumer avformat:" +
-              edit.tmp_filename +
-              ` real_time=-2 r=25 width=${edit.width || "1920"} height=${
-                edit.height || "1080"
-              } strict=experimental`
-          );
-
           if (bedtrack) {
             maineditcommand.push("-audio-track " + bedtrack);
             // thecommand.push('-repeat 6')
@@ -614,14 +639,6 @@ module.exports = function (winston, thedb) {
             maineditcommand.push("-transition mix in=0");
           }
 
-          //ADD WHITE TRACK UNDERNEATH:
-          // maineditcommand.splice(
-          //   0,
-          //   0,
-          //   `-track color:white out="${calcTS(totallength)}"`
-          // );
-          // maineditcommand.insert(0,);
-
           //if we are rendering the tagged version from scratch (not using HQ version)
           if (edit.mode == "original") {
             maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
@@ -636,6 +653,29 @@ module.exports = function (winston, thedb) {
               );
             }
           }
+
+          var taggedcommand = [];
+
+          taggedcommand.push(edit.tmp_filename);
+          taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
+          taggedcommand.push(
+            "-transition composite fill=0 a_track=0 b_track=1"
+          );
+          if (subtitles.length > 0) {
+            taggedcommand.push(`-video-track ${subtitles.join(" ")}`);
+            taggedcommand.push(
+              "-transition composite fill=0 a_track=0 b_track=2"
+            );
+          }
+          taggedcommand.push("-progress");
+          taggedcommand.push("-profile hdv_720_25p");
+          taggedcommand.push(
+            "-consumer avformat:" +
+              edit.tmp_filename +
+              ` real_time=-2 r=25 width=${edit.width || "1920"} height=${
+                edit.height || "1080"
+              } strict=experimental`
+          );
 
           maineditcommand.push("-progress");
           maineditcommand.push(`-profile ${edit.profile || "hdv_720_25p"}`);
@@ -983,7 +1023,7 @@ module.exports = function (winston, thedb) {
             if (edit.mode && edit.mode == "high") updt.hashighquality = true;
 
             //TODO: MASSIVE HACK - REMOVE FOR USE
-            return callback("bury");
+            // return callback("bury");
 
             var collection = thedb.collection("edits");
             collection.update(

@@ -47,7 +47,7 @@ const calcTS = function (ts) {
   let hours = Math.floor(ts / 3600);
   let mins = Math.floor((ts - hours * 3600) / 60);
   let secs = Math.floor(ts % 60);
-  let subs = ((ts % 60) - secs).toFixed(2).toString();
+  let subs = ((ts % 60) - secs).toFixed(2);
   // console.log(hours, mins, secs, subs);
   return `${_.padStart(hours, 2, "0")}:${_.padStart(mins, 2, "0")}:${_.padStart(
     secs,

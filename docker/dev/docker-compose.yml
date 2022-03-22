@@ -10,6 +10,7 @@ services:
       - "5859:5859"
     volumes:
       - ../../handlers:/usr/src/app/handlers
+      - ../../util:/usr/src/app/util
       # - ../../index.js:/usr/src/app/index.js
       - ../../test:/usr/src/app/test
       # - ../../config/local.js:/usr/src/app/config/local.js

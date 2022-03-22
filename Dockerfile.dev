@@ -5,11 +5,11 @@ LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
 # RUN echo 'deb http://ftp.uk.debian.org/debian jessie-backports main' >> /etc/apt/sources.list.d/ffmpeg.list
 
 RUN apt-get update -q && \
-	apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
-    Dpkg::Options::="--force-confold" \
-    # ffmpeg \
-    libav-tools \
-    melt
+  apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
+  Dpkg::Options::="--force-confold" \
+  # ffmpeg \
+  libav-tools \
+  melt
 
 # FROM node:8-jessie
 # LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
@@ -29,7 +29,7 @@ WORKDIR /usr/src/app
 
 COPY package.json /usr/src/app/
 
-RUN npm i -g nodemon --silent && npm i --silent
+RUN npm i -g nodemon@1.11.0 --silent && npm i --silent
 
 COPY . /usr/src/app
 
