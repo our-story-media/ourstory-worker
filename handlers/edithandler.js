@@ -22,6 +22,7 @@ const {
   normaliseTime,
   calcTS,
 } = require("../util/time");
+const { title } = require("process");
 
 module.exports = function (winston, thedb) {
   var logger = null;
@@ -69,14 +70,25 @@ module.exports = function (winston, thedb) {
       //   //s.unlinkSync(edit.tmp_filename);
       // }
 
-      //TODO: remove all BMP files:
-
       // cleanOutAll();
+    } else {
+      //remove all title files:
+      let dir = `${path.dirname(require.main.filename)}${uploaddir}`;
+      fs.readdirSync(dir).forEach((file) => {
+        if (file.endsWith(".png") || file.endsWith(".svg")) {
+          console.log(`Removing ${dir}${file}`);
+          fs.unlinkSync(`${dir}${file}`);
+        }
+      });
     }
   }
 
   DoEditHandler.prototype.work = function (edit, callback) {
     edit.files_in_use = [];
+
+    //TODO: TEMP
+    clearOut(edit);
+    return callback("bury");
 
     try {
       if (edit.mode == "") edit.mode == "original";
