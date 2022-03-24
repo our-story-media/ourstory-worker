@@ -86,10 +86,6 @@ module.exports = function (winston, thedb) {
   DoEditHandler.prototype.work = function (edit, callback) {
     edit.files_in_use = [];
 
-    //TODO: TEMP
-    clearOut(edit);
-    return callback("bury");
-
     try {
       if (edit.mode == "") edit.mode == "original";
 
