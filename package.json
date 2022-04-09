@@ -19,7 +19,7 @@
     "request": "2.83.0",
     "tough-cookie": "2.3.3",
     "dropbox": "2.5.12",
-    "moment": "2.19.1",
+    "moment": "2.29.2",
     "uuid": "3.1.0",
     "shell-escape": "0.2.0",
     "touch": "1.0.0",
