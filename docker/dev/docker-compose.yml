@@ -14,14 +14,15 @@ services:
       # - ../../index.js:/usr/src/app/index.js
       - ../../test:/usr/src/app/test
       # - ../../config/local.js:/usr/src/app/config/local.js
-      - ./.tmp:/.tmp
+      # - ./.tmp:/.tmp
+      - ./.tmp:/usr/src/app/.tmp # for server side (where .tmp might not be available)
       # - /usr/src/app/node_modules
       - /Users/tbar0012/Documents/Research/newserver/docker/dev/upload:/usr/src/app/upload
       # - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
       - /Users/tbar0012/Documents/Research/newserver/assets/music:/usr/src/app/www/music
       # - ./music:/usr/src/app/www/music
-      # - ../../.sailsrc:/usr/src/app/.sailsrc
+      - ../../../newserver/docker/prod/.sailsrc:/usr/src/app/.sailsrc
     # env_file: ../../.env
 networks:
   default:
