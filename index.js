@@ -1,198 +1,225 @@
 //edit file:
-const winston = require('winston');
-const _ = require('lodash');
-const fivebeans = require('fivebeans').worker;
-const MongoClient = require('mongodb').MongoClient;
-const ObjectId = require('mongodb').ObjectId;
-let config = require('./config/local.js').config;
+const winston = require("winston");
+const _ = require("lodash");
+const fivebeans = require("fivebeans").worker;
+const MongoClient = require("mongodb").MongoClient;
+const ObjectId = require("mongodb").ObjectId;
+let config = require("./config/local.js").config;
 
 // console.log(config);
 
 global.config = config;
 
-require('rc')('sails', config);
+require("rc")("sails", config);
 let sendgrid;
 
-if (!config.LOCALONLY)
-    sendgrid  = require('sendgrid')(config.email.SENDGRID_ID);
-const moment = require('moment');
+if (!config.LOCALONLY) sendgrid = require("sendgrid")(config.email.SENDGRID_ID);
+
+console.log(config);
+
+const moment = require("moment");
 const uploaddir = "/.tmp/";
-const fs = require('fs-extra');
-const path = require('path');
+const fs = require("fs-extra");
+const path = require("path");
 
 //ENTRY POINT:
 start();
 
-function start()
-{
-	winston.remove(winston.transports.Console);
-	winston.add(winston.transports.Console, {colorize: true});
-    require('winston-mongodb').MongoDB;
-    winston.add(winston.transports.MongoDB, {
-		db:'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database,
-		collection:'log',
-        storeHost:true
+function start() {
+  winston.remove(winston.transports.Console);
+  winston.add(winston.transports.Console, { colorize: true });
+  require("winston-mongodb").MongoDB;
+  winston.add(winston.transports.MongoDB, {
+    db:
+      "mongodb://" +
+      (config.db_user != ""
+        ? config.db_user + ":" + config.db_password + "@"
+        : "") +
+      config.db_host +
+      ":" +
+      config.db_port +
+      "/" +
+      config.db_database,
+    collection: "log",
+    storeHost: true,
+  });
+
+  winston.info("Transcode and Sync Server Started");
+
+  connection =
+    "mongodb://" +
+    (config.db_user != ""
+      ? config.db_user + ":" + config.db_password + "@"
+      : "") +
+    config.db_host +
+    ":" +
+    config.db_port +
+    "/" +
+    config.db_database;
+  MongoClient.connect(connection, function (err, db) {
+    if (err) throw err;
+    thedb = db;
+    winston.info("Database connection established");
+
+    var handlers = {};
+    if (config.LOCALONLY) {
+      handlers = {
+        edit: require("./handlers/edithandler")(winston, db),
+        transcode: require("./handlers/transcodehandler")(winston, db),
+      };
+    } else {
+      handlers = {
+        edit: require("./handlers/edithandler")(winston, db),
+        dropbox: require("./handlers/dropboxhandler")(winston, db),
+      };
+    }
+
+    var runner = new fivebeans({
+      id: "transcode-server",
+      host: config.BEANSTALK_HOST,
+      port: config.BEANSTALK_PORT,
+      ignoreDefault: true,
+      handlers: handlers,
     });
-
-    winston.info("Transcode and Sync Server Started");
-
-	connection = 'mongodb://'+((config.db_user != '') ? (config.db_user + ':' + config.db_password + '@'):'')  + config.db_host + ':' + config.db_port + '/' + config.db_database;
-	MongoClient.connect(connection, function(err, db) {
-		if(err) throw err;
-		thedb = db;
-   		winston.info("Database connection established");
-        
-        var handlers = {};
-        if (config.LOCALONLY)
-        {
-            handlers = {
-                edit: require('./handlers/edithandler')(winston,db),
-                transcode: require('./handlers/transcodehandler')(winston,db)
-            }
-        }
-        else
-        {
-            handlers = 
-			{
-				edit: require('./handlers/edithandler')(winston,db),
-				dropbox: require('./handlers/dropboxhandler')(winston,db)
-			}
-        }
-
-		var runner = new fivebeans({
-			id:'transcode-server',
-			host:config.BEANSTALK_HOST,
-			port:config.BEANSTALK_PORT,
-			ignoreDefault:true,
-			handlers: handlers
-		});
-		runner.on('error',function(err)
-		{
-			winston.error(err);
-		});
-		runner.on('started',function(err)
-		{
-			winston.info("Connected to tube");
-		});
-		runner.on('info',function(err)
-		{
-			//winston.info(err);
-		});
-		runner.start(['edits']);
-	});
+    runner.on("error", function (err) {
+      winston.error(err);
+    });
+    runner.on("started", function (err) {
+      winston.info("Connected to tube");
+    });
+    runner.on("info", function (err) {
+      //winston.info(err);
+    });
+    runner.start(["edits"]);
+  });
 }
 
-function sendEmail(userid,subject,body)
-{
-	var collection = thedb.collection('user');
-	collection.findOne({"_id": new ObjectId(userid)}, function(err, doc) {
+function sendEmail(userid, subject, body) {
+  var collection = thedb.collection("user");
+  collection.findOne({ _id: new ObjectId(userid) }, function (err, doc) {
+    var email = new sendgrid.Email({
+      // to:       doc.profile.emails[0].value,
+      to: "tom@bartindale.com",
+      replyto: "no-reply@bootlegger.tv",
+      from: "info@bootlegger.tv",
+      fromname: "Bootlegger",
+      subject: subject,
+      html: body,
+    });
 
-		var email = new sendgrid.Email({
-			// to:       doc.profile.emails[0].value,
-			to: 'tom@bartindale.com',
-			replyto:  "no-reply@bootlegger.tv",
-			from:     "info@bootlegger.tv",
-			fromname: "Bootlegger",
-			subject:  subject,
-			html:     body
-		});
-		
-		email.addFilter('templates', 'enable', 1);
-		email.addFilter('templates', 'template_id', config.email.SENDGRID_TEMPLATE);
-		email.addSubstitution('%sentat%', moment().format('HH:mm'));
-		email.addSubstitution('%senton%', moment().format('ddd Do MMM'));
-		email.addSubstitution('%url%', config.master_url);
-		email.addSubstitution('%btnurl%', config.master_url);
-		email.addSubstitution('%btntext%', 'Visit Bootlegger Now');
-		email.addSubstitution('%name%', doc.profile.displayName);
-		
-		sendgrid.send(email, function(err, json) {
-			if (err) console.error(err); 
-			console.log(json);
-		});
-	});
-};
+    email.addFilter("templates", "enable", 1);
+    email.addFilter("templates", "template_id", config.email.SENDGRID_TEMPLATE);
+    email.addSubstitution("%sentat%", moment().format("HH:mm"));
+    email.addSubstitution("%senton%", moment().format("ddd Do MMM"));
+    email.addSubstitution("%url%", config.master_url);
+    email.addSubstitution("%btnurl%", config.master_url);
+    email.addSubstitution("%btntext%", "Visit Bootlegger Now");
+    email.addSubstitution("%name%", doc.profile.displayName);
 
-function cleanOutAll()
-{
-	// List all files 
-        var allfiles = fs.readdirSync(path.normalize(path.dirname(require.main.filename) + uploaddir));
+    sendgrid.send(email, function (err, json) {
+      if (err) console.error(err);
+      console.log(json);
+    });
+  });
+}
 
-        //3 hours ago
-        var ZOMBIE_TIMEOUT = Date.now() - (3 * 3600000);
+function cleanOutAll() {
+  // List all files
+  var allfiles = fs.readdirSync(
+    path.normalize(path.dirname(require.main.filename) + uploaddir)
+  );
 
-        //Remove all lock files from anywhere older then 3 hours (for failed things half way through)
-        var zombie_lockfiles = _.filter(allfiles,function(f){
-            var stats = fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
-            //console.log(stats.atime.getTime())
-            return stats.atime.getTime() < ZOMBIE_TIMEOUT && (_.endsWith('.part') || _.endsWith('.lock'));
-        });
+  //3 hours ago
+  var ZOMBIE_TIMEOUT = Date.now() - 3 * 3600000;
 
-        winston.info('Removing Zombies: ' + _.size(zombie_lockfiles));
-        _.each(zombie_lockfiles,function(f){
-            //console.log(f);
-            fs.unlinkSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f);
-        });
+  //Remove all lock files from anywhere older then 3 hours (for failed things half way through)
+  var zombie_lockfiles = _.filter(allfiles, function (f) {
+    var stats = fs.statSync(
+      path.normalize(path.dirname(require.main.filename) + uploaddir) + f
+    );
+    //console.log(stats.atime.getTime())
+    return (
+      stats.atime.getTime() < ZOMBIE_TIMEOUT &&
+      (_.endsWith(".part") || _.endsWith(".lock"))
+    );
+  });
 
-        // ONLY delete video files with no lock files
+  winston.info("Removing Zombies: " + _.size(zombie_lockfiles));
+  _.each(zombie_lockfiles, function (f) {
+    //console.log(f);
+    fs.unlinkSync(
+      path.normalize(path.dirname(require.main.filename) + uploaddir) + f
+    );
+  });
 
-        //TODO -- only delete files with NO lock files
-        var allmp4s = _.filter(allfiles,function(f){
-            return _.endsWith(f,'.mp4') && !_.endsWith(f,'.edit.mp4');
-        });
+  // ONLY delete video files with no lock files
 
-        var nolockfiles = _.filter(allmp4s,function(f){
-            var matchinglockfiles = _.find(allfiles,function(ff){
-                return _.startsWith(ff,f) && _.endsWith(ff,'.lock');
-            });
-            return _.size(matchinglockfiles) == 0;
-        });
+  //TODO -- only delete files with NO lock files
+  var allmp4s = _.filter(allfiles, function (f) {
+    return _.endsWith(f, ".mp4") && !_.endsWith(f, ".edit.mp4");
+  });
 
-        winston.info('Files with no lock: ' + _.size(nolockfiles));
-        _.each(nolockfiles,function(f){
-            //console.log(f);
-        });
+  var nolockfiles = _.filter(allmp4s, function (f) {
+    var matchinglockfiles = _.find(allfiles, function (ff) {
+      return _.startsWith(ff, f) && _.endsWith(ff, ".lock");
+    });
+    return _.size(matchinglockfiles) == 0;
+  });
 
-        var statfiles = _.map(nolockfiles,function(f){
-            return {file:path.normalize(path.dirname(require.main.filename) + uploaddir) + f,stats:fs.statSync(path.normalize(path.dirname(require.main.filename) + uploaddir) + f)};
-        });
+  winston.info("Files with no lock: " + _.size(nolockfiles));
+  _.each(nolockfiles, function (f) {
+    //console.log(f);
+  });
 
-        // console.log(allfiles_nolock);
-        var ordered = _.orderBy(statfiles,'stats.atime.getTime()','desc');
-        // console.log('ordered:');
-        // _.each(ordered,function(f){
-        //     console.log(f.file + ' ' + f.stats.atime);
-        // });
+  var statfiles = _.map(nolockfiles, function (f) {
+    return {
+      file: path.normalize(path.dirname(require.main.filename) + uploaddir) + f,
+      stats: fs.statSync(
+        path.normalize(path.dirname(require.main.filename) + uploaddir) + f
+      ),
+    };
+  });
 
+  // console.log(allfiles_nolock);
+  var ordered = _.orderBy(statfiles, "stats.atime.getTime()", "desc");
+  // console.log('ordered:');
+  // _.each(ordered,function(f){
+  //     console.log(f.file + ' ' + f.stats.atime);
+  // });
 
-        var keep = [];
-        var remove = [];
-        //20GB
-        var space_avail = config.MAX_CACHE;
-        //var space_avail = 20*1024*1024;
-        var sizecounter = space_avail;
-        var index = 0;
+  var keep = [];
+  var remove = [];
+  //20GB
+  var space_avail = config.MAX_CACHE;
+  //var space_avail = 20*1024*1024;
+  var sizecounter = space_avail;
+  var index = 0;
 
-        while (sizecounter > 0 && index < _.size(ordered))
-        {
-            keep.push(ordered[index]);
-            // console.log(ordered[index].stats.size);
-            sizecounter -= ordered[index].stats.size;
-            index++;
-        }
+  while (sizecounter > 0 && index < _.size(ordered)) {
+    keep.push(ordered[index]);
+    // console.log(ordered[index].stats.size);
+    sizecounter -= ordered[index].stats.size;
+    index++;
+  }
 
-        remove = _.slice(ordered,index);
+  remove = _.slice(ordered, index);
 
-        winston.info("Keeping " + _.size(keep) + ' files within the '+(space_avail/(1024*1024)) + 'MB cap');
-        _.each(keep,function(f){
-             //console.log(f.file);
-        });
+  winston.info(
+    "Keeping " +
+      _.size(keep) +
+      " files within the " +
+      space_avail / (1024 * 1024) +
+      "MB cap"
+  );
+  _.each(keep, function (f) {
+    //console.log(f.file);
+  });
 
-        winston.info('Removing ' + _.size(remove) + ' files');
-        _.each(remove,function(f){
-            //console.log(f.file);
-            fs.unlinkSync(f.file);
-        });
+  winston.info("Removing " + _.size(remove) + " files");
+  _.each(remove, function (f) {
+    //console.log(f.file);
+    fs.unlinkSync(f.file);
+  });
 }
 global.cleanOutAll = cleanOutAll;
 global.sendEmail = sendEmail;

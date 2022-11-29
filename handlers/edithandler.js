@@ -57,10 +57,23 @@ module.exports = function (winston, thedb) {
   function clearOut(edit) {
     if (!config.LOCALONLY) {
       // Remove all the lock files for this edit
+      try {
+        // console.log(edit);
+        // fs.closeSync(edit.tmp_filename);
+        fs.unlinkSync(edit.tmp_filename);
+      } catch (e) {
+        //do nothing, some error in removing the lockfile
+        console.log(e);
+      }
       _.each(edit.media, function (m) {
         if (m.id) {
-          fs.closeSync(m.lock_file);
-          fs.unlinkSync(m.lock_file_name);
+          try {
+            fs.closeSync(m.lock_file);
+            fs.unlinkSync(m.lock_file_name);
+          } catch (e) {
+            //do nothing, some error in removing the lockfile
+            console.log(e);
+          }
         }
       });
 
@@ -71,16 +84,20 @@ module.exports = function (winston, thedb) {
       // }
 
       // cleanOutAll();
-    } else {
-      //remove all title files:
-      let dir = `${path.dirname(require.main.filename)}${uploaddir}`;
-      fs.readdirSync(dir).forEach((file) => {
-        if (file.endsWith(".png") || file.endsWith(".svg")) {
-          console.log(`Removing ${dir}${file}`);
-          fs.unlinkSync(`${dir}${file}`);
-        }
-      });
     }
+
+    //remove all title files:
+    let dir = `${path.dirname(require.main.filename)}${uploaddir}`;
+    fs.readdirSync(dir).forEach((file) => {
+      if (
+        file.endsWith(".png") ||
+        file.endsWith(".svg") ||
+        file.endsWith(".bmp")
+      ) {
+        console.log(`Removing ${dir}${file}`);
+        fs.unlinkSync(`${dir}${file}`);
+      }
+    });
   }
 
   DoEditHandler.prototype.work = function (edit, callback) {
@@ -103,6 +120,8 @@ module.exports = function (winston, thedb) {
       var dir = path.normalize(path.dirname(require.main.filename) + uploaddir);
 
       var event_id = _.find(edit.media, "event_id").event_id;
+
+      logger.info(`${config.LOCALONLY ? "LOCAL EDIT" : "S3 EDIT"}`);
 
       if (config.LOCALONLY)
         //volume map to the same location as the uploads dir on the disk...
@@ -179,25 +198,26 @@ module.exports = function (winston, thedb) {
                   },
                 });
 
+                // console.log(config);
+
+                var key = `upload/${event_id}/${media.path
+                  .replace(config.S3_CLOUD_URL, "")
+                  .replace(config.master_url + "/media/preview/", "")}`;
+
                 var params = {
                   localFile: localfile + "_" + uuid_tmp + ".part",
                   s3Params: {
                     Bucket: config.S3_BUCKET,
-                    Key:
-                      "upload/" +
-                      event_id +
-                      "/" +
-                      media.path
-                        .replace(config.S3_CLOUD_URL, "")
-                        .replace(config.master_url + "/media/preview/", ""),
+                    Key: key,
                   },
                 };
 
                 //console.log(params);
-                logger.info("Downloading: " + localfile);
+                logger.info(`Downloading ${key} -> ${localfile}`);
                 var downloader = s3.downloadFile(params);
 
                 downloader.on("error", function (err) {
+                  console.log(err);
                   //console.log("s3 error "+err);
                   cb(err.toString());
                   //release file lock
@@ -456,6 +476,7 @@ module.exports = function (winston, thedb) {
                 var musicfile = path.normalize(config.MUSIC_LOCATION + m.audio);
                 bedtrack = musicfile;
               } else {
+                // console.log(`${config.master_url}/music/looped/${m.audio}`);
                 bedtrack = `${config.master_url}/music/looped/${m.audio}`;
               }
               credits = m.credits;
@@ -834,14 +855,14 @@ module.exports = function (winston, thedb) {
         calls.push(function (cb) {
           // //FOR DEBUGGING
           //return cb(null);
+          let name = ".mp4";
+
+          if (edit.mode == "high") name = "_hq.mp4";
+          if (edit.mode == "tagged") name = "_tags.mp4";
+          if (edit.mode == "original") name = ".mp4";
 
           if (config.LOCALONLY) {
             //copy the file to the right location:
-            let name = ".mp4";
-
-            if (edit.mode == "high") name = "_hq.mp4";
-            if (edit.mode == "tagged") name = "_tags.mp4";
-            if (edit.mode == "original") name = ".mp4";
 
             if (fs.existsSync(edit.tmp_filename)) {
               fs.moveSync(
@@ -868,7 +889,7 @@ module.exports = function (winston, thedb) {
             //   console.log(path.normalize(path.dirname(require.main.filename) + uploaddir + edit.code + ".mp4"));
             client.putFile(
               edit.tmp_filename,
-              "upload/edits/" + edit.code + ".mp4",
+              "upload/edits/" + edit.code + name,
               function (err) {
                 //console.log(err);
                 if (err) {
@@ -876,20 +897,21 @@ module.exports = function (winston, thedb) {
                   cb(err.toString());
                 } else {
                   logger.info("Uploaded Mainfile");
-                  client.putFile(
-                    edit.tmp_filename + "_tags.mp4",
-                    "upload/edits/" + edit.code + "_tags.mp4",
-                    function (err) {
-                      //console.log(err);
-                      if (err) {
-                        logger.error(err);
-                        cb(err.toString());
-                      } else {
-                        logger.info("Uploaded Tagged File");
-                        cb();
-                      }
-                    }
-                  );
+                  cb();
+                  // client.putFile(
+                  //   edit.tmp_filename + "_tags.mp4",
+                  //   "upload/edits/" + edit.code + "_tags.mp4",
+                  //   function (err) {
+                  //     //console.log(err);
+                  //     if (err) {
+                  //       logger.error(err);
+                  //       cb(err.toString());
+                  //     } else {
+                  //       logger.info("Uploaded Tagged File");
+                  //       cb();
+                  //     }
+                  //   }
+                  // );
                   // cb();
                 }
               }
