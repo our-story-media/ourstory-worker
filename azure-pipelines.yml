@@ -1,34 +1,36 @@
 # Docker
-# Build a Docker image 
+# Build a Docker image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+pr: none
 
 trigger:
   tags:
     include:
-    - '*'
+      - "*"
 
 resources:
-- repo: self
+  - repo: self
 
 variables:
-  tag: '$(Build.SourceBranchName)'
+  tag: "$(Build.SourceBranchName)"
 
 stages:
-- stage: Build
-  displayName: Build image
-  jobs:  
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'DockerHub'
-        repository: 'bootlegger/ourstory-worker'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          $(tag)
-          latest
-        addPipelineData: false
+  - stage: Build
+    displayName: Build image
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: "DockerHub"
+              repository: "bootlegger/ourstory-worker"
+              command: "buildAndPush"
+              Dockerfile: "**/Dockerfile"
+              tags: |
+                $(tag)
+                latest
+              addPipelineData: false
