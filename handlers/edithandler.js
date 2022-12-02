@@ -86,6 +86,9 @@ module.exports = function (winston, thedb) {
       // cleanOutAll();
     }
 
+    // //TODO: DEBUG;
+    // return;
+
     //remove all title files:
     let dir = `${path.dirname(require.main.filename)}${uploaddir}`;
     fs.readdirSync(dir).forEach((file) => {
@@ -595,7 +598,7 @@ module.exports = function (winston, thedb) {
           // console.log("totalframes:" + totallength);
 
           if (credits) {
-            // console.log('doing credits');
+            // console.log("doing credits");
             let titlefile = path.normalize(
               path.dirname(require.main.filename) +
                 uploaddir +
@@ -604,12 +607,17 @@ module.exports = function (winston, thedb) {
                 ".bmp"
             );
             // console.log('starting title');
+
+            // console.log(
+            //   `convert -size 1720x880 xc:white -background white -fill black -bordercolor white -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${credits}" \\) -composite ${titlefile}`
+            // );
             //convert to image:
             const spawnSync = require("child_process").execSync;
-            `convert -size 1720x880 xc:white -background white -fill black -bordercolor white -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${credits}" \\) -composite ${titlefile}`;
-            // let code = spawnSync(
-            //   `convert -background white -fill black -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
-            // );
+
+            let code = spawnSync(
+              `convert -size 1720x880 xc:white -background white -fill black -bordercolor white -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${credits}" \\) -composite ${titlefile}`
+              //   `convert -background white -fill black -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
+            );
             thecommand.push(titlefile);
             thecommand.push("out=75"); //3 seconds:
             // thecommand.push("-mix 10");

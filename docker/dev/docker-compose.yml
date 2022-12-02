@@ -22,7 +22,7 @@ services:
       # ///usr/src/app/www
       - /Users/tbar0012/Documents/Research/newserver/assets/music:/usr/src/app/www/music
       # - ./music:/usr/src/app/www/music
-      - ../../../newserver/docker/prod/.sailsrc:/usr/src/app/.sailsrc
+      # - ../../../newserver/docker/prod/.sailsrc:/usr/src/app/.sailsrc
     # env_file: ../../.env
 networks:
   default:
