@@ -452,14 +452,16 @@ module.exports = function (winston, thedb) {
 
           //FIRST SLIDE:
           thecommand.push("-track");
+          var event_id = _.find(edit.media, "event_id").event_id;
           if (
             fs.existsSync(
-              path.dirname(require.main.filename) + "/upload/branding.png"
+              path.dirname(require.main.filename) +
+                `/upload/${event_id}/branding.png`
             )
           ) {
             thecommand.push(
               path.dirname(require.main.filename) +
-                "/upload/branding.png out=15 -mix 10 -mixer luma"
+                `/upload/${event_id}/branding.png out=15 -mix 10 -mixer luma`
             );
           } else {
             // INITIAL WHITE SLIDE
@@ -621,14 +623,16 @@ module.exports = function (winston, thedb) {
           }
 
           //LAST LOGO/BLANK
+          var event_id = _.find(edit.media, "event_id").event_id;
           if (
             fs.existsSync(
-              path.dirname(require.main.filename) + "/upload/branding.png"
+              path.dirname(require.main.filename) +
+                `/upload/${event_id}/branding.png`
             )
           ) {
             thecommand.push(
               path.dirname(require.main.filename) +
-                "/upload/branding.png out=50 -mix 10 -mixer luma"
+                `/upload/${event_id}/branding.png out=50 -mix 10 -mixer luma`
             );
             totallength += 5.0 / 25;
           } else {

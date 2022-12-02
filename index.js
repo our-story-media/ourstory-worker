@@ -15,7 +15,7 @@ let sendgrid;
 
 if (!config.LOCALONLY) sendgrid = require("sendgrid")(config.email.SENDGRID_ID);
 
-console.log(config);
+// console.log(config);
 
 const moment = require("moment");
 const uploaddir = "/.tmp/";
