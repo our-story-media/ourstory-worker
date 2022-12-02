@@ -284,7 +284,8 @@ module.exports = function (winston, thedb) {
           var totalclips = 1;
           var tagtrack = [];
           var subtitles = [];
-          var mix_adjust = 11.5 / 25;
+          // var mix_adjust = 11.5 / 25;
+          var mix_adjust = 0;
           let to_burn = [];
 
           //Generate Subtitles:
@@ -461,7 +462,7 @@ module.exports = function (winston, thedb) {
           ) {
             thecommand.push(
               path.dirname(require.main.filename) +
-                `/upload/${event_id}/branding.png out=15 -mix 10 -mixer luma`
+                `/upload/${event_id}/branding.png out=15`
             );
           } else {
             // INITIAL WHITE SLIDE
@@ -496,8 +497,8 @@ module.exports = function (winston, thedb) {
 
               thecommand.push('in="' + inpoint + '"');
               thecommand.push('out="' + outpoint + '"');
-              thecommand.push("-mix 10");
-              thecommand.push("-mixer luma");
+              // thecommand.push("-mix 10");
+              // thecommand.push("-mixer luma");
 
               if (m.tag) {
                 //FOR TAGGING:
@@ -528,8 +529,8 @@ module.exports = function (winston, thedb) {
                 tagtrack.push(
                   `out=${(calcTime(m.inpoint, m.outpoint) - 0.2) * 25}`
                 );
-                tagtrack.push("-mix 10");
-                tagtrack.push("-mixer luma");
+                // tagtrack.push("-mix 10");
+                // tagtrack.push("-mixer luma");
 
                 // console.log(`Label ${labelfile} ${totallength} - ${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);
               } else {
@@ -539,7 +540,7 @@ module.exports = function (winston, thedb) {
               }
 
               totallength += calcTime(m.inpoint, m.outpoint);
-              totallength -= mix_adjust;
+              // totallength -= mix_adjust;
               totalclips++;
             } //if title:
             else {
@@ -569,16 +570,16 @@ module.exports = function (winston, thedb) {
                 thecommand.push(
                   "out=" + calcTime("00:00:00.00", m.outpoint) * 25
                 ); //3 seconds (usually):
-                thecommand.push("-mix 10");
-                thecommand.push("-mixer luma");
+                // thecommand.push("-mix 10");
+                // thecommand.push("-mixer luma");
                 // console.log(calcTime('00:00:00.00',m.outpoint));
                 tagtrack.push(
                   `-blank ${calcTime("00:00:00.00", m.outpoint) * 25}`
                 );
-                tagtrack.push("-mix 10");
-                tagtrack.push("-mixer luma");
+                // tagtrack.push("-mix 10");
+                // tagtrack.push("-mixer luma");
                 totallength += calcTime("00:00:00.00", m.outpoint);
-                totallength -= mix_adjust;
+                // totallength -= mix_adjust;
                 totalclips++;
                 // totallength += 70/25;//minus the luma overlaps
               } catch (e) {
@@ -605,20 +606,21 @@ module.exports = function (winston, thedb) {
             // console.log('starting title');
             //convert to image:
             const spawnSync = require("child_process").execSync;
-            let code = spawnSync(
-              `convert -background white -fill black -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
-            );
+            `convert -size 1720x880 xc:white -background white -fill black -bordercolor white -border 100x100 +size -gravity center \\( -size 1720 -pointsize 80 -font /usr/src/app/fonts/NotoSans-Regular.ttf pango:"${credits}" \\) -composite ${titlefile}`;
+            // let code = spawnSync(
+            //   `convert -background white -fill black -font DejaVu-Sans -size 1720x880 -gravity Center -bordercolor black -border 100x100 -pointsize 60 caption:"${credits}" ${titlefile}`
+            // );
             thecommand.push(titlefile);
             thecommand.push("out=75"); //3 seconds:
-            thecommand.push("-mix 10");
-            thecommand.push("-mixer luma");
+            // thecommand.push("-mix 10");
+            // thecommand.push("-mixer luma");
 
             tagtrack.push(`-blank 75`);
-            tagtrack.push("-mix 10");
-            tagtrack.push("-mixer luma");
+            // tagtrack.push("-mix 10");
+            // tagtrack.push("-mixer luma");
             // totallength += 70/25;//minus the luma overlaps
             totallength += calcTime("00:00:00.00", "00:00:03.00");
-            totallength -= mix_adjust;
+            // totallength -= mix_adjust;
             totalclips++;
           }
 
@@ -632,11 +634,11 @@ module.exports = function (winston, thedb) {
           ) {
             thecommand.push(
               path.dirname(require.main.filename) +
-                `/upload/${event_id}/branding.png out=50 -mix 10 -mixer luma`
+                `/upload/${event_id}/branding.png out=50`
             );
             totallength += 5.0 / 25;
           } else {
-            thecommand.push("colour:white out=15 -mix 10 -mixer luma");
+            thecommand.push("colour:white out=15");
             totallength += 5.0 / 25;
           }
 
