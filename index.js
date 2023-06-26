@@ -70,7 +70,6 @@ function start() {
     } else {
       handlers = {
         edit: require("./handlers/edithandler")(winston, db),
-        dropbox: require("./handlers/dropboxhandler")(winston, db),
       };
     }
 
