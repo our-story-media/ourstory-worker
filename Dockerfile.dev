@@ -1,4 +1,4 @@
-FROM node:8-stretch
+FROM node:10-buster
 # FROM node:8-jessie
 LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
 
@@ -7,8 +7,8 @@ LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
 RUN apt-get update -q && \
   apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
   Dpkg::Options::="--force-confold" \
-  # ffmpeg \
-  libav-tools \
+  ffmpeg \
+  # libav-tools \
   melt
 
 # FROM node:8-jessie

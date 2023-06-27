@@ -1,4 +1,4 @@
-FROM node:8-stretch
+FROM node:10-buster
 
 LABEL maintainer="Tom Bartindale <tom@bartindale.com>"
 
@@ -10,7 +10,7 @@ RUN mkdir -p /usr/src/app && \
   apt-get update -q && \
   apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o \
   Dpkg::Options::="--force-confold" \
-  libav-tools \
+  ffmpeg \
   melt && \
   npm i --silent && \
   mkdir ~/.fonts && cp -r /usr/src/app/fonts/* ~/.fonts && chmod -R 644 ~/.fonts && fc-cache
