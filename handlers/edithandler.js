@@ -747,20 +747,20 @@ module.exports = function (winston, thedb) {
           //create original:
           var totalperc = 0;
           var exec = require("child_process").exec;
-          console.log("melt " + maineditcommand.join(" "));
+          console.log("xvfb-run -a melt " + maineditcommand.join(" "));
 
           //render both the untagged and tagged video
-          var actualcmd = `melt ${maineditcommand.join(
+          var actualcmd = `xvfb-run -a melt ${maineditcommand.join(
             " "
-          )} && melt ${taggedcommand.join(" ")}`;
+          )} && xvfb-run -a melt ${taggedcommand.join(" ")}`;
 
           //render just the tagged video (assuming no priors exist)
           if (edit.mode == "original")
-            actualcmd = `melt ${maineditcommand.join(" ")}`;
+            actualcmd = `xvfb-run -a melt ${maineditcommand.join(" ")}`;
 
           // only render non-tagged version in HQ
           if (edit.mode == "high")
-            actualcmd = `melt ${maineditcommand.join(" ")}`;
+            actualcmd = `xvfb-run -a melt ${maineditcommand.join(" ")}`;
 
           //only render tagged version (needs hq to exist)
           if (edit.mode == "tagged") {
@@ -796,7 +796,7 @@ module.exports = function (winston, thedb) {
             }
             taggedcommand[0] = pathtoorig;
 
-            actualcmd = `melt ${taggedcommand.join(" ")}`;
+            actualcmd = `xvfb-run -a melt ${taggedcommand.join(" ")}`;
           }
 
           var child = exec(
