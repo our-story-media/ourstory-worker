@@ -530,7 +530,7 @@ module.exports = function (winston, thedb) {
                 tagtrack.push(labelfile);
                 // tagtrack.push(`in=${totallength}`);
                 tagtrack.push(
-                  `out=${(calcTime(m.inpoint, m.outpoint) - 0.2) * 25}`
+                  `out=${(calcTime(m.inpoint, m.outpoint) - 0.25) * 25}`
                 );
                 // tagtrack.push("-mix 10");
                 // tagtrack.push("-mixer luma");
@@ -538,7 +538,7 @@ module.exports = function (winston, thedb) {
                 // console.log(`Label ${labelfile} ${totallength} - ${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);
               } else {
                 tagtrack.push(
-                  `-blank ${(calcTime(m.inpoint, m.outpoint) - 0.2) * 25}`
+                  `-blank ${(calcTime(m.inpoint, m.outpoint) - 0.25) * 25}`
                 );
               }
 

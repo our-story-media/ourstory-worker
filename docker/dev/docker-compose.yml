@@ -1,7 +1,7 @@
 version: '2'
 services:
   worker:
-    build: 
+    build:
       context: ../..
       dockerfile: Dockerfile.dev
     image: bootlegger/ourstory-worker:latest
@@ -17,13 +17,13 @@ services:
       # - ./.tmp:/.tmp
       - ./.tmp:/usr/src/app/.tmp # for server side (where .tmp might not be available)
       # - /usr/src/app/node_modules
-      - /Users/tbar0012/Documents/Research/newserver/docker/dev/upload:/usr/src/app/upload
+      - ../../../ourstory-server/docker/dev/upload:/usr/src/app/upload
       # - ./fonts:/user/src/app/fonts
       # ///usr/src/app/www
-      - /Users/tbar0012/Documents/Research/newserver/assets/music:/usr/src/app/www/music
+      - ../../../ourstory-server/assets/music:/usr/src/app/www/music
       # - ./music:/usr/src/app/www/music
       # - ../../../newserver/docker/prod/.sailsrc:/usr/src/app/.sailsrc
-    # env_file: ../../.env
+      # env_file: ../../.env
 networks:
   default:
     external:
