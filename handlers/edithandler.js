@@ -291,6 +291,10 @@ module.exports = function (winston, thedb) {
           var mix_adjust = 0;
           let to_burn = [];
 
+          // console.log("CHECKING FOR TRANSCRIPT");
+
+          // console.log(edit);
+
           //Generate Subtitles:
           if (edit.transcription && edit.transcription.chunks) {
             // console.log(edit.transcription);
@@ -465,15 +469,15 @@ module.exports = function (winston, thedb) {
           ) {
             thecommand.push(
               path.dirname(require.main.filename) +
-                `/upload/${event_id}/branding.png out=15`
+                `/upload/${event_id}/branding.png out=25`
             );
           } else {
             // INITIAL WHITE SLIDE
-            thecommand.push("colour:white out=15");
+            thecommand.push("colour:white out=25");
           }
 
-          tagtrack.push("-blank 15");
-          totallength += 5.0 / 25;
+          tagtrack.push("-blank 25");
+          totallength += 1.0;
 
           _.each(edit.media, function (m) {
             if (m.audio) {
@@ -529,17 +533,20 @@ module.exports = function (winston, thedb) {
                 fs.writeFileSync(labelfile, contents);
                 tagtrack.push(labelfile);
                 // tagtrack.push(`in=${totallength}`);
-                tagtrack.push(
-                  `out=${(calcTime(m.inpoint, m.outpoint) - 0.25) * 25}`
+
+                console.log(
+                  `out: ${m.inpoint}-${m.outpoint}  ${
+                    calcTime(m.inpoint, m.outpoint) * 25
+                  }`
                 );
+                tagtrack.push(`out=${calcTime(m.inpoint, m.outpoint) * 25}`);
                 // tagtrack.push("-mix 10");
                 // tagtrack.push("-mixer luma");
 
                 // console.log(`Label ${labelfile} ${totallength} - ${(calcTime(m.inpoint,m.outpoint)-.2)*25}`);
               } else {
-                tagtrack.push(
-                  `-blank ${(calcTime(m.inpoint, m.outpoint) - 0.25) * 25}`
-                );
+                console.log(`blank: ${calcTime(m.inpoint, m.outpoint) * 25}`);
+                tagtrack.push(`-blank ${calcTime(m.inpoint, m.outpoint) * 25}`);
               }
 
               totallength += calcTime(m.inpoint, m.outpoint);
@@ -644,10 +651,10 @@ module.exports = function (winston, thedb) {
               path.dirname(require.main.filename) +
                 `/upload/${event_id}/branding.png out=50`
             );
-            totallength += 5.0 / 25;
+            totallength += 2.0;
           } else {
-            thecommand.push("colour:white out=15");
-            totallength += 5.0 / 25;
+            thecommand.push("colour:white out=50");
+            totallength += 2.0;
           }
 
           totalclips++;

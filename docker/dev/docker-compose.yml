@@ -13,6 +13,7 @@ services:
       - ../../util:/usr/src/app/util
       # - ../../index.js:/usr/src/app/index.js
       - ../../test:/usr/src/app/test
+      - ../../labels.svg:/usr/src/app/labels.svg
       # - ../../config/local.js:/usr/src/app/config/local.js
       # - ./.tmp:/.tmp
       - ./.tmp:/usr/src/app/.tmp # for server side (where .tmp might not be available)
