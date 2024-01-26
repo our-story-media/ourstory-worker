@@ -668,6 +668,36 @@ module.exports = function (winston, thedb) {
 
           // console.log(tagtrack);
 
+          //if we are rendering the tagged version from scratch (not using HQ version), then add on the tags to the main video sequence
+          if (edit.mode == "original") {
+            maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
+            maineditcommand.push(
+              "-transition composite fill=0 a_track=0 b_track=1"
+            );
+
+            if (subtitles.length > 0) {
+              maineditcommand.push(`-video-track ${subtitles.join(" ")}`);
+              maineditcommand.push(
+                "-transition composite fill=0 a_track=0 b_track2"
+              );
+            }
+          }
+
+          var taggedcommand = [];
+
+          taggedcommand.push(edit.tmp_filename);
+          taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
+          taggedcommand.push(
+            "-transition composite fill=0 a_track=0 b_track=1"
+          );
+          if (subtitles.length > 0) {
+            taggedcommand.push(`-video-track ${subtitles.join(" ")}`);
+            taggedcommand.push(
+              "-transition composite fill=0 a_track=0 b_track=2"
+            );
+          }
+
+          //Add bedtrack audio after all video stuff...
           if (bedtrack) {
             maineditcommand.push("-audio-track " + bedtrack);
             // thecommand.push('-repeat 6')
@@ -689,34 +719,6 @@ module.exports = function (winston, thedb) {
             maineditcommand.push("-transition mix in=0");
           }
 
-          //if we are rendering the tagged version from scratch (not using HQ version)
-          if (edit.mode == "original") {
-            maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
-            maineditcommand.push(
-              "-transition composite fill=0 a_track=0 b_track=2"
-            );
-
-            if (subtitles.length > 0) {
-              maineditcommand.push(`-video-track ${subtitles.join(" ")}`);
-              maineditcommand.push(
-                "-transition composite fill=0 a_track=0 b_track=3"
-              );
-            }
-          }
-
-          var taggedcommand = [];
-
-          taggedcommand.push(edit.tmp_filename);
-          taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
-          taggedcommand.push(
-            "-transition composite fill=0 a_track=0 b_track=1"
-          );
-          if (subtitles.length > 0) {
-            taggedcommand.push(`-video-track ${subtitles.join(" ")}`);
-            taggedcommand.push(
-              "-transition composite fill=0 a_track=0 b_track=2"
-            );
-          }
           taggedcommand.push("-progress");
           taggedcommand.push("-profile hdv_720_25p");
           taggedcommand.push(
@@ -754,7 +756,7 @@ module.exports = function (winston, thedb) {
           //create original:
           var totalperc = 0;
           var exec = require("child_process").exec;
-          console.log("xvfb-run -a melt " + maineditcommand.join(" "));
+          // console.log("xvfb-run -a melt " + maineditcommand.join(" "));
 
           //render both the untagged and tagged video
           var actualcmd = `xvfb-run -a melt ${maineditcommand.join(
@@ -805,6 +807,9 @@ module.exports = function (winston, thedb) {
 
             actualcmd = `xvfb-run -a melt ${taggedcommand.join(" ")}`;
           }
+
+          console.log(`Running [${edit.mode}]:`);
+          console.log(actualcmd);
 
           var child = exec(
             actualcmd,
