@@ -965,7 +965,7 @@ module.exports = function (winston, thedb) {
 
               client.use("edits", function () {
                 client.put(
-                  10,
+                  5,
                   0,
                   1000000000,
                   JSON.stringify([
