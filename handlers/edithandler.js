@@ -759,17 +759,21 @@ module.exports = function (winston, thedb) {
           // console.log("xvfb-run -a melt " + maineditcommand.join(" "));
 
           //render both the untagged and tagged video
-          var actualcmd = `xvfb-run -a melt ${maineditcommand.join(
+          var actualcmd = `nice -n 10 xvfb-run -a melt ${maineditcommand.join(
             " "
-          )} && xvfb-run -a melt ${taggedcommand.join(" ")}`;
+          )} && nice -n 10 xvfb-run -a melt ${taggedcommand.join(" ")}`;
 
           //render just the tagged video (assuming no priors exist)
           if (edit.mode == "original")
-            actualcmd = `xvfb-run -a melt ${maineditcommand.join(" ")}`;
+            actualcmd = `nice -n 10 xvfb-run -a melt ${maineditcommand.join(
+              " "
+            )}`;
 
           // only render non-tagged version in HQ
           if (edit.mode == "high")
-            actualcmd = `xvfb-run -a melt ${maineditcommand.join(" ")}`;
+            actualcmd = `nice -n 10 xvfb-run -a melt ${maineditcommand.join(
+              " "
+            )}`;
 
           //only render tagged version (needs hq to exist)
           if (edit.mode == "tagged") {
@@ -805,7 +809,9 @@ module.exports = function (winston, thedb) {
             }
             taggedcommand[0] = pathtoorig;
 
-            actualcmd = `xvfb-run -a melt ${taggedcommand.join(" ")}`;
+            actualcmd = `nice -n 10 xvfb-run -a melt ${taggedcommand.join(
+              " "
+            )}`;
           }
 
           console.log(`Running [${edit.mode}]:`);
