@@ -460,21 +460,21 @@ module.exports = function (winston, thedb) {
 
           //FIRST SLIDE:
           thecommand.push("-track");
-          var event_id = _.find(edit.media, "event_id").event_id;
-          if (
-            fs.existsSync(
-              path.dirname(require.main.filename) +
-                `/upload/${event_id}/branding.png`
-            )
-          ) {
-            thecommand.push(
-              path.dirname(require.main.filename) +
-                `/upload/${event_id}/branding.png out=25`
-            );
-          } else {
-            // INITIAL WHITE SLIDE
-            thecommand.push("colour:white out=25");
-          }
+          // var event_id = _.find(edit.media, "event_id").event_id;
+          // if (
+          //   fs.existsSync(
+          //     path.dirname(require.main.filename) +
+          //       `/upload/${event_id}/branding.png`
+          //   )
+          // ) {
+          //   thecommand.push(
+          //     path.dirname(require.main.filename) +
+          //       `/upload/${event_id}/branding.png out=25`
+          //   );
+          // } else {
+          //   // INITIAL WHITE SLIDE
+          //   thecommand.push("colour:white out=25");
+          // }
 
           tagtrack.push("-blank 25");
           totallength += 1.0;
