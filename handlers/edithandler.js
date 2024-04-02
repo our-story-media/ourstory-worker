@@ -782,7 +782,8 @@ module.exports = function (winston, thedb) {
 
             var taggedcommand = [];
 
-            taggedcommand.push(edit.tmp_filename);
+            taggedcommand.push(pathtoorig);
+            // taggedcommand.push(edit.tmp_filename);
             taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
             taggedcommand.push(
               "-transition composite fill=0 a_track=0 b_track=1"
@@ -804,7 +805,6 @@ module.exports = function (winston, thedb) {
                   edit.height || "1080"
                 } strict=experimental`
             );
-            taggedcommand[0] = pathtoorig;
 
             actualcmd = `nice -n 10 xvfb-run -a melt ${taggedcommand.join(
               " "
