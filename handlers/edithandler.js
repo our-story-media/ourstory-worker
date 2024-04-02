@@ -666,36 +666,20 @@ module.exports = function (winston, thedb) {
 
           var maineditcommand = thecommand;
 
-          // console.log(tagtrack);
-
           //if we are rendering the tagged version from scratch (not using HQ version), then add on the tags to the main video sequence
-          if (edit.mode == "original") {
-            maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
-            maineditcommand.push(
-              "-transition composite fill=0 a_track=0 b_track=1"
-            );
+          // if (edit.mode == "tagged") {
+          //   maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
+          //   maineditcommand.push(
+          //     "-transition composite fill=0 a_track=0 b_track=1"
+          //   );
 
-            if (subtitles.length > 0) {
-              maineditcommand.push(`-video-track ${subtitles.join(" ")}`);
-              maineditcommand.push(
-                "-transition composite fill=0 a_track=0 b_track2"
-              );
-            }
-          }
-
-          var taggedcommand = [];
-
-          taggedcommand.push(edit.tmp_filename);
-          taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
-          taggedcommand.push(
-            "-transition composite fill=0 a_track=0 b_track=1"
-          );
-          if (subtitles.length > 0) {
-            taggedcommand.push(`-video-track ${subtitles.join(" ")}`);
-            taggedcommand.push(
-              "-transition composite fill=0 a_track=0 b_track=2"
-            );
-          }
+          //   if (subtitles.length > 0) {
+          //     maineditcommand.push(`-video-track ${subtitles.join(" ")}`);
+          //     maineditcommand.push(
+          //       "-transition composite fill=0 a_track=0 b_track2"
+          //     );
+          //   }
+          // }
 
           //Add bedtrack audio after all video stuff...
           if (bedtrack) {
@@ -718,16 +702,6 @@ module.exports = function (winston, thedb) {
             );
             maineditcommand.push("-transition mix in=0");
           }
-
-          taggedcommand.push("-progress");
-          taggedcommand.push("-profile hdv_720_25p");
-          taggedcommand.push(
-            "-consumer avformat:" +
-              edit.tmp_filename +
-              ` real_time=-2 r=25 width=${edit.width || "1920"} height=${
-                edit.height || "1080"
-              } strict=experimental`
-          );
 
           maineditcommand.push("-progress");
           maineditcommand.push(`-profile ${edit.profile || "hdv_720_25p"}`);
@@ -758,10 +732,8 @@ module.exports = function (winston, thedb) {
           var exec = require("child_process").exec;
           // console.log("xvfb-run -a melt " + maineditcommand.join(" "));
 
-          //render both the untagged and tagged video
-          var actualcmd = `nice -n 10 xvfb-run -a melt ${maineditcommand.join(
-            " "
-          )} && nice -n 10 xvfb-run -a melt ${taggedcommand.join(" ")}`;
+          //render both the untagged and tagged video (only used for testing)
+          var actualcmd = ``;
 
           //render just the tagged video (assuming no priors exist)
           if (edit.mode == "original")
@@ -807,6 +779,31 @@ module.exports = function (winston, thedb) {
                 }
               );
             }
+
+            var taggedcommand = [];
+
+            taggedcommand.push(edit.tmp_filename);
+            taggedcommand.push(`-video-track ${tagtrack.join(" ")}`);
+            taggedcommand.push(
+              "-transition composite fill=0 a_track=0 b_track=1"
+            );
+
+            if (subtitles.length > 0) {
+              taggedcommand.push(`-video-track ${subtitles.join(" ")}`);
+              taggedcommand.push(
+                "-transition composite fill=0 a_track=0 b_track=2"
+              );
+            }
+
+            taggedcommand.push("-progress");
+            taggedcommand.push("-profile hdv_720_25p");
+            taggedcommand.push(
+              "-consumer avformat:" +
+                edit.tmp_filename +
+                ` real_time=-2 r=25 width=${edit.width || "1920"} height=${
+                  edit.height || "1080"
+                } strict=experimental`
+            );
             taggedcommand[0] = pathtoorig;
 
             actualcmd = `nice -n 10 xvfb-run -a melt ${taggedcommand.join(
