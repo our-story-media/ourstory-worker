@@ -666,6 +666,8 @@ module.exports = function (winston, thedb) {
 
           var maineditcommand = thecommand;
 
+          maineditcommand.push(`-filter volume normalise=-3db`);
+
           //if we are rendering the tagged version from scratch (not using HQ version), then add on the tags to the main video sequence
           // if (edit.mode == "tagged") {
           //   maineditcommand.push(`-video-track ${tagtrack.join(" ")}`);
@@ -688,9 +690,10 @@ module.exports = function (winston, thedb) {
             // let output =
             maineditcommand.push('out="' + calcTS(totallength) + '"');
             // thecommand.push("-mix 10");
-            maineditcommand.push(
-              "-attach-track volume:" + (config.MUSIC_VOLUME || "0.3")
-            );
+            // maineditcommand.push(
+            //   "-attach-track volume:" + (config.MUSIC_VOLUME || "0.1")
+            // );
+            maineditcommand.push(`-filter volume:0.05 normalise= track=1`);
             // thecommand.push('-filter aloop')
             // thecommand.push('-attach volume:0db end:-70db in='+(totallength-100)+' out='+(totallength+3));
             maineditcommand.push(
