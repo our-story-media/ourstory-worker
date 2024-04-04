@@ -80,8 +80,27 @@ module.exports = function (winston, thedb) {
 
     let newar = [];
 
+    //only remove one of this id from the front list:
+
+    //only remove first id that matches from the list:
+
+    let seeit = false;
     for (let n in queue.value) {
+      //if this code is not the current code:
       if (queue.value[n] != edit.id) newar.push(queue.value[n]);
+      else {
+        //if it is, and I've not seen it before:
+        if (!seeit) {
+          seeit = true;
+        } else {
+          newar.push(queue.value[n]);
+        }
+      }
+
+      //   if (doall || queue.value[n] != edit.id) {
+      //     newar.push(queue.value[n]);
+      //     if (queue.value[n] == edit.id) doall = true;
+      //   }
     }
 
     // console.log(`New queue: ${newar}`);
@@ -526,8 +545,8 @@ module.exports = function (winston, thedb) {
           //   thecommand.push("colour:white out=25");
           // }
 
-          tagtrack.push("-blank 25");
-          totallength += 1.0;
+          // tagtrack.push("-blank 25");
+          // totallength += 1.0;
 
           _.each(edit.media, function (m) {
             if (m.audio) {
