@@ -54,6 +54,52 @@ module.exports = function (winston, thedb) {
       .connect();
   }
 
+  async function removeFromSettingsQueue(edit) {
+    // let setting = await Settings.findOrCreate(
+    //   { name: "queue" },
+    //   { name: "queue" }
+    // );
+
+    // if (!setting.value) setting.value = [];
+    // setting.value.push(edit.id);
+
+    // setting.save(function (err) {});
+
+    var collection = thedb.collection("settings");
+
+    // console.log(collection);
+
+    let queue = await collection.findOne({ name: "queue" });
+
+    //remove edit id from queue:
+    // _.remove(queue.value,function(n){
+
+    // });
+
+    // console.log(queue);
+
+    let newar = [];
+
+    for (let n in queue.value) {
+      if (queue.value[n] != edit.id) newar.push(queue.value[n]);
+    }
+
+    // console.log(`New queue: ${newar}`);
+
+    collection.update(
+      { name: "queue" },
+      {
+        $set: {
+          value: newar,
+        },
+      },
+      { w: 1 },
+      function (err) {
+        console.log("Queue updated");
+      }
+    );
+  }
+
   function clearOut(edit) {
     if (!config.LOCALONLY) {
       // Remove all the lock files for this edit
@@ -103,8 +149,11 @@ module.exports = function (winston, thedb) {
     });
   }
 
-  DoEditHandler.prototype.work = function (edit, callback) {
+  DoEditHandler.prototype.work = async function (edit, callback) {
     edit.files_in_use = [];
+
+    //TODO: FOR DEBUG:
+    // await removeFromSettingsQueue(edit);
 
     try {
       if (edit.mode == "") edit.mode == "original";
@@ -150,7 +199,8 @@ module.exports = function (winston, thedb) {
             $unset: { path: "" },
           },
           { w: 1 },
-          function () {
+          async function () {
+            await removeFromSettingsQueue(edit);
             callback("bury");
           }
         );
@@ -777,7 +827,8 @@ module.exports = function (winston, thedb) {
                   $unset: { path: "" },
                 },
                 { w: 1 },
-                function () {
+                async function () {
+                  await removeFromSettingsQueue(edit);
                   callback("bury");
                 }
               );
@@ -1060,9 +1111,10 @@ module.exports = function (winston, thedb) {
                 $unset: { path: "" },
               },
               { w: 1 },
-              function (err) {
+              async function (err) {
                 //done update...
                 logger.error(err);
+                await removeFromSettingsQueue(edit);
                 callback("bury");
               }
             );
@@ -1095,10 +1147,11 @@ module.exports = function (winston, thedb) {
                 $unset: { failed: false, failereason: false, error: false },
               },
               { w: 1 },
-              function (err) {
+              async function (err) {
                 //done update...
                 if (err) logger.error(err);
                 //logger.info(result);
+                await removeFromSettingsQueue(edit);
                 callback("success");
               }
             );
@@ -1107,6 +1160,7 @@ module.exports = function (winston, thedb) {
       }
     } catch (e) {
       logger.error(e);
+      await removeFromSettingsQueue(edit);
       callback("bury");
     }
   };
