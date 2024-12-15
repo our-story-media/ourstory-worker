@@ -16,7 +16,7 @@
     "async": "2.5.0",
     "mongodb": "2.2.33",
     "fs-extra": "4.0.2",
-    "request": "2.83.0",
+    "request": "2.88.2",
     "tough-cookie": "2.3.3",
     "dropbox": "2.5.12",
     "moment": "2.19.1",
