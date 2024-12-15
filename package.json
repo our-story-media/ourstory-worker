@@ -8,7 +8,7 @@
     "fluent-ffmpeg": "2.1.2",
     "s3": "4.4.0",
     "knox-s3": "0.9.3",
-    "aws-sdk": "2.133.0",
+    "aws-sdk": "2.814.0",
     "fivebeans": "1.5.0",
     "winston": "2.4.0",
     "winston-mongodb": "3.0.1",
